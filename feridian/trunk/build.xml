@@ -6,7 +6,7 @@
     <!-- =================================================================== -->
     <property name="Name" value="Echomine Muse"/>
     <property name="project" value="muse"/>
-    <property name="version" value="0.81"/>
+    <property name="version" value="1.0a1"/>
     <property name="year" value="2001-2005"/>
 
     <property name="project.home" value="."/>
@@ -20,11 +20,23 @@
         <include name="com/echomine/net/**"/>
     </patternset>
 
+    <path id="jibx.classpath">
+        <pathelement location="${lib.compile.dir}/bcel.jar"/>
+        <pathelement location="${lib.compile.dir}/jibx-bind.jar"/>
+        <pathelement location="${src.lib.dir}/jibx-run.jar"/>
+        <pathelement location="${src.lib.dir}/xpp3.jar"/>
+    </path>
+
     <path id="compile.classpath">
         <fileset dir="${src.lib.dir}">
             <include name="**/*.jar"/>
         </fileset>
     </path>
+
+    <!-- taskdef for jibx -->
+    <taskdef name="bind" classname="org.jibx.binding.ant.CompileTask">
+        <classpath refid="jibx.classpath"/>
+    </taskdef>
 
     <!-- ================================================================== -->
     <!-- Prints useful build environment values                             -->
@@ -62,7 +74,6 @@
         </copy>
     </target>
 
-
     <!-- compile the entire package, but NOT including any logging/debugging -->
     <target name="compile" depends="prepare">
         <javac srcdir="${build.src}" destdir="${build.dest}" debug="${compile.debug}"
@@ -78,8 +89,16 @@
         </copy>
     </target>
 
+    <!-- adds jibx binding to compiled classes -->
+    <target name="bind" depends="compile">
+        <bind verbose="true" load="true" 
+            binding="${src.bindings.dir}/binding.xml">
+            <classpathset dir="${build.dest}"/>
+        </bind>
+    </target>
+
     <!-- jars all the compiled files -->
-    <target name="jar" depends="compile">
+    <target name="jar" depends="bind">
         <jar jarfile="${work.dir}/${jar.name}">
             <fileset dir="${build.dest}"/>
             <manifest>
