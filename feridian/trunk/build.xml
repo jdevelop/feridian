@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="jar" name="muse">
+<project basedir="." default="jar-all" name="muse">
 
     <!-- =================================================================== -->
     <!-- Variable Initialization                                             -->
@@ -14,15 +14,10 @@
     <property file="${user.home}/build.properties"/>
     <property file="build.properties"/>
 
-    <patternset id="common-files">
-        <include name="com/echomine/common/**"/>
-        <include name="com/echomine/util/**"/>
-        <include name="com/echomine/net/**"/>
-    </patternset>
-
     <path id="jibx.classpath">
         <pathelement location="${lib.compile.dir}/bcel.jar"/>
         <pathelement location="${lib.compile.dir}/jibx-bind.jar"/>
+        <pathelement location="${lib.compile.dir}/jibx-extras.jar"/>
         <pathelement location="${src.lib.dir}/jibx-run.jar"/>
         <pathelement location="${src.lib.dir}/xpp3.jar"/>
     </path>
@@ -39,9 +34,10 @@
     </taskdef>
 
     <!-- ================================================================== -->
-    <!-- Prints useful build environment values                             -->
+    <!-- Basic preparation                                                  -->
     <!-- ================================================================== -->
     <target name="env">
+        <!--
         <echo message="project.home = ${project.home}"/>
         <echo message="java.home = ${java.home}"/>
         <echo message="java.version = ${java.version}"/>
@@ -49,92 +45,300 @@
         <echo message="os.name = ${os.name}"/>
         <echo message="java.class.path = ${java.class.path}"/>
         <echo message=""/>
+        -->
     </target>
 
-    <!-- Create directories, copy static files -->
-    <target name="prepare" depends="env">
+    <target name="prepare-base" depends="env">
         <mkdir dir="${work.dir}"/>
         <mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.dest}"/>
-        <mkdir dir="${build.src}"/>
-        <copy todir="${build.src}">
-            <fileset dir="${src.java.dir}">
-                <include name="**/**"/>
-            </fileset>
-        </copy>
-
-        <!-- example files -->
-        <mkdir dir="${build.examples.dir}"/>
-        <mkdir dir="${build.examples.dir}/src"/>
-        <mkdir dir="${build.examples.dir}/classes"/>
-        <copy todir="${build.examples.dir}/src">
-            <fileset dir="${src.examples.dir}">
-                <include name="**/**"/>
-            </fileset>
+    </target>
+    
+    <!-- ================================================================== -->
+    <!-- Generic tasks for use by all modules                               -->
+    <!-- ================================================================== -->
+    
+    <!-- generic prepare module task -->
+    <target name="prepare-module" depends="prepare-base" if="module.name">
+        <echo message="Preparing Module ${module.name}"/>
+        <mkdir dir="${build.dir}/${module.name}"/>
+        <mkdir dir="${build.dir}/${module.name}/classes"/>
+        <mkdir dir="${build.dir}/${module.name}/src"/>
+        <!-- copy all source codes over to build dir -->
+        <copy todir="${build.dir}/${module.name}/src">
+            <fileset dir="${src.java.dir}/${module.name}"/>
         </copy>
     </target>
-
-    <!-- compile the entire package, but NOT including any logging/debugging -->
-    <target name="compile" depends="prepare">
-        <javac srcdir="${build.src}" destdir="${build.dest}" debug="${compile.debug}"
+    
+    <!-- compile the module -->
+    <target name="compile-module" depends="prepare-module" if="module.name">
+        <echo message="Compiling Module ${module.name}"/>
+        <javac srcdir="${build.dir}/${module.name}/src"
+            destdir="${build.dir}/${module.name}/classes" debug="${compile.debug}"
             deprecation="${compile.deprecation}" optimize="${compile.optimize}">
             <classpath refid="compile.classpath"/>
+            <classpath refid="module.classpath"/>
             <include name="**/*.java"/>
         </javac>
-        <!-- copy any properties files over to the classes directory -->
-        <copy todir="${build.dest}">
-            <fileset dir="${build.src}">
-                <include name="**/*.properties"/>
-            </fileset>
-        </copy>
     </target>
 
-    <!-- adds jibx binding to compiled classes -->
-    <target name="bind" depends="compile">
-        <bind verbose="true" load="true" 
-            binding="${src.bindings.dir}/binding.xml">
-            <classpathset dir="${build.dest}"/>
+    <!-- jibx binding modifications to compiled classes -->
+    <target name="bind-module" depends="compile-module" if="module.name">
+        <echo message="Binding Module ${module.name}"/>
+        <bind verbose="true" load="true">
+            <bindingfileset dir="${src.bindings.dir}/${module.name}"/>
+            <classpathset dir="${build.dir}/${module.name}/classes"/>
         </bind>
     </target>
 
-    <!-- jars all the compiled files -->
-    <target name="jar" depends="bind">
-        <jar jarfile="${work.dir}/${jar.name}">
-            <fileset dir="${build.dest}"/>
+    <!-- jars all the compiled module files -->
+    <target name="jar-module" depends="bind-module" if="module.name">
+        <echo message="Jarring Module ${module.name}"/>
+        <jar jarfile="${work.dir}/${project}-${module.name}.jar">
+            <fileset dir="${build.dir}/${module.name}/classes"/>
             <manifest>
-                <attribute name="Implementation-Title" value="Muse"/>
+                <attribute name="Implementation-Title" value="${project}-${module.name}"/>
                 <attribute name="Implementation-Version" value="${version}"/>
                 <attribute name="Implementation-Vendor" value="Echomine Inc."/>
             </manifest>
         </jar>
     </target>
 
-    <!-- example file compilation -->
-    <target name="compile-examples" depends="compile">
-        <javac srcdir="${build.examples.dir}/src" destdir="${build.examples.dir}/classes" debug="${compile.debug}"
-            deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+    <!-- Cleans up the module build directory  -->
+    <target name="clean-module" if="module.name">
+        <delete file="${work.dir}/${project}-${module.name}.jar" verbose="false"/>
+        <delete dir="${build.dir}/${module.name}"/>
+    </target>
+    
+    <!-- ================================================================== -->
+    <!-- Generic unit testing tasks for use by all modules                  -->
+    <!-- ================================================================== -->
+
+    <!-- prepares test sources -->
+    <target name="prepare-test-module" depends="prepare-base" if="module.name">
+        <mkdir dir="${build.dir}/${module.name}/tests"/>
+        <mkdir dir="${build.dir}/${module.name}/tests/src"/>
+        <mkdir dir="${build.dir}/${module.name}/tests/classes"/>
+        <!-- copy test source over to build directory -->
+        <copy todir="${build.dir}/${module.name}/tests/src">
+            <fileset dir="${src.test.dir}/${module.name}"/>
+        </copy>
+    </target>
+
+    <!-- Compile unit tests -->
+    <target name="compile-test-module" depends="prepare-test-module" if="module.name">
+        <javac srcdir="${build.dir}/${module.name}/tests/src"
+            destdir="${build.dir}/${module.name}/tests/classes"
+            debug="${compile.debug}" optimize="${compile.optimize}"
+            deprecation="${compile.deprecation}">
+            <classpath location="${lib.compile.dir}/junit.jar"/>
+            <classpath location="${build.dir}/${module.name}/classes"/>
+            <classpath refid="module.classpath"/>
             <classpath refid="compile.classpath"/>
-            <classpath location="${build.dest}"/>
-            <include name="**/*.java"/>
+            <classpath refid="jibx.classpath"/>
         </javac>
+        <copy todir="${build.dir}/${module.name}/tests/classes">
+            <fileset dir="${build.dir}/${module.name}/tests/src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
     </target>
 
-    <!-- jar example files -->
-    <target name="jar-examples" depends="compile-examples">
-        <jar jarfile="${work.dir}/${jar.examples.name}">
-            <fileset dir="${build.examples.dir}/classes"/>
-            <manifest>
-                <attribute name="Implementation-Title" value="Muse Examples"/>
-                <attribute name="Implementation-Version" value="${version}"/>
-                <attribute name="Implementation-Vendor" value="Echomine Inc."/>
-            </manifest>
-        </jar>
+    <!-- run the junit tests for a module -->
+    <target name="test-module" depends="compile-test-module" if="module.name">
+        <junit printsummary="yes" haltonfailure="no" haltonerror="no" fork="yes">
+            <!-- JUnit Configuration Options -->
+            <classpath location="${build.dir}/${module.name}/classes"/>
+            <classpath location="${build.dir}/${module.name}/tests/classes"/>
+            <classpath refid="module.classpath"/>
+            <classpath refid="compile.classpath"/>
+            <classpath refid="jibx.classpath"/>
+            <formatter type="plain" usefile="false"/>
+            <batchtest fork="yes">
+                <fileset dir="${build.dir}/${module.name}/tests/classes">
+                    <include name="**/*Test.class"/>
+                </fileset>
+            </batchtest>
+        </junit>
     </target>
 
+    <!-- Cleans up the module build directory  -->
+    <target name="clean-test-module" if="module.name">
+        <delete dir="${build.dir}/${module.name}/tests"/>
+    </target>
+    
+    <!-- ================================================================== -->
+    <!-- core Module tasks                                             -->
+    <!-- ================================================================== -->
+    <target name="prepare-core" depends="prepare-base">
+        <antcall target="prepare-module">
+            <param name="module.name" value="core"/>
+        </antcall>
+    </target>
+    
+    <target name="compile-core" depends="prepare-core">
+        <path id="core.classpath">
+            <pathelement location="${build.dir}/core/classes"/>
+        </path>
+        <path id="core.classpath.depends"/>
+        <antcall target="compile-module">
+            <param name="module.name" value="core"/>
+            <reference refid="core.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="bind-core" depends="compile-core">
+        <antcall target="bind-module">
+            <param name="module.name" value="core"/>
+        </antcall>
+    </target>    
+    
+    <target name="jar-core" depends="bind-core">
+        <antcall target="jar-module">
+            <param name="module.name" value="core"/>
+        </antcall>
+    </target>
+
+    <target name="clean-core">
+        <antcall target="clean-module">
+            <param name="module.name" value="core"/>
+        </antcall>
+    </target>
+
+    <target name="test-core" depends="bind-core">
+        <antcall target="test-module">
+            <param name="module.name" value="core"/>
+            <reference refid="core.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="clean-test-core">
+        <antcall target="clean-module">
+            <param name="module.name" value="core"/>
+        </antcall>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- xmpp Module tasks                                             -->
+    <!-- ================================================================== -->
+    <target name="prepare-xmpp" depends="prepare-base">
+        <antcall target="prepare-module">
+            <param name="module.name" value="xmpp"/>
+        </antcall>
+    </target>
+    
+    <target name="compile-xmpp" depends="prepare-xmpp,compile-core">
+        <path id="xmpp.classpath">
+            <pathelement location="${build.dir}/xmpp/classes"/>
+        </path>
+        <path id="xmpp.classpath.depends">
+            <path refid="core.classpath"/>
+        </path>
+        <antcall target="compile-module">
+            <param name="module.name" value="xmpp"/>
+            <reference refid="xmpp.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="bind-xmpp" depends="compile-xmpp">
+        <antcall target="bind-module">
+            <param name="module.name" value="xmpp"/>
+        </antcall>
+    </target>
+    
+    <target name="jar-xmpp" depends="bind-xmpp">
+        <antcall target="jar-module">
+            <param name="module.name" value="xmpp"/>
+        </antcall>
+    </target>
+
+    <target name="clean-xmpp">
+        <antcall target="clean-module">
+            <param name="module.name" value="xmpp"/>
+        </antcall>
+    </target>
+
+    <target name="test-xmpp" depends="bind-xmpp">
+        <antcall target="test-module">
+            <param name="module.name" value="xmpp"/>
+            <reference refid="xmpp.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="clean-test-xmpp">
+        <antcall target="clean-module">
+            <param name="module.name" value="xmpp"/>
+        </antcall>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- jabber-compat Module tasks                                         -->
+    <!-- ================================================================== -->
+    <target name="prepare-jabber-compat" depends="prepare-base">
+        <antcall target="prepare-module">
+            <param name="module.name" value="jabber-compat"/>
+        </antcall>
+    </target>
+    
+    <target name="compile-jabber-compat" depends="prepare-jabber-compat">
+        <path id="jabber-compat.classpath">
+            <pathelement location="${build.dir}/jabber-compat/classes"/>
+        </path>
+        <path id="jabber-compat.classpath.depends">
+            <path refid="xmpp.classpath"/>
+            <path refid="core.classpath"/>
+            <path location="${build.dir}/xmpp/tests/classes"/>
+        </path>    
+        <antcall target="compile-module">
+            <param name="module.name" value="jabber-compat"/>
+            <reference refid="jabber-compat.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="bind-jabber-compat" depends="compile-jabber-compat">
+        <antcall target="bind-module">
+            <param name="module.name" value="jabber-compat"/>
+        </antcall>
+    </target>
+    
+    <target name="jar-jabber-compat" depends="bind-jabber-compat">
+        <antcall target="jar-module">
+            <param name="module.name" value="jabber-compat"/>
+        </antcall>
+    </target>
+
+    <target name="clean-jabber-compat">
+        <antcall target="clean-module">
+            <param name="module.name" value="jabber-compat"/>
+        </antcall>
+    </target>
+
+    <target name="test-jabber-compat" depends="bind-jabber-compat">
+        <antcall target="test-module">
+            <param name="module.name" value="jabber-compat"/>
+            <reference refid="jabber-compat.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="clean-test-jabber-compat">
+        <antcall target="clean-module">
+            <param name="module.name" value="jabber-compat"/>
+        </antcall>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Tasks to perform on all modules at once                            -->
+    <!-- ================================================================== -->
+    <target name="prepare-all" depends="prepare-core,prepare-xmpp,prepare-jabber-compat"/>
+    <target name="compile-all" depends="compile-core,compile-xmpp,compile-jabber-compat"/>
+    <target name="bind-all" depends="bind-core,bind-xmpp,bind-jabber-compat"/>
+    <target name="jar-all" depends="jar-core,jar-xmpp,jar-jabber-compat"/>
+    <target name="test-all" depends="test-core,test-xmpp,test-jabber-compat"/>
+    <target name="clean-all" depends="clean-core,clean-xmpp,clean-jabber-compat"/>
+    
     <!-- =================================================================== -->
-    <!-- Creates the API documentation                                       -->
+    <!-- Creates the API documentation for all modules                       -->
     <!-- =================================================================== -->
-    <target name="javadocs" depends="prepare">
+    <target name="javadocs" depends="prepare-all">
         <mkdir dir="${javadoc.dest}"/>
         <javadoc author="true" bottom="Copyright &amp;copy; ${year} Echomine. All Rights Reserved." destdir="${javadoc.dest}"
             doctitle="${Name} ${version} API" packagenames="com.echomine.*" private="false" sourcepath="${build.src}"
@@ -146,7 +350,7 @@
     <!-- =================================================================== -->
     <!-- Package Preparation (no archiving yet)                              -->
     <!-- =================================================================== -->
-    <target name="prepare-package" depends="jar,jar-examples">
+    <target name="prepare-package" depends="jar-all">
         <delete dir="${dist.dir}" verbose="false"/>
         <mkdir dir="${dist.dir}"/>
 
@@ -206,27 +410,5 @@
     <!-- Packages the distribution with ZIP and TAG-GZIP (with or w/o docs)  -->
     <!-- =================================================================== -->
     <target name="package-all" depends="package-zip, package-tgz">
-    </target>
-
-    <!-- run the unit tests -->
-    <target name="test.junit" depends="compile" description="Run JUnit tests">
-        <ant antfile="build-tests.xml" inheritrefs="yes" target="test.junit"/>
-    </target>
-
-    <target name="test.clean">
-        <ant antfile="build-tests.xml" target="clean"/>
-    </target>
-
-    <!-- Cleans up the build directory  -->
-    <target name="clean">
-        <delete file="${work.dir}/${dist.zip.name}" verbose="false"/>
-        <delete file="${work.dir}/${dist.tar.name}" verbose="false"/>
-        <delete file="${work.dir}/${dist.tgz.name}" verbose="false"/>
-        <delete file="${work.dir}/${jar.name}" verbose="false"/>
-        <delete file="${work.dir}/${jar.examples.name}" verbose="false"/>
-        <delete dir="${build.dir}"/>
-        <delete dir="${build.examples.dir}"/>
-        <delete dir="${work.dir}/docs"/>
-        <delete dir="${dist.dir}" verbose="false"/>
     </target>
 </project>

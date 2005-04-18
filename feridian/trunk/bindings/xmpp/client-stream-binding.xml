@@ -1,0 +1,26 @@
+<!-- 
+	Binding file representing most, if not all, packets that work
+	at the top level of a client stream.  This includes errors,
+	stream features, message/iq/presence stanzas, SASL, and
+	TLS stanzas
+-->
+<binding>
+	<namespace uri="http://etherx.jabber.org/streams" prefix="stream"/>
+	<namespace uri="jabber:client" default="elements"/>
+	<namespace uri="urn:ietf:params:xml:ns:xmpp-streams" prefix="streams"/>
+	
+	<!-- stream error support -->
+	<mapping name="error" class="com.echomine.xmpp.ErrorPacket"
+		marshaller="com.echomine.xmpp.jibx.ErrorPacketMapper"
+		unmarshaller="com.echomine.xmpp.jibx.ErrorPacketMapper"
+		ns="http://etherx.jabber.org/streams"/>
+		
+	<!-- features support -->
+	<mapping name="features" class="com.echomine.xmpp.StreamFeaturesPacket" ns="http://etherx.jabber.org/streams">
+		<namespace uri="urn:ietf:params:xml:ns:xmpp-tls" prefix="tls"/>
+		<structure name="starttls" field="tlsFeature" ns="urn:ietf:params:xml:ns:xmpp-tls"
+			marshaller="com.echomine.xmpp.jibx.StartTLSFeatureMapper"
+			unmarshaller="com.echomine.xmpp.jibx.StartTLSFeatureMapper" usage="optional">
+		</structure>
+	</mapping>
+</binding>
