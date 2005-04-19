@@ -1,9 +1,0 @@
-<?xml version='1.0'?>
-<stream:stream from='example.com' id='someid' version='1.0'
-	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
-	<stream:features>
-		<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>
-    			<required/>
-		</starttls>
-  	</stream:features>
-</stream:stream>

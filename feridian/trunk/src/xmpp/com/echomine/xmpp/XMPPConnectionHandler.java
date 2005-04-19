@@ -1,7 +1,5 @@
 package com.echomine.xmpp;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -12,6 +10,9 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.SocketHandler;
 import com.echomine.util.IOUtil;
+import com.echomine.xmpp.stream.TLSHandshakeStream;
+import com.echomine.xmpp.stream.XMPPClientHandshakeStream;
+import com.echomine.xmpp.stream.XMPPConnectionContext;
 
 /**
  * The handler for working with the xmpp client connection. The handler will
@@ -20,10 +21,9 @@ import com.echomine.util.IOUtil;
  */
 public class XMPPConnectionHandler implements SocketHandler {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
-    protected final static int SOCKETBUF = 8192;
-    protected XMPPConnectionContext ctx;
+    protected XMPPClientContext clientCtx;
+    protected XMPPConnectionContext connCtx;
     protected boolean shutdown;
-    protected Socket socket;
     protected XMPPStreamWriter writer;
     protected UnmarshallingContext uctx;
 
@@ -31,10 +31,13 @@ public class XMPPConnectionHandler implements SocketHandler {
      * The constructor for the handler. It accepts a connection context to use
      * the data stored or to store any connection-related data.
      * 
-     * @param ctx the connection context
+     * @param connCtx the connection context
      */
-    public XMPPConnectionHandler(XMPPConnectionContext ctx) {
-        this.ctx = ctx;
+    public XMPPConnectionHandler(XMPPClientContext clientCtx) {
+        if (clientCtx == null)
+            throw new IllegalArgumentException("Client Context cannot be null");
+        this.clientCtx = clientCtx;
+        connCtx = new XMPPConnectionContext();
         shutdown = false;
         writer = new XMPPStreamWriter(XMPPConstants.STREAM_URIS);
         uctx = new UnmarshallingContext();
@@ -46,9 +49,7 @@ public class XMPPConnectionHandler implements SocketHandler {
      * @see com.echomine.net.SocketHandler#handle(alt.java.net.Socket)
      */
     public void handle(Socket socket) throws IOException {
-        this.socket = socket;
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
+        connCtx.setSocket(socket);
         try {
             //set socket keepalive
             socket.setKeepAlive(true);
@@ -59,20 +60,14 @@ public class XMPPConnectionHandler implements SocketHandler {
             uctx.setDocument(socket.getInputStream(), "UTF-8");
             //handshake processing
             XMPPClientHandshakeStream handshakeStream = new XMPPClientHandshakeStream();
-            handshakeStream.process(ctx, uctx, writer);
+            handshakeStream.process(clientCtx, connCtx, uctx, writer);
             //Determine whether to do TLS processing
-            if (ctx.getTLSFeature().tlsSupported) {
+            if (connCtx.getTLSFeature().tlsSupported) {
                 TLSHandshakeStream tlsStream = new TLSHandshakeStream();
-                tlsStream.setSocket(socket);
-                tlsStream.process(ctx, uctx, writer);
-                this.socket = socket = tlsStream.getTLSSocket();
-                writer.flush();
-                bis = new BufferedInputStream(socket.getInputStream(), SOCKETBUF);
-                bos = new BufferedOutputStream(socket.getOutputStream(), SOCKETBUF);
-                writer.setOutput(bos);
-                uctx.setDocument(bis, "UTF-8");
+                tlsStream.process(clientCtx, connCtx, uctx, writer);
+                socket = connCtx.getSocket();
                 //redo the handshake process
-                handshakeStream.process(ctx, uctx, writer);
+                handshakeStream.process(clientCtx, connCtx, uctx, writer);
             }
             //Determine whether to do SASL processing
             //Start normal session processing
@@ -80,11 +75,10 @@ public class XMPPConnectionHandler implements SocketHandler {
             if (log.isWarnEnabled())
                 log.warn("Exception occurred during socket processing", ex);
         } finally {
-            shutdown();
             //disconnected from server, close streams but not the socket
             if (writer != null)
                 writer.close();
-            IOUtil.closeStream(bis);
+            shutdown();
         }
     }
 
@@ -95,6 +89,7 @@ public class XMPPConnectionHandler implements SocketHandler {
      */
     public void start() {
         shutdown = false;
+        connCtx.reset();
     }
 
     /*
@@ -104,7 +99,7 @@ public class XMPPConnectionHandler implements SocketHandler {
      */
     public void shutdown() {
         shutdown = true;
-        IOUtil.closeSocket(socket);
+        IOUtil.closeSocket(connCtx.getSocket());
     }
 
 }

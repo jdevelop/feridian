@@ -1,11 +1,10 @@
 package com.echomine.xmpp;
 
-import com.echomine.MuseException;
 
 /**
  * base exception class for all XMPP related errors.
  */
-public class XMPPException extends MuseException {
+public class XMPPException extends Exception {
     ErrorPacket errorPacket;
 
     public XMPPException() {
@@ -28,7 +27,7 @@ public class XMPPException extends MuseException {
         super();
         this.errorPacket = packet;
     }
-    
+
     public XMPPException(String message, ErrorPacket packet) {
         super(message);
         this.errorPacket = packet;

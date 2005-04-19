@@ -12,11 +12,12 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.TLSFeature;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.stream.TLSFeature;
 
 /**
- * The jibx mapper (unmarshaller/marshaller) for working with the starttls element.
+ * The jibx mapper (unmarshaller/marshaller) for working with the starttls
+ * element.
  */
 
 public class StartTLSFeatureMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
@@ -107,9 +108,9 @@ public class StartTLSFeatureMapper implements IUnmarshaller, IMarshaller, IAlias
         if (!ctx.isAt(uri, name)) {
             ctx.throwStartTagNameError(uri, name);
         }
-        TLSFeature packet = (TLSFeature) obj;
+        com.echomine.xmpp.stream.TLSFeature packet = (com.echomine.xmpp.stream.TLSFeature) obj;
         if (packet == null)
-            packet = new TLSFeature();
+            packet = new com.echomine.xmpp.stream.TLSFeature();
         //parse past the starttls element
         ctx.parsePastStartTag(uri, name);
         packet.tlsSupported = true;

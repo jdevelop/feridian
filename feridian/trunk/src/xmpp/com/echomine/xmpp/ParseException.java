@@ -1,9 +1,9 @@
-package com.echomine;
+package com.echomine.xmpp;
 
 /**
  * any problem while parsing anything can throw this exception.
  */
-public class ParseException extends MuseException {
+public class ParseException extends XMPPException {
     public ParseException() {
     }
 

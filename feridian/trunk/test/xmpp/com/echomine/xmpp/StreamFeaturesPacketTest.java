@@ -13,6 +13,8 @@ import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.xmpp.stream.XMPPClientHandshakeStream;
+import com.echomine.xmpp.stream.XMPPConnectionContext;
 
 /**
  * Tests the stream features packet

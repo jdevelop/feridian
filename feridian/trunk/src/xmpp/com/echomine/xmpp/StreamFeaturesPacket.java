@@ -1,5 +1,7 @@
 package com.echomine.xmpp;
 
+import com.echomine.xmpp.stream.TLSFeature;
+
 
 /**
  * This represents the stream:features packet used during handshake negotiation.

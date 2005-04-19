@@ -84,7 +84,7 @@
     <!-- jibx binding modifications to compiled classes -->
     <target name="bind-module" depends="compile-module" if="module.name">
         <echo message="Binding Module ${module.name}"/>
-        <bind verbose="true" load="true">
+        <bind verbose="false" load="true">
             <bindingfileset dir="${src.bindings.dir}/${module.name}"/>
             <classpathset dir="${build.dir}/${module.name}/classes"/>
         </bind>
@@ -167,57 +167,6 @@
     </target>
     
     <!-- ================================================================== -->
-    <!-- core Module tasks                                             -->
-    <!-- ================================================================== -->
-    <target name="prepare-core" depends="prepare-base">
-        <antcall target="prepare-module">
-            <param name="module.name" value="core"/>
-        </antcall>
-    </target>
-    
-    <target name="compile-core" depends="prepare-core">
-        <path id="core.classpath">
-            <pathelement location="${build.dir}/core/classes"/>
-        </path>
-        <path id="core.classpath.depends"/>
-        <antcall target="compile-module">
-            <param name="module.name" value="core"/>
-            <reference refid="core.classpath.depends" torefid="module.classpath"/>
-        </antcall>
-    </target>
-    
-    <target name="bind-core" depends="compile-core">
-        <antcall target="bind-module">
-            <param name="module.name" value="core"/>
-        </antcall>
-    </target>    
-    
-    <target name="jar-core" depends="bind-core">
-        <antcall target="jar-module">
-            <param name="module.name" value="core"/>
-        </antcall>
-    </target>
-
-    <target name="clean-core">
-        <antcall target="clean-module">
-            <param name="module.name" value="core"/>
-        </antcall>
-    </target>
-
-    <target name="test-core" depends="bind-core">
-        <antcall target="test-module">
-            <param name="module.name" value="core"/>
-            <reference refid="core.classpath.depends" torefid="module.classpath"/>
-        </antcall>
-    </target>
-    
-    <target name="clean-test-core">
-        <antcall target="clean-module">
-            <param name="module.name" value="core"/>
-        </antcall>
-    </target>
-
-    <!-- ================================================================== -->
     <!-- xmpp Module tasks                                             -->
     <!-- ================================================================== -->
     <target name="prepare-xmpp" depends="prepare-base">
@@ -226,12 +175,11 @@
         </antcall>
     </target>
     
-    <target name="compile-xmpp" depends="prepare-xmpp,compile-core">
+    <target name="compile-xmpp" depends="prepare-xmpp">
         <path id="xmpp.classpath">
             <pathelement location="${build.dir}/xmpp/classes"/>
         </path>
         <path id="xmpp.classpath.depends">
-            <path refid="core.classpath"/>
         </path>
         <antcall target="compile-module">
             <param name="module.name" value="xmpp"/>
@@ -328,12 +276,12 @@
     <!-- ================================================================== -->
     <!-- Tasks to perform on all modules at once                            -->
     <!-- ================================================================== -->
-    <target name="prepare-all" depends="prepare-core,prepare-xmpp,prepare-jabber-compat"/>
-    <target name="compile-all" depends="compile-core,compile-xmpp,compile-jabber-compat"/>
-    <target name="bind-all" depends="bind-core,bind-xmpp,bind-jabber-compat"/>
-    <target name="jar-all" depends="jar-core,jar-xmpp,jar-jabber-compat"/>
-    <target name="test-all" depends="test-core,test-xmpp,test-jabber-compat"/>
-    <target name="clean-all" depends="clean-core,clean-xmpp,clean-jabber-compat"/>
+    <target name="prepare-all" depends="prepare-xmpp,prepare-jabber-compat"/>
+    <target name="compile-all" depends="compile-xmpp,compile-jabber-compat"/>
+    <target name="bind-all" depends="bind-xmpp,bind-jabber-compat"/>
+    <target name="jar-all" depends="jar-xmpp,jar-jabber-compat"/>
+    <target name="test-all" depends="test-xmpp,test-jabber-compat"/>
+    <target name="clean-all" depends="clean-xmpp,clean-jabber-compat"/>
     
     <!-- =================================================================== -->
     <!-- Creates the API documentation for all modules                       -->

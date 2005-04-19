@@ -11,7 +11,9 @@ import org.jibx.runtime.impl.UTF8StreamWriter;
  * streaming xml.
  */
 public class XMPPStreamWriter extends UTF8StreamWriter {
-
+    private static final String STREAM_PREFIX = "stream";
+    private static final String CLIENT_PREFIX = "";
+    
     /**
      * @param uris ordered array of URIs for namespaces used in document (must
      * be constant; the value in position 0 must always be the empty string "",
@@ -22,7 +24,7 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      */
     public XMPPStreamWriter(String[] uris) {
         super(uris);
-        defineNamespace(2, "stream");
-        defineNamespace(3, "");
+        defineNamespace(2, STREAM_PREFIX);
+        defineNamespace(3, CLIENT_PREFIX);
     }
 }

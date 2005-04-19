@@ -1,4 +1,4 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.stream;
 
 /**
  * This is a model container for the starttls feature used in the 
