@@ -22,6 +22,7 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
     protected XMPPClientContext clientCtx;
     protected XMPPConnectionContext connCtx;
     protected XMPPStreamWriter writer;
+    protected ByteArrayOutputStream os;
 
     public XMPPTestCase() {
         super();
@@ -33,6 +34,8 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
         connCtx = new XMPPConnectionContext();
         uctx = new UnmarshallingContext();
         writer = new XMPPStreamWriter(STREAM_URIS);
+        os = new ByteArrayOutputStream(256);
+        writer.setOutput(os);
     }
 
     protected void tearDown() throws Exception {
@@ -91,8 +94,6 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
      * @throws Exception
      */
     protected void runAndCompare(Reader inReader, Reader outReader, IXMPPStream stream, boolean addHeaders, boolean stripHeaders) throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(256);
-        writer.setOutput(os);
         uctx.setDocument(inReader);
         Exception thrownEx = null;
         if (addHeaders)
@@ -127,8 +128,6 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
      * @throws Exception
      */
     protected void run(String inRes, IXMPPStream stream) throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(256);
-        writer.setOutput(os);
         uctx.setDocument(getClass().getClassLoader().getResourceAsStream(inRes), "UTF-8");
         stream.process(clientCtx, connCtx, uctx, writer);
     }
@@ -150,14 +149,16 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
 
     /**
      * This will close the element header, effectively closing the XML document.
-     * To call this method, you must have already called the
-     * prependStreamHeader.
+     * This method works diretly with the enclosing OutputStream that 
+     * gets checked with the out resource.  Whatever goes on with the connection
+     * context socket stream is a separate matter.  This is made to specifically
+     * work properly in case streams were changed in the middle of handshake
+     * and the writer and unmarshalling context got reset.
      * 
      * @throws Exception
      */
     protected void endOutgoingStreamHeader() throws Exception {
-        writer.endTag(IDX_JABBER_STREAM, "stream");
-        writer.flush();
+        os.write("</stream:stream>".getBytes());
     }
 
     /**

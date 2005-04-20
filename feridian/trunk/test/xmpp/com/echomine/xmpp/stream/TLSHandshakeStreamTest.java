@@ -1,5 +1,7 @@
 package com.echomine.xmpp.stream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.security.KeyManagementException;
@@ -7,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLSocket;
 
+import com.echomine.net.MockSSLSocket;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPTestCase;
 
@@ -77,7 +80,11 @@ public class TLSHandshakeStreamTest extends XMPPTestCase {
 
     class TestableTLSHandshakeStream extends TLSHandshakeStream {
         protected SSLSocket startTLSHandshake(Socket socket) throws KeyManagementException, NoSuchAlgorithmException, IOException {
-            return setupSSLSocket(socket);
+            MockSSLSocket mockSocket = new MockSSLSocket();
+            mockSocket.setInputStream(new ByteArrayInputStream("".getBytes()));
+            mockSocket.setOutputStream(new ByteArrayOutputStream());
+            mockSocket.setUseClientMode(true);
+            return mockSocket;
         }
     }
 }

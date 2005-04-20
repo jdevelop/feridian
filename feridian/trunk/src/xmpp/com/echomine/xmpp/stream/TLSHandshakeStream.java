@@ -69,13 +69,9 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             if (!uctx.isAt(NS_TLS, "proceed"))
                 throw new XMPPException("Expecting <proceed> tag, but found: " + uctx.getName());
             uctx.parsePastEndTag(NS_TLS, "proceed");
-            System.out.println("orig output: " + connCtx.getSocket().getOutputStream());
-            System.out.println("orig input: " + connCtx.getSocket().getInputStream());
             SSLSocket tlsSocket = startTLSHandshake(connCtx.getSocket());
             connCtx.setSocket(tlsSocket);
             writer.flush();
-            System.out.println("orig output: " + connCtx.getSocket().getOutputStream());
-            System.out.println("orig input: " + connCtx.getSocket().getInputStream());
             BufferedInputStream bis = new BufferedInputStream(tlsSocket.getInputStream(), SOCKETBUF);
             BufferedOutputStream bos = new BufferedOutputStream(tlsSocket.getOutputStream(), SOCKETBUF);
             //setting output and document automatically reset the writer and
@@ -123,6 +119,7 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
         SSLSocketFactory factory = context.getSocketFactory();
         //test codes will not go through SSL
         SSLSocket sslsocket = (SSLSocket) factory.createSocket(socket, socket.getInetAddress().getHostAddress(), socket.getPort(), true);
+        sslsocket.setUseClientMode(true);
         return sslsocket;
     }
 }
