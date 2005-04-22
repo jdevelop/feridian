@@ -16,11 +16,8 @@
 		ns="http://etherx.jabber.org/streams"/>
 		
 	<!-- features support -->
-	<mapping name="features" class="com.echomine.xmpp.StreamFeaturesPacket" ns="http://etherx.jabber.org/streams">
-		<namespace uri="urn:ietf:params:xml:ns:xmpp-tls" prefix="tls"/>
-		<structure name="starttls" field="tlsFeature" ns="urn:ietf:params:xml:ns:xmpp-tls"
-			marshaller="com.echomine.xmpp.jibx.StartTLSFeatureMapper"
-			unmarshaller="com.echomine.xmpp.jibx.StartTLSFeatureMapper" usage="optional">
-		</structure>
-	</mapping>
+	<mapping name="features" class="com.echomine.xmpp.StreamFeaturesPacket"
+		marshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"
+		unmarshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"
+		ns="http://etherx.jabber.org/streams"/>
 </binding>

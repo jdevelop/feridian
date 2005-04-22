@@ -6,8 +6,21 @@ package com.echomine.xmpp;
  * XMPPConnectionContext, which holds session-specific data during negotiation.
  */
 public class XMPPClientContext {
+    public static final int DEFAULT_PORT = 5222;
     private String username;
     private String host;
+
+    public XMPPClientContext() {    
+    }
+    
+    /**
+     * @param username the username
+     * @param serverName the server to connect to
+     */
+    public XMPPClientContext(String username, String serverName) {
+        this.username = username;
+        this.host = serverName;
+    }
 
     /**
      * @return Returns the host to connect to.

@@ -44,8 +44,10 @@ public class XMPPClientHandshakeStreamTest extends XMPPTestCase {
     public void testHandshakeWithFeatures() throws Exception {
         String inRes = "com/echomine/xmpp/data/XMPPClientHandshakeStream_in1.xml";
         String outRes = "com/echomine/xmpp/data/XMPPEmptyStream.xml";
-        runAndCompare(inRes, outRes, stream, false, false);
-        assertTrue(connCtx.getTLSFeature().tlsSupported);
-        assertTrue(connCtx.getTLSFeature().tlsRequired);
+        run(inRes, stream);
+        endOutgoingStreamHeader();
+        compare(outRes);
+        assertTrue(connCtx.isTLSSupported());
+        assertTrue(connCtx.isTLSRequired());
     }
 }

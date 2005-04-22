@@ -63,7 +63,7 @@ public class StreamFeaturesPacketTest extends TestCase implements XMPPConstants 
     }
     
     public void testMarshallRequireTLS() throws Exception {
-        String xml = "<stream:features xmlns='jabber:client' xmlns:streams='urn:ietf:params:xml:ns:xmpp-streams' xmlns:tls='urn:ietf:params:xml:ns:xmpp-tls' xmlns:stream='http://etherx.jabber.org/streams'>"
+        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
                 + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>\n\t<required/></starttls></stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
@@ -81,7 +81,7 @@ public class StreamFeaturesPacketTest extends TestCase implements XMPPConstants 
     }
 
     public void testMarshallOptionalTLS() throws Exception {
-        String xml = "<stream:features xmlns='jabber:client' xmlns:streams='urn:ietf:params:xml:ns:xmpp-streams' xmlns:tls='urn:ietf:params:xml:ns:xmpp-tls' xmlns:stream='http://etherx.jabber.org/streams'>"
+        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
                 + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/></stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
@@ -99,7 +99,7 @@ public class StreamFeaturesPacketTest extends TestCase implements XMPPConstants 
     }
 
     public void testMarshallNoTLS() throws Exception {
-        String xml = "<stream:features xmlns='jabber:client' xmlns:streams='urn:ietf:params:xml:ns:xmpp-streams' xmlns:tls='urn:ietf:params:xml:ns:xmpp-tls' xmlns:stream='http://etherx.jabber.org/streams'>"
+        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
                 + "</stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();

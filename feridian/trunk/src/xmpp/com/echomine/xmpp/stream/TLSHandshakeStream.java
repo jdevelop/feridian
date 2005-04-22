@@ -53,7 +53,7 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
      *      com.echomine.jibx.XMPPStreamWriter)
      */
     public void process(XMPPClientContext clientCtx, XMPPConnectionContext connCtx, UnmarshallingContext uctx, XMPPStreamWriter writer) throws XMPPException {
-        if (!connCtx.getTLSFeature().tlsSupported)
+        if (!connCtx.isTLSSupported())
             return;
         String[] extns = new String[] { NS_TLS };
         writer.pushExtensionNamespaces(extns);

@@ -110,12 +110,38 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
             endOutgoingStreamHeader();
         writer.flush();
         //check that the stream sent by the stream is proper.
+        compare(outReader);
+        if (thrownEx != null)
+            throw thrownEx;
+    }
+
+    /**
+     * Only compares the output with the given resource stream. It is assumed
+     * that the run() or something equivalent has already been done, and there
+     * is data to compare in the output.
+     * 
+     * @param outRes the resource to compare with
+     * @throws Exception
+     */
+    protected void compare(String outRes) throws Exception {
+        InputStreamReader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream(outRes));
+        compare(reader);
+    }
+
+    /**
+     * Only compares the output with the given out reader. It is assumed that
+     * the run() or something equivalent has already been done, and there is
+     * data to compare in the output.
+     * 
+     * @param outReader the resource to compare output with
+     * @throws Exception
+     */
+    protected void compare(Reader outReader) throws Exception {
+        //check that the stream sent by the stream is proper.
         String str = os.toString("UTF-8");
         InputStreamReader brdr = new InputStreamReader(new ByteArrayInputStream(os.toByteArray()), "UTF-8");
         DocumentComparator comp = new DocumentComparator(System.err);
         assertTrue("Invalid XML: " + str, comp.compare(outReader, brdr));
-        if (thrownEx != null)
-            throw thrownEx;
     }
 
     /**
@@ -149,11 +175,11 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
 
     /**
      * This will close the element header, effectively closing the XML document.
-     * This method works diretly with the enclosing OutputStream that 
-     * gets checked with the out resource.  Whatever goes on with the connection
-     * context socket stream is a separate matter.  This is made to specifically
-     * work properly in case streams were changed in the middle of handshake
-     * and the writer and unmarshalling context got reset.
+     * This method works diretly with the enclosing OutputStream that gets
+     * checked with the out resource. Whatever goes on with the connection
+     * context socket stream is a separate matter. This is made to specifically
+     * work properly in case streams were changed in the middle of handshake and
+     * the writer and unmarshalling context got reset.
      * 
      * @throws Exception
      */

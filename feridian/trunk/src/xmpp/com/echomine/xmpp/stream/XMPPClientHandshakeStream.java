@@ -2,6 +2,8 @@ package com.echomine.xmpp.stream;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
@@ -21,6 +23,7 @@ import com.echomine.xmpp.XMPPException;
  * stream handler.
  */
 public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
+    private static final Log log = LogFactory.getLog(XMPPClientHandshakeStream.class);
     private static final String STREAM_ELEMENT_NAME = "stream";
 
     /*
@@ -45,16 +48,18 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
             connCtx.setHost(uctx.attributeText(null, "from"));
             connCtx.setSessionId(uctx.attributeText(null, "id"));
             //parse past start tag
-            uctx.parsePastStartTag(NS_JABBER_STREAM, STREAM_ELEMENT_NAME);
-            int eventType;
             while (true) {
-                eventType = uctx.next();
+                int eventType = uctx.next();
                 if (eventType == UnmarshallingContext.END_DOCUMENT) {
+                    if (log.isDebugEnabled())
+                        log.debug("Reached end of document. Breaking out..");
                     //stream finished
                     endStream(writer);
                     break;
                 }
                 if (eventType == UnmarshallingContext.END_TAG && "stream".equals(uctx.getName()) && NS_JABBER_STREAM.equals(uctx.getNamespace())) {
+                    if (log.isDebugEnabled())
+                        log.debug("Reached stream end tag. Breaking out..");
                     //check if end tag is for stream
                     endStream(writer);
                     break;
@@ -67,7 +72,9 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
                 }
                 if (uctx.isAt(NS_JABBER_STREAM, "features")) {
                     StreamFeaturesPacket packet = (StreamFeaturesPacket) JiBXUtil.unmarshallObject(uctx, StreamFeaturesPacket.class);
-                    connCtx.setTLSFeature(packet.getTLSFeature());
+                    connCtx.setTLSSupported(packet.isTLSSupported());
+                    connCtx.setTLSRequired(packet.isTLSRequired());
+                    break;
                 }
             }
         } catch (IOException ex) {

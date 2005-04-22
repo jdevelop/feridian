@@ -110,6 +110,43 @@
     </target>
     
     <!-- ================================================================== -->
+    <!-- Generic example tasks for use by all modules                       -->
+    <!-- ================================================================== -->
+
+    <target name="prepare-examples-module" if="module.name">
+        <mkdir dir="${build.dir}/${module.name}/examples"/>
+        <mkdir dir="${build.dir}/${module.name}/examples/src"/>
+        <mkdir dir="${build.dir}/${module.name}/examples/classes"/>
+        <copy todir="${build.dir}/${module.name}/examples/src">
+            <fileset dir="${src.examples.dir}/${module.name}"/>
+        </copy>
+    </target>
+    
+    <target name="compile-examples-module" depends="prepare-examples-module" if="module.name">
+        <javac srcdir="${build.dir}/${module.name}/examples/src"
+            destdir="${build.dir}/${module.name}/examples/classes"
+            debug="${compile.debug}" optimize="${compile.optimize}"
+            deprecation="${compile.deprecation}">
+            <classpath location="${build.dir}/${module.name}/classes"/>
+            <classpath refid="module.classpath"/>
+            <classpath refid="compile.classpath"/>
+            <classpath refid="jibx.classpath"/>
+        </javac>
+    </target>
+    
+    <target name="jar-examples-module" depends="compile-examples-module" if="module.name">
+        <echo message="Jarring Examples for Module ${module.name}"/>
+        <jar jarfile="${work.dir}/${project}-${module.name}-examples.jar">
+            <fileset dir="${build.dir}/${module.name}/examples/classes"/>
+            <manifest>
+                <attribute name="Implementation-Title" value="${project}-${module.name}-examples"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Implementation-Vendor" value="Echomine Inc."/>
+            </manifest>
+        </jar>
+    </target>
+    
+    <!-- ================================================================== -->
     <!-- Generic unit testing tasks for use by all modules                  -->
     <!-- ================================================================== -->
 
@@ -199,6 +236,19 @@
         </antcall>
     </target>
 
+    <target name="compile-xmpp-examples" depends="bind-xmpp">
+        <antcall target="compile-examples-module">
+            <param name="module.name" value="xmpp"/>
+            <reference refid="xmpp.classpath.depends" torefid="module.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="jar-xmpp-examples" depends="compile-xmpp-examples">
+        <antcall target="jar-examples-module">
+            <param name="module.name" value="xmpp"/>
+        </antcall>
+    </target>
+    
     <target name="clean-xmpp">
         <antcall target="clean-module">
             <param name="module.name" value="xmpp"/>

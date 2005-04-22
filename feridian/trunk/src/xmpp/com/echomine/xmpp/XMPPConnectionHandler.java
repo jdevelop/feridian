@@ -1,6 +1,7 @@
 package com.echomine.xmpp;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.commons.logging.Log;
@@ -57,12 +58,12 @@ public class XMPPConnectionHandler implements SocketHandler {
             // context
             //will get resetted
             writer.setOutput(socket.getOutputStream());
-            uctx.setDocument(socket.getInputStream(), "UTF-8");
+            uctx.setDocument(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             //handshake processing
             XMPPClientHandshakeStream handshakeStream = new XMPPClientHandshakeStream();
             handshakeStream.process(clientCtx, connCtx, uctx, writer);
             //Determine whether to do TLS processing
-            if (connCtx.getTLSFeature().tlsSupported) {
+            if (connCtx.isTLSSupported()) {
                 TLSHandshakeStream tlsStream = new TLSHandshakeStream();
                 tlsStream.process(clientCtx, connCtx, uctx, writer);
                 socket = connCtx.getSocket();

@@ -1,5 +1,9 @@
 package com.echomine.jibx;
 
+import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.impl.UTF8StreamWriter;
 
 /**
@@ -11,6 +15,7 @@ import org.jibx.runtime.impl.UTF8StreamWriter;
  * streaming xml.
  */
 public class XMPPStreamWriter extends UTF8StreamWriter {
+    private static final Log log = LogFactory.getLog(XMPPStreamWriter.class);
     private static final String STREAM_PREFIX = "stream";
     private static final String CLIENT_PREFIX = "";
     
@@ -26,5 +31,17 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
         super(uris);
         defineNamespace(2, STREAM_PREFIX);
         defineNamespace(3, CLIENT_PREFIX);
+    }
+    
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jibx.runtime.IXMLWriter#flush()
+     */
+    public void flush() throws IOException {
+        if (log.isDebugEnabled())
+            log.debug(new String(m_buffer, 0, m_fillOffset));
+        super.flush();
     }
 }

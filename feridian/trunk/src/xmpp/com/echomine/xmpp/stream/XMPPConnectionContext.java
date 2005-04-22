@@ -15,10 +15,10 @@ public class XMPPConnectionContext {
     private String host;
     private String sessionId;
     private Socket socket;
-    private TLSFeature tlsFeature;
+    private boolean tlsSupported;
+    private boolean tlsRequired;
 
     public XMPPConnectionContext() {
-        tlsFeature = new TLSFeature();
     }
 
     /**
@@ -27,8 +27,36 @@ public class XMPPConnectionContext {
     public void reset() {
         host = null;
         sessionId = null;
-        tlsFeature.tlsRequired = false;
-        tlsFeature.tlsSupported = false;
+        tlsSupported = false;
+        tlsRequired = false;
+    }
+
+    /**
+     * @return Returns the tlsRequired.
+     */
+    public boolean isTLSRequired() {
+        return tlsRequired;
+    }
+
+    /**
+     * @param tlsRequired The tlsRequired to set.
+     */
+    public void setTLSRequired(boolean tlsRequired) {
+        this.tlsRequired = tlsRequired;
+    }
+
+    /**
+     * @return Returns the tlsSupported.
+     */
+    public boolean isTLSSupported() {
+        return tlsSupported;
+    }
+
+    /**
+     * @param tlsSupported The tlsSupported to set.
+     */
+    public void setTLSSupported(boolean tlsSupported) {
+        this.tlsSupported = tlsSupported;
     }
 
     /**
@@ -62,27 +90,12 @@ public class XMPPConnectionContext {
     }
 
     /**
-     * @return Returns the tlsFeature.
-     */
-    public TLSFeature getTLSFeature() {
-        return tlsFeature;
-    }
-
-    /**
-     * @param tlsFeature The tlsFeature to set.
-     */
-    public void setTLSFeature(TLSFeature feature) {
-        tlsFeature.tlsSupported = feature.tlsSupported;
-        tlsFeature.tlsRequired = feature.tlsRequired;
-    }
-
-    /**
      * @param socket
      */
     public void setSocket(Socket socket) {
         this.socket = socket;
     }
-    
+
     /**
      * @return get the socket associated with the connection
      */

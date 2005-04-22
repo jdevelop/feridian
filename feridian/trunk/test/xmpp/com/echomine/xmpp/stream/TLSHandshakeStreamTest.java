@@ -26,7 +26,7 @@ public class TLSHandshakeStreamTest extends XMPPTestCase {
         stream = new TestableTLSHandshakeStream();
         clientCtx.setHost("example.com");
         clientCtx.setUsername("romeo");
-        connCtx.getTLSFeature().tlsSupported = true;
+        connCtx.setTLSSupported(true);
         Socket socket = new Socket();
         connCtx.setSocket(socket);
     }
@@ -74,8 +74,8 @@ public class TLSHandshakeStreamTest extends XMPPTestCase {
         assertTrue(connCtx.getSocket() instanceof SSLSocket);
         assertEquals(null, connCtx.getHost());
         assertEquals(null, connCtx.getSessionId());
-        assertFalse(connCtx.getTLSFeature().tlsSupported);
-        assertFalse(connCtx.getTLSFeature().tlsRequired);
+        assertFalse(connCtx.isTLSSupported());
+        assertFalse(connCtx.isTLSRequired());
     }
 
     class TestableTLSHandshakeStream extends TLSHandshakeStream {
