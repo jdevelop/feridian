@@ -159,6 +159,20 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
     }
 
     /**
+     * This will take an incoming reader to give the stream to unmarshall but
+     * will only run through the stream handler. It will not do any comparison
+     * afterwards, and is up to the subclasses to test any assertions.
+     * 
+     * @param inRes the reader containing incoming XML
+     * @param stream the stream handler to run the resource through
+     * @throws Exception
+     */
+    protected void run(Reader rdr, IXMPPStream stream) throws Exception {
+        uctx.setDocument(rdr);
+        stream.process(clientCtx, connCtx, uctx, writer);
+    }
+    
+    /**
      * Prepends the stream element header. Some tests will work with subelements
      * and require a root element in order to be a valid XML. This will prepend
      * the header for those test cases that needs it

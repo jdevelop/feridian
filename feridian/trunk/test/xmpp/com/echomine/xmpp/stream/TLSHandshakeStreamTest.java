@@ -74,8 +74,6 @@ public class TLSHandshakeStreamTest extends XMPPTestCase {
         assertTrue(connCtx.getSocket() instanceof SSLSocket);
         assertEquals(null, connCtx.getHost());
         assertEquals(null, connCtx.getSessionId());
-        assertFalse(connCtx.isTLSSupported());
-        assertFalse(connCtx.isTLSRequired());
     }
 
     class TestableTLSHandshakeStream extends TLSHandshakeStream {

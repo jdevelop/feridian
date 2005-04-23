@@ -1,22 +1,25 @@
 package com.echomine.xmpp.stream;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.util.SimpleTrustManager;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.XMPPConstants;
@@ -38,7 +41,6 @@ import com.echomine.xmpp.XMPPException;
 public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
     private static Log log = LogFactory.getLog(TLSHandshakeStream.class);
     private static final String STARTTLS_ELEMENT_NAME = "starttls";
-    protected final static int SOCKETBUF = 8192;
 
     public TLSHandshakeStream() {
         super();
@@ -64,28 +66,17 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             writer.closeEmptyTag();
             writer.flush();
             //check for error or proceed
+            int eventType = uctx.next();
             if (uctx.isAt(NS_TLS, "failure"))
                 throw new XMPPException("TLS Failure");
             if (!uctx.isAt(NS_TLS, "proceed"))
                 throw new XMPPException("Expecting <proceed> tag, but found: " + uctx.getName());
-            uctx.parsePastEndTag(NS_TLS, "proceed");
+            uctx.toEnd();
             SSLSocket tlsSocket = startTLSHandshake(connCtx.getSocket());
             connCtx.setSocket(tlsSocket);
-            writer.flush();
-            BufferedInputStream bis = new BufferedInputStream(tlsSocket.getInputStream(), SOCKETBUF);
-            BufferedOutputStream bos = new BufferedOutputStream(tlsSocket.getOutputStream(), SOCKETBUF);
-            //setting output and document automatically reset the writer and
-            // context
-            writer.setOutput(bos);
-            uctx.setDocument(bis, "UTF-8");
-            connCtx.reset();
-        } catch (IOException ex) {
-            throw new XMPPException(ex);
-        } catch (JiBXException ex) {
-            throw new XMPPException(ex);
-        } catch (KeyManagementException ex) {
-            throw new XMPPException(ex);
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (Exception ex) {
+            if (ex instanceof XMPPException)
+                throw (XMPPException) ex;
             throw new XMPPException(ex);
         }
     }
@@ -98,7 +89,7 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
      */
-    protected SSLSocket startTLSHandshake(Socket socket) throws KeyManagementException, NoSuchAlgorithmException, IOException {
+    protected SSLSocket startTLSHandshake(Socket socket) throws KeyManagementException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, IOException {
         SSLSocket sslsocket = setupSSLSocket(socket);
         sslsocket.startHandshake();
         return sslsocket;
@@ -111,11 +102,15 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
      * @param socket the socket to do TLS over
      * @throws IOException
      */
-    protected SSLSocket setupSSLSocket(Socket socket) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected SSLSocket setupSSLSocket(Socket socket) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException, IOException {
         // Create an SSL context
         SSLContext context = null;
         context = SSLContext.getInstance("TLS");
-        context.init(null, null, null);
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        TrustManagerFactory tfactory = TrustManagerFactory.getInstance("SunPKIX");
+        tfactory.init(keyStore);
+        SimpleTrustManager tmanager = new SimpleTrustManager(keyStore, System.getProperty("user.home") + System.getProperty("file.separator") + ".keystore", null);
+        context.init(null, new TrustManager[] { tmanager }, null);
         SSLSocketFactory factory = context.getSocketFactory();
         //test codes will not go through SSL
         SSLSocket sslsocket = (SSLSocket) factory.createSocket(socket, socket.getInetAddress().getHostAddress(), socket.getPort(), true);

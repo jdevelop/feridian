@@ -21,6 +21,8 @@ import com.echomine.xmpp.XMPPException;
  * outgoing handshake and parse incoming handshake header only. Once the
  * handshake is finished, this stream handler will relinquish control to another
  * stream handler.
+ * This handler does NOT close the stream in any way.  It only works with sending
+ * the initiating stream tag as well as receiving up to the stream features.
  */
 public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
     private static final Log log = LogFactory.getLog(XMPPClientHandshakeStream.class);
@@ -45,53 +47,26 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
             if (!uctx.isAt(NS_JABBER_STREAM, STREAM_ELEMENT_NAME))
                 uctx.throwStartTagNameError(NS_JABBER_STREAM, STREAM_ELEMENT_NAME);
             //parse out the incoming info
-            connCtx.setHost(uctx.attributeText(null, "from"));
+            if (uctx.hasAttribute(null, "from"))
+                connCtx.setHost(uctx.attributeText(null, "from"));
             connCtx.setSessionId(uctx.attributeText(null, "id"));
             //parse past start tag
-            while (true) {
-                int eventType = uctx.next();
-                if (eventType == UnmarshallingContext.END_DOCUMENT) {
-                    if (log.isDebugEnabled())
-                        log.debug("Reached end of document. Breaking out..");
-                    //stream finished
-                    endStream(writer);
-                    break;
-                }
-                if (eventType == UnmarshallingContext.END_TAG && "stream".equals(uctx.getName()) && NS_JABBER_STREAM.equals(uctx.getNamespace())) {
-                    if (log.isDebugEnabled())
-                        log.debug("Reached stream end tag. Breaking out..");
-                    //check if end tag is for stream
-                    endStream(writer);
-                    break;
-                }
-                //read in any possible error element
-                if (uctx.isAt(NS_JABBER_STREAM, "error")) {
-                    ErrorPacket packet = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
-                    endStream(writer);
-                    throw new XMPPException("Error message received for handshake", packet);
-                }
-                if (uctx.isAt(NS_JABBER_STREAM, "features")) {
-                    StreamFeaturesPacket packet = (StreamFeaturesPacket) JiBXUtil.unmarshallObject(uctx, StreamFeaturesPacket.class);
-                    connCtx.setTLSSupported(packet.isTLSSupported());
-                    connCtx.setTLSRequired(packet.isTLSRequired());
-                    break;
-                }
+            int eventType = uctx.next();
+            //read in any possible error element
+            if (uctx.isAt(NS_JABBER_STREAM, "error")) {
+                ErrorPacket packet = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
+                throw new XMPPException("Error message received for handshake", packet);
+            }
+            if (uctx.isAt(NS_JABBER_STREAM, "features")) {
+                StreamFeaturesPacket packet = (StreamFeaturesPacket) JiBXUtil.unmarshallObject(uctx, StreamFeaturesPacket.class);
+                connCtx.setTLSSupported(packet.isTLSSupported());
+                connCtx.setTLSRequired(packet.isTLSRequired());
+                return;
             }
         } catch (IOException ex) {
             throw new XMPPException(ex);
         } catch (JiBXException ex) {
             throw new XMPPException(ex);
         }
-    }
-
-    /**
-     * Ends the stream due to either receiving an error from remote entity or
-     * any error encountered here. The method will not flush or close the
-     * underlying stream.
-     * 
-     * @param writer the stream writer to write the end stream to
-     */
-    private void endStream(XMPPStreamWriter writer) throws IOException {
-        writer.endTag(IDX_JABBER_STREAM, "stream");
     }
 }

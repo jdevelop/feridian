@@ -22,7 +22,9 @@ public class XMPPClientHandshakeStreamTest extends XMPPTestCase {
     public void testHandshakeWithNoError() throws Exception {
         StringReader rdr = new StringReader("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='c2s_123' from='example.com' version='1.0'></stream:stream>");
         String outRes = "com/echomine/xmpp/data/XMPPEmptyStream.xml";
-        runAndCompare(rdr, outRes, stream, false, false);
+        run(rdr, stream);
+        endOutgoingStreamHeader();
+        compare(outRes);
         assertEquals("c2s_123", connCtx.getSessionId());
         assertEquals("example.com", connCtx.getHost());
     }

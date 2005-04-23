@@ -135,7 +135,7 @@ public class ErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable
             //parse to end of the error element
             ctx.parsePastEndTag(ctx.getNamespace(), ctx.getName());
         }
-        ctx.parsePastEndTag(uri, name);
+        ctx.toEnd();
         return packet;
     }
 

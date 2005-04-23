@@ -1,5 +1,6 @@
 package com.echomine.xmpp;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -8,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.JiBXOutputStreamWrapper;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.SocketHandler;
 import com.echomine.util.IOUtil;
@@ -22,6 +24,7 @@ import com.echomine.xmpp.stream.XMPPConnectionContext;
  */
 public class XMPPConnectionHandler implements SocketHandler {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
+    protected final static int SOCKETBUF = 8192;
     protected XMPPClientContext clientCtx;
     protected XMPPConnectionContext connCtx;
     protected boolean shutdown;
@@ -39,8 +42,6 @@ public class XMPPConnectionHandler implements SocketHandler {
             throw new IllegalArgumentException("Client Context cannot be null");
         this.clientCtx = clientCtx;
         connCtx = new XMPPConnectionContext();
-        shutdown = false;
-        writer = new XMPPStreamWriter(XMPPConstants.STREAM_URIS);
         uctx = new UnmarshallingContext();
     }
 
@@ -50,14 +51,15 @@ public class XMPPConnectionHandler implements SocketHandler {
      * @see com.echomine.net.SocketHandler#handle(alt.java.net.Socket)
      */
     public void handle(Socket socket) throws IOException {
+        start();
+        connCtx.setHost(clientCtx.getHost());
         connCtx.setSocket(socket);
         try {
             //set socket keepalive
             socket.setKeepAlive(true);
             //by setting output and document, the writer and unmarshalling
-            // context
-            //will get resetted
-            writer.setOutput(socket.getOutputStream());
+            // context will get resetted
+            writer.setOutput(new JiBXOutputStreamWrapper(socket.getOutputStream()));
             uctx.setDocument(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             //handshake processing
             XMPPClientHandshakeStream handshakeStream = new XMPPClientHandshakeStream();
@@ -65,8 +67,19 @@ public class XMPPConnectionHandler implements SocketHandler {
             //Determine whether to do TLS processing
             if (connCtx.isTLSSupported()) {
                 TLSHandshakeStream tlsStream = new TLSHandshakeStream();
+
                 tlsStream.process(clientCtx, connCtx, uctx, writer);
                 socket = connCtx.getSocket();
+                InputStreamReader bis = new InputStreamReader(socket.getInputStream(), "UTF-8");
+                BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream(), SOCKETBUF);
+                //FIXME: Workaround for JiBX's reset() not resetting prefix
+                //when this is fixed, instantiating a new stream writer is no
+                // longer necessary
+                writer.close();
+                writer = new XMPPStreamWriter();
+                writer.setOutput(bos);
+                uctx.setDocument(bis);
+                connCtx.reset();
                 //redo the handshake process
                 handshakeStream.process(clientCtx, connCtx, uctx, writer);
             }
@@ -76,9 +89,14 @@ public class XMPPConnectionHandler implements SocketHandler {
             if (log.isWarnEnabled())
                 log.warn("Exception occurred during socket processing", ex);
         } finally {
-            //disconnected from server, close streams but not the socket
-            if (writer != null)
-                writer.close();
+            try {
+                endStream();
+                //disconnected from server, close streams but not the socket
+                if (writer != null)
+                    writer.close();
+            } catch (IOException ex) {
+                //intentionally left blank
+            }
             shutdown();
         }
     }
@@ -91,6 +109,7 @@ public class XMPPConnectionHandler implements SocketHandler {
     public void start() {
         shutdown = false;
         connCtx.reset();
+        writer = new XMPPStreamWriter();
     }
 
     /*
@@ -103,4 +122,12 @@ public class XMPPConnectionHandler implements SocketHandler {
         IOUtil.closeSocket(connCtx.getSocket());
     }
 
+    /**
+     * Ends the stream due to either receiving an error from remote entity or
+     * any error encountered here. The method will not flush or close the
+     * underlying stream.
+     */
+    protected void endStream() throws IOException {
+        writer.endTag(XMPPConstants.IDX_JABBER_STREAM, "stream");
+    }
 }
