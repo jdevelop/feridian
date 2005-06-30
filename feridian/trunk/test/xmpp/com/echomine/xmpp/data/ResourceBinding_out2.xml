@@ -1,0 +1,5 @@
+<iq type='set'>
+  <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
+  	<resource>someresource</resource>
+  </bind>
+</iq>

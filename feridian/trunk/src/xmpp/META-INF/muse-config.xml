@@ -1,0 +1,6 @@
+<muse xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!-- Namespace mappings maps URI to IQ packets. -->
+	<nsmappings>
+		<entry key="urn:ietf:params:xml:ns:xmpp-bind" xsi:type="xsd:string">com.echomine.xmpp.IQResourceBindPacket</entry>
+	</nsmappings>
+</muse>

@@ -1,0 +1,31 @@
+<!-- 
+	binding file for working with the stanzas required by the XMPP
+	standard.
+-->
+<binding>
+	<namespace uri="http://etherx.jabber.org/streams" prefix="stream"/>
+	<namespace uri="jabber:client" default="elements"/>
+
+	<!-- setup serializers/deserializers -->
+	<format type="com.echomine.xmpp.JID" serializer="com.echomine.xmpp.JID.toString"
+		deserializer="com.echomine.xmpp.JID.parseJID"/>
+		
+	<!-- stanza error support -->
+	<mapping name="error" class="com.echomine.xmpp.StanzaErrorPacket"
+		marshaller="com.echomine.xmpp.jibx.StanzaErrorPacketMapper"
+		unmarshaller="com.echomine.xmpp.jibx.StanzaErrorPacketMapper"
+		ns="jabber:client"/>
+		
+	<!-- message packet support -->
+	<mapping name="message" ns="jabber:client"
+		marshaller="com.echomine.xmpp.jibx.MessagePacketMapper"
+		unmarshaller="com.echomine.xmpp.jibx.MessagePacketMapper"
+		class="com.echomine.xmpp.MessagePacket"/>
+
+	<!-- presence packet support -->
+	<mapping name="presence" ns="jabber:client"
+		marshaller="com.echomine.xmpp.jibx.PresencePacketMapper"
+		unmarshaller="com.echomine.xmpp.jibx.PresencePacketMapper"
+		class="com.echomine.xmpp.PresencePacket"/>
+	
+</binding>

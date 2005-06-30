@@ -16,24 +16,18 @@ import com.echomine.xmpp.ErrorPacket;
 import com.echomine.xmpp.NSI;
 import com.echomine.xmpp.XMPPConstants;
 
-public class ErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
-    private static final String TEXT_ELEMENT_NAME = "text";
-    private static final String ERROR_ELEMENT_NAME = "error";
+public class StreamErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
+    protected static final String TEXT_ELEMENT_NAME = "text";
+    protected static final String ERROR_ELEMENT_NAME = "error";
 
-    private String uri;
-    private String name;
+    protected String uri;
+    protected String name;
+    protected int index;
 
-    /**
-     * Default mapper
-     */
-    public ErrorPacketMapper() {
-        uri = NS_JABBER_STREAM;
-        name = ERROR_ELEMENT_NAME;
-    }
-
-    public ErrorPacketMapper(String uri, int index, String name) {
-        this.uri = NS_JABBER_STREAM;
-        this.name = ERROR_ELEMENT_NAME;
+    public StreamErrorPacketMapper(String uri, int index, String name) {
+        this.uri = uri;
+        this.name = name;
+        this.index = index;
     }
 
     /*
@@ -59,30 +53,16 @@ public class ErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable
             MarshallingContext ctx = (MarshallingContext) ictx;
             ErrorPacket packet = (ErrorPacket) obj;
             IXMLWriter writer = ctx.getXmlWriter();
+            int idx = writer.getNamespaces().length;
             //add extension namespaces
             String[] extns;
-            if (packet.getApplicationCondition() != null) {
-                extns = new String[] { packet.getApplicationCondition().getNamespaceURI() };
-	            writer.pushExtensionNamespaces(extns);
-            }
+            if (packet.getApplicationCondition() == null)
+                extns = new String[] { NS_STREAMS_ERROR };
+            else
+                extns = new String[] { NS_STREAMS_ERROR, packet.getApplicationCondition().getNamespaceURI() };
+            writer.pushExtensionNamespaces(extns);
             ctx.startTagNamespaces(IDX_JABBER_STREAM, name, new int[] { IDX_JABBER_STREAM }, new String[] { "stream" }).closeStartContent();
-            //write out defined condition
-            if (packet.getCondition() == null)
-                throw new JiBXException("Error packet must contain a condition");
-            ctx.startTagNamespaces(IDX_XMPP_STREAMS, packet.getCondition(), new int[] { IDX_XMPP_STREAMS }, new String[] { "" }).closeStartEmpty();
-            //write out the error descriptive text
-            if (packet.getText() != null) {
-                ctx.startTagNamespaces(IDX_XMPP_STREAMS, TEXT_ELEMENT_NAME, new int[] { IDX_XMPP_STREAMS }, new String[] { "" }).closeStartContent();
-                //TODO: add xml:lang attribute in future
-                ctx.content(packet.getText());
-                ctx.endTag(IDX_XMPP_STREAMS, TEXT_ELEMENT_NAME);
-            }
-            //write out application specific error
-            if (packet.getApplicationCondition() != null) {
-                int appNsIdx = ctx.getNamespaces().length;
-                NSI nsi = packet.getApplicationCondition();
-                ctx.startTagNamespaces(appNsIdx, nsi.getName(), new int[] { appNsIdx }, new String[] { "" }).closeStartEmpty();
-            }
+            marshallErrorCondition(ctx, idx, idx+1, packet);
             //close error tag
             ctx.endTag(IDX_JABBER_STREAM, name);
             writer.popExtensionNamespaces();
@@ -91,6 +71,34 @@ public class ErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable
             } catch (IOException ex) {
                 throw new JiBXException("Error flushing stream", ex);
             }
+        }
+    }
+
+    /**
+     * Marshalls the inner error conditions, text, and application conditions.
+     * 
+     * @param ctx the marshalling context
+     * @param idx the namespace index to use for error conditions
+     * @param appIdx the namespace index to use for application condition
+     * @param packet the error packet containing the data
+     * @throws JiBXException
+     */
+    protected void marshallErrorCondition(MarshallingContext ctx, int idx, int appIdx, ErrorPacket packet) throws JiBXException {
+        //write out defined condition
+        if (packet.getCondition() == null)
+            throw new JiBXException("Error packet must contain a condition");
+        ctx.startTagNamespaces(idx, packet.getCondition(), new int[] { idx }, new String[] { "" }).closeStartEmpty();
+        //write out the error descriptive text
+        if (packet.getText() != null) {
+            ctx.startTagNamespaces(idx, TEXT_ELEMENT_NAME, new int[] { idx }, new String[] { "" }).closeStartContent();
+            //TODO: add xml:lang attribute in future
+            ctx.content(packet.getText());
+            ctx.endTag(idx, TEXT_ELEMENT_NAME);
+        }
+        //write out application specific error
+        if (packet.getApplicationCondition() != null) {
+            NSI nsi = packet.getApplicationCondition();
+            ctx.startTagNamespaces(appIdx, nsi.getName(), new int[] { appIdx }, new String[] { "" }).closeStartEmpty();
         }
     }
 
@@ -120,13 +128,24 @@ public class ErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable
             packet = new ErrorPacket();
         //parse past the error element
         ctx.parsePastStartTag(uri, name);
+        unmarshallErrorCondition(ctx, NS_STREAMS_ERROR, packet);
+        ctx.toEnd();
+        return packet;
+    }
+
+    /**
+     * does the main unmarshalling of the elements.
+     * 
+     * @param packet the packet that contains the data
+     */
+    protected void unmarshallErrorCondition(UnmarshallingContext ctx, String errorNs, ErrorPacket packet) throws JiBXException {
         //set our error condition
         packet.setCondition(ctx.toStart());
         //find optional error text
         ctx.parsePastEndTag(ctx.getNamespace(), ctx.getName());
         int eventType = ctx.toTag();
         if (eventType == UnmarshallingContext.START_TAG && TEXT_ELEMENT_NAME.equals(ctx.getName())) {
-            packet.setText(ctx.parseElementText(NS_XMPP_STREAMS, TEXT_ELEMENT_NAME));
+            packet.setText(ctx.parseElementText(errorNs, TEXT_ELEMENT_NAME));
             eventType = ctx.toTag();
         }
         if (eventType == UnmarshallingContext.START_TAG) {
@@ -135,8 +154,6 @@ public class ErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable
             //parse to end of the error element
             ctx.parsePastEndTag(ctx.getNamespace(), ctx.getName());
         }
-        ctx.toEnd();
-        return packet;
     }
 
 }

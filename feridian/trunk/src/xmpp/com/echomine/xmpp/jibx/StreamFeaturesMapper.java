@@ -25,13 +25,15 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
     private static final String FEATURES_ELEMENT_NAME = "features";
     private static final String STARTTLS_ELEMENT_NAME = "starttls";
     private static final String REQUIRED_ELEMENT_NAME = "required";
+    private static final String BINDING_ELEMENT_NAME = "bind";
+    private static final String SESSION_ELEMENT_NAME = "session";
 
     private String uri;
     private String name;
     private int index;
 
     public StreamFeaturesMapper() {
-        uri = NS_TLS;
+        uri = NS_STREAM_TLS;
         name = FEATURES_ELEMENT_NAME;
     }
 
@@ -79,12 +81,39 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
             //now check if tls should be marshalled
             marshallStartTLSFeature(ctx, packet);
+            //now check for session and resource binding elements
+            marshallSessionFeature(ctx, packet);
             ctx.endTag(index, name);
             try {
                 writer.flush();
             } catch (IOException ex) {
                 throw new JiBXException("Error flushing stream", ex);
             }
+        }
+    }
+
+    /**
+     * Marshalls the session and resource binding feature
+     * 
+     * @param ctx the marshalling context
+     * @param packet the packet containing the data to marshall
+     * @throws JiBXException
+     */
+    private void marshallSessionFeature(MarshallingContext ctx, StreamFeaturesPacket packet) throws JiBXException {
+        int tlsIdx = ctx.getNamespaces().length;
+        if (packet.isBindingRequired()) {
+            String[] extns = new String[] { NS_STREAM_BINDING };
+            ctx.getXmlWriter().pushExtensionNamespaces(extns);
+            ctx.startTagNamespaces(tlsIdx, BINDING_ELEMENT_NAME, new int[] { tlsIdx }, new String[] { "" });
+            ctx.closeStartEmpty();
+            ctx.getXmlWriter().popExtensionNamespaces();
+        }
+        if (packet.isSessionRequired()) {
+            String[] extns = new String[] { NS_STREAM_SESSION };
+            ctx.getXmlWriter().pushExtensionNamespaces(extns);
+            ctx.startTagNamespaces(tlsIdx, SESSION_ELEMENT_NAME, new int[] { tlsIdx }, new String[] { "" });
+            ctx.closeStartEmpty();
+            ctx.getXmlWriter().popExtensionNamespaces();
         }
     }
 
@@ -98,20 +127,20 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
     private void marshallStartTLSFeature(MarshallingContext ctx, StreamFeaturesPacket packet) throws JiBXException {
         if (!packet.isTLSSupported())
             return;
-        String[] extns = new String[] { NS_TLS };
+        String[] extns = new String[] { NS_STREAM_TLS };
         int tlsIdx = ctx.getNamespaces().length;
         ctx.getXmlWriter().pushExtensionNamespaces(extns);
         ctx.startTagNamespaces(tlsIdx, STARTTLS_ELEMENT_NAME, new int[] { tlsIdx }, new String[] { "" });
         //if tls is not required, close tag
         if (!packet.isTLSRequired()) {
             ctx.closeStartEmpty();
-            return;
+        } else {
+            ctx.closeStartContent();
+            //write out the <required/> element
+            ctx.startTagAttributes(tlsIdx, "required").closeStartEmpty();
+            //close tag
+            ctx.endTag(tlsIdx, STARTTLS_ELEMENT_NAME);
         }
-        ctx.closeStartContent();
-        //write out the <required/> element
-        ctx.startTagAttributes(tlsIdx, "required").closeStartEmpty();
-        //close tag
-        ctx.endTag(tlsIdx, STARTTLS_ELEMENT_NAME);
         ctx.getXmlWriter().popExtensionNamespaces();
     }
 
@@ -131,9 +160,19 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
             packet = new StreamFeaturesPacket();
         //parse past the features element
         ctx.parsePastStartTag(uri, name);
-        //now check if TLS is supported
-        if (ctx.isAt(NS_TLS, STARTTLS_ELEMENT_NAME))
-            unmarshallStartTLSFeature(ctx, packet);
+        do {
+            if (ctx.isAt(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME)) {
+                unmarshallStartTLSFeature(ctx, packet);
+            } else if (ctx.isAt(NS_STREAM_BINDING, BINDING_ELEMENT_NAME)) {
+                packet.setBindingRequired(true);
+                ctx.parsePastEndTag(NS_STREAM_BINDING, BINDING_ELEMENT_NAME);
+            } else if (ctx.isAt(NS_STREAM_SESSION, SESSION_ELEMENT_NAME)) {
+                packet.setSessionRequired(true);
+                ctx.parsePastEndTag(NS_STREAM_SESSION, SESSION_ELEMENT_NAME);
+            } else {
+                break;
+            }
+        } while (true);
         ctx.toEnd();
         return packet;
     }
@@ -146,17 +185,17 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
      * @throws JiBXException
      */
     private void unmarshallStartTLSFeature(UnmarshallingContext ctx, StreamFeaturesPacket packet) throws JiBXException {
-        if (!ctx.isAt(NS_TLS, STARTTLS_ELEMENT_NAME))
-            ctx.throwStartTagNameError(NS_TLS, STARTTLS_ELEMENT_NAME);
-        ctx.parsePastStartTag(NS_TLS, STARTTLS_ELEMENT_NAME);
+        if (!ctx.isAt(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME))
+            ctx.throwStartTagNameError(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
+        ctx.parsePastStartTag(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
         packet.setTLSSupported(true);
         //find optional required element text
         int eventType = ctx.toTag();
         if (eventType == UnmarshallingContext.START_TAG && REQUIRED_ELEMENT_NAME.equals(ctx.getName())) {
             packet.setTLSRequired(true);
-            ctx.parsePastEndTag(NS_TLS, REQUIRED_ELEMENT_NAME);
+            ctx.parsePastEndTag(NS_STREAM_TLS, REQUIRED_ELEMENT_NAME);
         }
-        ctx.parsePastEndTag(NS_TLS, STARTTLS_ELEMENT_NAME);
+        ctx.parsePastEndTag(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
     }
 
 }

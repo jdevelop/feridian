@@ -57,7 +57,7 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
     public void process(XMPPClientContext clientCtx, XMPPConnectionContext connCtx, UnmarshallingContext uctx, XMPPStreamWriter writer) throws XMPPException {
         if (!connCtx.isTLSSupported())
             return;
-        String[] extns = new String[] { NS_TLS };
+        String[] extns = new String[] { NS_STREAM_TLS };
         writer.pushExtensionNamespaces(extns);
         int idx = writer.getNamespaces().length;
         try {
@@ -67,9 +67,9 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             writer.flush();
             //check for error or proceed
             int eventType = uctx.next();
-            if (uctx.isAt(NS_TLS, "failure"))
+            if (uctx.isAt(NS_STREAM_TLS, "failure"))
                 throw new XMPPException("TLS Failure");
-            if (!uctx.isAt(NS_TLS, "proceed"))
+            if (!uctx.isAt(NS_STREAM_TLS, "proceed"))
                 throw new XMPPException("Expecting <proceed> tag, but found: " + uctx.getName());
             uctx.toEnd();
             SSLSocket tlsSocket = startTLSHandshake(connCtx.getSocket());
@@ -112,7 +112,6 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
         SimpleTrustManager tmanager = new SimpleTrustManager(keyStore, System.getProperty("user.home") + System.getProperty("file.separator") + ".keystore", null);
         context.init(null, new TrustManager[] { tmanager }, null);
         SSLSocketFactory factory = context.getSocketFactory();
-        //test codes will not go through SSL
         SSLSocket sslsocket = (SSLSocket) factory.createSocket(socket, socket.getInetAddress().getHostAddress(), socket.getPort(), true);
         sslsocket.setUseClientMode(true);
         return sslsocket;

@@ -61,7 +61,7 @@ public class StreamFeaturesPacketTest extends TestCase implements XMPPConstants 
         assertFalse(packet.isTLSSupported());
         assertFalse(packet.isTLSRequired());
     }
-    
+
     public void testMarshallRequireTLS() throws Exception {
         String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
                 + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>\n\t<required/></starttls></stream:features>";
@@ -81,8 +81,7 @@ public class StreamFeaturesPacketTest extends TestCase implements XMPPConstants 
     }
 
     public void testMarshallOptionalTLS() throws Exception {
-        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
-                + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/></stream:features>";
+        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>" + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/></stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
         packet.setTLSSupported(true);
@@ -99,12 +98,38 @@ public class StreamFeaturesPacketTest extends TestCase implements XMPPConstants 
     }
 
     public void testMarshallNoTLS() throws Exception {
-        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
-                + "</stream:features>";
+        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>" + "</stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
         packet.setTLSSupported(false);
         packet.setTLSRequired(false);
+        IBindingFactory bfact = BindingDirectory.getFactory(StreamFeaturesPacket.class);
+        IMarshallingContext ctx = bfact.createMarshallingContext();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ctx.setOutput(bos, "UTF-8");
+        ctx.marshalDocument(packet);
+        String str = bos.toString();
+        StringReader brdr = new StringReader(str);
+        DocumentComparator comp = new DocumentComparator(System.err);
+        assertTrue("Invalid Output String: " + str, comp.compare(reader, brdr));
+    }
+
+    public void testUnmarshallSessionAndBinding() throws Exception {
+        String xml = "<stream:features xmlns:stream='http://etherx.jabber.org/streams'>" + "\n\t<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>\n\t<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>\n\t</stream:features>";
+        StringReader reader = new StringReader(xml);
+        IBindingFactory bfact = BindingDirectory.getFactory(StreamFeaturesPacket.class);
+        IUnmarshallingContext ctx = bfact.createUnmarshallingContext();
+        StreamFeaturesPacket packet = (StreamFeaturesPacket) ctx.unmarshalDocument(reader);
+        assertTrue(packet.isBindingRequired());
+        assertTrue(packet.isSessionRequired());
+    }
+    
+    public void testMarshallSessionAndBinding() throws Exception {
+        String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>" + "\n\t<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>\n\t<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>\n\t</stream:features>";
+        StringReader reader = new StringReader(xml);
+        StreamFeaturesPacket packet = new StreamFeaturesPacket();
+        packet.setBindingRequired(true);
+        packet.setSessionRequired(true);
         IBindingFactory bfact = BindingDirectory.getFactory(StreamFeaturesPacket.class);
         IMarshallingContext ctx = bfact.createMarshallingContext();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();

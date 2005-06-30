@@ -7,6 +7,8 @@ package com.echomine.xmpp;
 public class StreamFeaturesPacket implements IPacket {
     boolean tlsRequired;
     boolean tlsSupported;
+    boolean sessionRequired;
+    boolean bindingRequired;
 
     public StreamFeaturesPacket() {
         super();
@@ -46,5 +48,36 @@ public class StreamFeaturesPacket implements IPacket {
      */
     public void setTLSSupported(boolean tlsSupported) {
         this.tlsSupported = tlsSupported;
+    }
+
+    /**
+     * Whether the stream supports resource binding
+     * 
+     * @return Returns the bindingRequired.
+     */
+    public boolean isBindingRequired() {
+        return bindingRequired;
+    }
+
+    /**
+     * @param bindingRequired The bindingRequired to set.
+     */
+    public void setBindingRequired(boolean bindingSupported) {
+        this.bindingRequired = bindingSupported;
+    }
+
+    /**
+     * Whether the stream supports session establishment
+     * @return Returns the sessionRequired.
+     */
+    public boolean isSessionRequired() {
+        return sessionRequired;
+    }
+
+    /**
+     * @param sessionRequired The sessionRequired to set.
+     */
+    public void setSessionRequired(boolean sessionSupported) {
+        this.sessionRequired = sessionSupported;
     }
 }

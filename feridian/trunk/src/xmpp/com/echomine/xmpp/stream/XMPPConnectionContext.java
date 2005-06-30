@@ -17,6 +17,8 @@ public class XMPPConnectionContext {
     private Socket socket;
     private boolean tlsSupported;
     private boolean tlsRequired;
+    private boolean resourceBindingRequired;
+    private boolean sessionRequired;
 
     public XMPPConnectionContext() {
     }
@@ -101,5 +103,33 @@ public class XMPPConnectionContext {
      */
     public Socket getSocket() {
         return socket;
+    }
+
+    /**
+     * @return Returns the resourceBindingRequired.
+     */
+    public boolean isResourceBindingRequired() {
+        return resourceBindingRequired;
+    }
+
+    /**
+     * @param resourceBindingRequired The resourceBindingRequired to set.
+     */
+    public void setResourceBindingRequired(boolean resourceBindingRequired) {
+        this.resourceBindingRequired = resourceBindingRequired;
+    }
+
+    /**
+     * @return Returns the sessionRequired.
+     */
+    public boolean isSessionRequired() {
+        return sessionRequired;
+    }
+
+    /**
+     * @param sessionRequired The sessionRequired to set.
+     */
+    public void setSessionRequired(boolean sessionRequired) {
+        this.sessionRequired = sessionRequired;
     }
 }

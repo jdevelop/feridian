@@ -7,14 +7,13 @@
 <binding>
 	<namespace uri="http://etherx.jabber.org/streams" prefix="stream"/>
 	<namespace uri="jabber:client" default="elements"/>
-	<namespace uri="urn:ietf:params:xml:ns:xmpp-streams" prefix="streams"/>
 	
 	<!-- stream error support -->
 	<mapping name="error" class="com.echomine.xmpp.ErrorPacket"
-		marshaller="com.echomine.xmpp.jibx.ErrorPacketMapper"
-		unmarshaller="com.echomine.xmpp.jibx.ErrorPacketMapper"
+		marshaller="com.echomine.xmpp.jibx.StreamErrorPacketMapper"
+		unmarshaller="com.echomine.xmpp.jibx.StreamErrorPacketMapper"
 		ns="http://etherx.jabber.org/streams"/>
-		
+			
 	<!-- features support -->
 	<mapping name="features" class="com.echomine.xmpp.StreamFeaturesPacket"
 		marshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"

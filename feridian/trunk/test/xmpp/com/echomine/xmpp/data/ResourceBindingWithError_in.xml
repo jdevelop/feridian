@@ -1,0 +1,8 @@
+<iq xmlns="jabber:client" type='error' id='bind_2'>
+  <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
+    <resource>someresource</resource>
+  </bind>
+  <error type='modify'>
+    <bad-request xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+  </error>
+</iq>

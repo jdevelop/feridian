@@ -1,0 +1,5 @@
+<iq xmlns="jabber:client" type='result' id='bind_1'>
+  <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
+    <jid>romeo@example.com/someresource</jid>
+  </bind>
+</iq>

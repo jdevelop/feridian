@@ -32,7 +32,7 @@ public class XMPPStreamWriter extends UTF8StreamWriter implements XMPPConstants 
      *            be constant; the value in position 0 must always be the empty
      *            string "", and the value in position 1 must always be the XML
      *            namespace "http://www.w3.org/XML/1998/namespace"). Position 2
-     *            must always be the XML namespace
+     *            must always be the Jabber Streams namespace
      *            "http://etherx.jabber.org/streams", and position 3 must always
      *            be the XML namespace jabber:client.
      */
@@ -48,8 +48,18 @@ public class XMPPStreamWriter extends UTF8StreamWriter implements XMPPConstants 
      * @see org.jibx.runtime.IXMLWriter#flush()
      */
     public void flush() throws IOException {
-        if (log.isDebugEnabled())
-            log.debug(new String(m_buffer, 0, m_fillOffset));
+        if (log.isDebugEnabled()) {
+            if (m_fillOffset != 0)
+                log.debug(new String(m_buffer, 0, m_fillOffset));
+        }
         super.flush();
+    }
+
+    /**
+     * Outputs the raw data. This method turns the parent's method to public
+     * instead of protected. It also adds debugging support.
+     */
+    public void writeMarkup(String text) throws IOException {
+        super.writeMarkup(text);
     }
 }

@@ -8,7 +8,7 @@ import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/** Convenience methods that closes IO Streams */
+/** Convenience methods that works with IO Streams */
 public class IOUtil {
     public static void closeStream(InputStream is) {
         try {
@@ -54,6 +54,22 @@ public class IOUtil {
         try {
             if (socket != null)
                 socket.close();
+        } catch (IOException ex) {
+        }
+    }
+    
+    public static void flush(OutputStream os) {
+        try {
+            if (os != null)
+                os.flush();
+        } catch (IOException ex) {
+        }
+    }
+
+    public static void flush(Writer writer) {
+        try {
+            if (writer != null)
+                writer.flush();
         } catch (IOException ex) {
         }
     }

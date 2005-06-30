@@ -1,15 +1,11 @@
 package com.echomine.xmpp;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import junit.framework.TestCase;
-
-import org.jibx.extras.DocumentComparator;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.BasicTestCase;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.stream.XMPPConnectionContext;
 
@@ -17,12 +13,11 @@ import com.echomine.xmpp.stream.XMPPConnectionContext;
  * Base class for stream test cases to extend from that provides many common
  * functionality.
  */
-public class XMPPTestCase extends TestCase implements XMPPConstants {
+public class XMPPTestCase extends BasicTestCase implements XMPPConstants {
     protected UnmarshallingContext uctx;
     protected XMPPClientContext clientCtx;
     protected XMPPConnectionContext connCtx;
     protected XMPPStreamWriter writer;
-    protected ByteArrayOutputStream os;
 
     public XMPPTestCase() {
         super();
@@ -34,7 +29,6 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
         connCtx = new XMPPConnectionContext();
         uctx = new UnmarshallingContext();
         writer = new XMPPStreamWriter(STREAM_URIS);
-        os = new ByteArrayOutputStream(256);
         writer.setOutput(os);
     }
 
@@ -104,44 +98,13 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
         try {
             stream.process(clientCtx, connCtx, uctx, writer);
         } catch (XMPPException ex) {
-            thrownEx = ex;
+            throw ex;
         }
         if (addHeaders)
             endOutgoingStreamHeader();
         writer.flush();
         //check that the stream sent by the stream is proper.
         compare(outReader);
-        if (thrownEx != null)
-            throw thrownEx;
-    }
-
-    /**
-     * Only compares the output with the given resource stream. It is assumed
-     * that the run() or something equivalent has already been done, and there
-     * is data to compare in the output.
-     * 
-     * @param outRes the resource to compare with
-     * @throws Exception
-     */
-    protected void compare(String outRes) throws Exception {
-        InputStreamReader reader = new InputStreamReader(getClass().getClassLoader().getResourceAsStream(outRes));
-        compare(reader);
-    }
-
-    /**
-     * Only compares the output with the given out reader. It is assumed that
-     * the run() or something equivalent has already been done, and there is
-     * data to compare in the output.
-     * 
-     * @param outReader the resource to compare output with
-     * @throws Exception
-     */
-    protected void compare(Reader outReader) throws Exception {
-        //check that the stream sent by the stream is proper.
-        String str = os.toString("UTF-8");
-        InputStreamReader brdr = new InputStreamReader(new ByteArrayInputStream(os.toByteArray()), "UTF-8");
-        DocumentComparator comp = new DocumentComparator(System.err);
-        assertTrue("Invalid XML: " + str, comp.compare(outReader, brdr));
     }
 
     /**
@@ -171,7 +134,7 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
         uctx.setDocument(rdr);
         stream.process(clientCtx, connCtx, uctx, writer);
     }
-    
+
     /**
      * Prepends the stream element header. Some tests will work with subelements
      * and require a root element in order to be a valid XML. This will prepend

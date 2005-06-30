@@ -30,6 +30,7 @@ public class XMPPConnectionHandler implements SocketHandler {
     protected boolean shutdown;
     protected XMPPStreamWriter writer;
     protected UnmarshallingContext uctx;
+    protected TLSHandshakeStream tlsStream;
 
     /**
      * The constructor for the handler. It accepts a connection context to use
@@ -43,6 +44,7 @@ public class XMPPConnectionHandler implements SocketHandler {
         this.clientCtx = clientCtx;
         connCtx = new XMPPConnectionContext();
         uctx = new UnmarshallingContext();
+        tlsStream = new TLSHandshakeStream();
     }
 
     /*
@@ -66,15 +68,12 @@ public class XMPPConnectionHandler implements SocketHandler {
             handshakeStream.process(clientCtx, connCtx, uctx, writer);
             //Determine whether to do TLS processing
             if (connCtx.isTLSSupported()) {
-                TLSHandshakeStream tlsStream = new TLSHandshakeStream();
-
                 tlsStream.process(clientCtx, connCtx, uctx, writer);
                 socket = connCtx.getSocket();
                 InputStreamReader bis = new InputStreamReader(socket.getInputStream(), "UTF-8");
                 BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream(), SOCKETBUF);
-                //FIXME: Workaround for JiBX's reset() not resetting prefix
-                //when this is fixed, instantiating a new stream writer is no
-                // longer necessary
+                //Workaround for JiBX's reset() not resetting prefix
+                //Thus, a new stream writer must be created
                 writer.close();
                 writer = new XMPPStreamWriter();
                 writer.setOutput(bos);
@@ -83,7 +82,14 @@ public class XMPPConnectionHandler implements SocketHandler {
                 //redo the handshake process
                 handshakeStream.process(clientCtx, connCtx, uctx, writer);
             }
-            //Determine whether to do SASL processing
+            //TODO: SASL processing
+            //Resource binding MUST be done if set
+            if (connCtx.isResourceBindingRequired()) {
+                
+            }
+            if (connCtx.isSessionRequired()) {
+                
+            }
             //Start normal session processing
         } catch (Exception ex) {
             if (log.isWarnEnabled())

@@ -79,6 +79,11 @@
             <classpath refid="module.classpath"/>
             <include name="**/*.java"/>
         </javac>
+        <copy todir="${build.dir}/${module.name}/classes">
+            <fileset dir="${src.java.dir}/${module.name}">
+                <include name="META-INF/**"/>
+            </fileset>
+        </copy>
     </target>
 
     <!-- jibx binding modifications to compiled classes -->
@@ -95,6 +100,7 @@
         <echo message="Jarring Module ${module.name}"/>
         <jar jarfile="${work.dir}/${project}-${module.name}.jar">
             <fileset dir="${build.dir}/${module.name}/classes"/>
+            <metainf dir="${src.java.dir}/${module.name}/META-INF"/>
             <manifest>
                 <attribute name="Implementation-Title" value="${project}-${module.name}"/>
                 <attribute name="Implementation-Version" value="${version}"/>
@@ -184,6 +190,7 @@
     <target name="test-module" depends="compile-test-module" if="module.name">
         <junit printsummary="yes" haltonfailure="no" haltonerror="no" fork="yes">
             <!-- JUnit Configuration Options -->
+            <classpath location="${classpath.extra}"/>
             <classpath location="${build.dir}/${module.name}/classes"/>
             <classpath location="${build.dir}/${module.name}/tests/classes"/>
             <classpath refid="module.classpath"/>
@@ -230,7 +237,7 @@
         </antcall>
     </target>
     
-    <target name="jar-xmpp" depends="bind-xmpp">
+    <target name="jar-xmpp" depends="clean-xmpp,bind-xmpp">
         <antcall target="jar-module">
             <param name="module.name" value="xmpp"/>
         </antcall>

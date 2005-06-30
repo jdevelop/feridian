@@ -35,8 +35,5 @@ public class XMPPStreamWriterTest extends TestCase implements XMPPConstants {
         writer.startTagNamespaces(2, "stream", new int[] { 2, 3 }, new String[] { "stream", "" });
         assertEquals("stream", writer.getNamespacePrefix(2));
         assertEquals("", writer.getNamespacePrefix(3));
-        writer.reset();
-        //assertNull(writer.getNamespacePrefix(2));
-        //assertNull(writer.getNamespacePrefix(3));
     }
 }

@@ -1,0 +1,3 @@
+<iq type='set'>
+  <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>
+</iq>

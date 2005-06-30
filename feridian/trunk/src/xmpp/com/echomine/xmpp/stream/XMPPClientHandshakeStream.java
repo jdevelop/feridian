@@ -20,9 +20,9 @@ import com.echomine.xmpp.XMPPException;
  * This is the initial handshaking stream to work with XMPP. Its job is to send
  * outgoing handshake and parse incoming handshake header only. Once the
  * handshake is finished, this stream handler will relinquish control to another
- * stream handler.
- * This handler does NOT close the stream in any way.  It only works with sending
- * the initiating stream tag as well as receiving up to the stream features.
+ * stream handler. This handler does NOT close the stream in any way. It only
+ * works with sending the initiating stream tag as well as receiving up to the
+ * stream features.
  */
 public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
     private static final Log log = LogFactory.getLog(XMPPClientHandshakeStream.class);
@@ -61,6 +61,8 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
                 StreamFeaturesPacket packet = (StreamFeaturesPacket) JiBXUtil.unmarshallObject(uctx, StreamFeaturesPacket.class);
                 connCtx.setTLSSupported(packet.isTLSSupported());
                 connCtx.setTLSRequired(packet.isTLSRequired());
+                connCtx.setResourceBindingRequired(packet.isBindingRequired());
+                connCtx.setSessionRequired(packet.isSessionRequired());
                 return;
             }
         } catch (IOException ex) {

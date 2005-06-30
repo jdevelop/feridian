@@ -36,6 +36,17 @@ public class JID {
     }
 
     /**
+     * a static method to turn the JID into a String for deserialization purposes
+     * 
+     * @param jid the jid to deserialize
+     * @return the string form of the JID
+     */
+    public static String toString(JID jid) {
+        if (jid == null) throw new IllegalArgumentException("JID cannot be null");
+        return jid.toString();
+    }
+    
+    /**
      * takes in a set of information to create the JID object that can be use to
      * convert into a JID string
      * 
