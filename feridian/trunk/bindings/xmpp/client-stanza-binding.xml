@@ -27,5 +27,10 @@
 		marshaller="com.echomine.xmpp.jibx.PresencePacketMapper"
 		unmarshaller="com.echomine.xmpp.jibx.PresencePacketMapper"
 		class="com.echomine.xmpp.PresencePacket"/>
-	
+
+	<!-- iq packet support -->
+	<mapping name="iq" ns="jabber:client"
+		marshaller="com.echomine.xmpp.jibx.IQPacketMapper"
+		unmarshaller="com.echomine.xmpp.jibx.IQPacketMapper"
+		class="com.echomine.xmpp.IQPacket"/>
 </binding>

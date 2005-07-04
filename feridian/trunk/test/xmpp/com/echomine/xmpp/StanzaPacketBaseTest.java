@@ -1,9 +1,17 @@
 package com.echomine.xmpp;
 
-import junit.framework.TestCase;
+import com.echomine.XMPPTestCase;
 
+public class StanzaPacketBaseTest extends XMPPTestCase {
 
-public class StanzaPacketBaseTest extends TestCase {
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
     /**
      * Setting the error to null should reset both the error and the type to
      * null.

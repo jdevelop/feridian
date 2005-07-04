@@ -4,12 +4,11 @@ import java.io.StringReader;
 
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPException;
-import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * Tests the handshaking stream to make sure it's processing properly
  */
-public class XMPPClientHandshakeStreamTest extends XMPPTestCase {
+public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
     XMPPClientHandshakeStream stream;
 
     protected void setUp() throws Exception {

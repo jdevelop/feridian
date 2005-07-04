@@ -1,0 +1,7 @@
+<query xmlns='jabber:iq:roster'>
+  <item
+      jid='contact@example.org'
+      name='MyContact'>
+    <group>MyBuddies</group>
+  </item>
+</query>

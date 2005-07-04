@@ -1,0 +1,3 @@
+<query xmlns='jabber:iq:roster'>
+  <item jid='nurse@example.com' subscription='remove'/>
+</query>

@@ -1,13 +1,22 @@
 package com.echomine.xmpp;
 
-import junit.framework.TestCase;
+import com.echomine.XMPPTestCase;
 
 /**
  * Tests the JID class and checks to see if the parsing of the JID is correct
  * TODO: tests that the JIDs really do conform to JEP-0029. (ie. Unicode and
  * specific character allowance checks).
  */
-public class JIDTest extends TestCase {
+public class JIDTest extends XMPPTestCase {
+
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
     /** test the equals() method */
     public void testJIDEquals() throws Exception {
         JID jid1 = JID.parseJID("abc@def.com");

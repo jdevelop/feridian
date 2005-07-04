@@ -2,12 +2,11 @@ package com.echomine.xmpp.stream;
 
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPException;
-import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * Tests the resource binding stream
  */
-public class XMPPResourceBindingStreamTest extends XMPPTestCase {
+public class XMPPResourceBindingStreamTest extends BaseStreamTestCase {
     XMPPResourceBindingStream stream;
 
     /*

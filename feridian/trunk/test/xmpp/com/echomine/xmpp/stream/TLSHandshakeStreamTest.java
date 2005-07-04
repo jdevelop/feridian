@@ -11,14 +11,13 @@ import javax.net.ssl.SSLSocket;
 
 import com.echomine.net.MockSSLSocket;
 import com.echomine.xmpp.XMPPException;
-import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * This tests the TLS handshaking feature. It will not test the TLS negotiation,
  * which is assumed to be working since JSSE is used. However, it will tests the
  * XML handshaking.
  */
-public class TLSHandshakeStreamTest extends XMPPTestCase {
+public class TLSHandshakeStreamTest extends BaseStreamTestCase {
     TLSHandshakeStream stream;
 
     protected void setUp() throws Exception {

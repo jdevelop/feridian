@@ -68,11 +68,10 @@ public abstract class StanzaPacketMapper implements IUnmarshaller, IMarshaller, 
      * positioned in the marshalling context. The attributes are the to, from,
      * id, type. This method does NOT close the start tag.
      * 
-     * @param packet stanza packet base
      * @param ctx the marshalling context
      * @throws JiBXException
      */
-    protected void marshallStanzaAttributes(StanzaPacketBase packet, MarshallingContext ctx) throws JiBXException {
+    public void marshallStanzaAttributes(StanzaPacketBase packet, MarshallingContext ctx) throws JiBXException {
         //write out the attributes
         if (packet.getTo() != null)
             ctx.attribute(0, TO_ATTRIBUTE_NAME, packet.getTo().toString());
@@ -82,6 +81,28 @@ public abstract class StanzaPacketMapper implements IUnmarshaller, IMarshaller, 
             ctx.attribute(0, ID_ATTRIBUTE_NAME, packet.getId());
         if (packet.getType() != null)
             ctx.attribute(0, TYPE_ATTRIBUTE_NAME, packet.getType());
+    }
+
+    /**
+     * unmarshalls the attributes from the context. the context must be
+     * positioned at the element name that contains the attributes.
+     * 
+     * @param ctx the unmarshalling context
+     * @throws JiBXException
+     */
+    public void unmarshallStanzaAttributes(StanzaPacketBase packet, UnmarshallingContext ctx) throws JiBXException {
+        try {
+            if (ctx.hasAttribute(null, TYPE_ATTRIBUTE_NAME))
+                packet.setType(ctx.attributeText(null, TYPE_ATTRIBUTE_NAME));
+            if (ctx.hasAttribute(null, TO_ATTRIBUTE_NAME))
+                packet.setTo(JID.parseJID(ctx.attributeText(null, TO_ATTRIBUTE_NAME)));
+            if (ctx.hasAttribute(null, FROM_ATTRIBUTE_NAME))
+                packet.setFrom(JID.parseJID(ctx.attributeText(null, FROM_ATTRIBUTE_NAME)));
+            if (ctx.hasAttribute(null, ID_ATTRIBUTE_NAME))
+                packet.setId(ctx.attributeText(null, ID_ATTRIBUTE_NAME));
+        } catch (ParseException ex) {
+            throw new JiBXException("Error Parsing JID", ex);
+        }
     }
 
     /**
@@ -97,29 +118,6 @@ public abstract class StanzaPacketMapper implements IUnmarshaller, IMarshaller, 
      */
     protected void marshallStanzaError(StanzaErrorPacket packet, MarshallingContext ctx) throws JiBXException {
         errorMapper.marshal(packet, ctx);
-    }
-
-    /**
-     * unmarshalls the attributes from the context. the context must be
-     * positioned at the element name that contains the attributes.
-     * 
-     * @param packet the stanza packet to store the attribute data
-     * @param ctx the unmarshalling context
-     * @throws JiBXException
-     */
-    protected void unmarshallStanzaAttributes(StanzaPacketBase packet, UnmarshallingContext ctx) throws JiBXException {
-        try {
-            if (ctx.hasAttribute(null, TYPE_ATTRIBUTE_NAME))
-                packet.setType(ctx.attributeText(null, TYPE_ATTRIBUTE_NAME));
-            if (ctx.hasAttribute(null, TO_ATTRIBUTE_NAME))
-                packet.setTo(JID.parseJID(ctx.attributeText(null, TO_ATTRIBUTE_NAME)));
-            if (ctx.hasAttribute(null, FROM_ATTRIBUTE_NAME))
-                packet.setFrom(JID.parseJID(ctx.attributeText(null, FROM_ATTRIBUTE_NAME)));
-            if (ctx.hasAttribute(null, ID_ATTRIBUTE_NAME))
-                packet.setId(ctx.attributeText(null, ID_ATTRIBUTE_NAME));
-        } catch (ParseException ex) {
-            throw new JiBXException("Error Parsing JID", ex);
-        }
     }
 
     /**

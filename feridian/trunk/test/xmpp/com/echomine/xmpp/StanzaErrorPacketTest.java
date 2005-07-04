@@ -1,22 +1,20 @@
 package com.echomine.xmpp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 
-import junit.framework.TestCase;
-
-import org.jibx.extras.DocumentComparator;
-import org.jibx.runtime.BindingDirectory;
-import org.jibx.runtime.IBindingFactory;
-import org.jibx.runtime.IMarshallingContext;
-import org.jibx.runtime.IUnmarshallingContext;
+import com.echomine.XMPPTestCase;
 
 /**
  * This will test both stanza and stream error packets.
  */
-public class StanzaErrorPacketTest extends TestCase {
+public class StanzaErrorPacketTest extends XMPPTestCase {
 
     protected void setUp() throws Exception {
+        super.setUp();
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
     }
 
     /**
@@ -26,9 +24,7 @@ public class StanzaErrorPacketTest extends TestCase {
         String xml = "<error type='continue' xmlns='jabber:client'>" + "\n\t<forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>"
                 + "\n\t<text xml:lang='en' xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>diagnostic</text>" + "\n\t<escape-your-data xmlns='application-ns'/></error>";
         StringReader reader = new StringReader(xml);
-        IBindingFactory bfact = BindingDirectory.getFactory(StanzaErrorPacket.class);
-        IUnmarshallingContext ctx = bfact.createUnmarshallingContext();
-        StanzaErrorPacket msg = (StanzaErrorPacket) ctx.unmarshalDocument(reader);
+        StanzaErrorPacket msg = (StanzaErrorPacket) unmarshallObject(reader, StanzaErrorPacket.class);
         assertEquals(ErrorCode.C_FORBIDDEN, msg.getCondition());
         assertEquals("diagnostic", msg.getText());
         assertEquals("continue", msg.getErrorType());
@@ -39,9 +35,7 @@ public class StanzaErrorPacketTest extends TestCase {
         String xml = "<error type='continue' xmlns='jabber:client'>\n\t" + "<forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>"
                 + "\n\t<text xml:lang='en' xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>diagnostic</text>" + "</error>";
         StringReader reader = new StringReader(xml);
-        IBindingFactory bfact = BindingDirectory.getFactory(StanzaErrorPacket.class);
-        IUnmarshallingContext ctx = bfact.createUnmarshallingContext();
-        StanzaErrorPacket msg = (StanzaErrorPacket) ctx.unmarshalDocument(reader);
+        StanzaErrorPacket msg = (StanzaErrorPacket) unmarshallObject(reader, StanzaErrorPacket.class);
         assertEquals(ErrorCode.C_FORBIDDEN, msg.getCondition());
         assertEquals("diagnostic", msg.getText());
         assertNull(msg.getApplicationCondition());
@@ -51,9 +45,7 @@ public class StanzaErrorPacketTest extends TestCase {
     public void testUnmarshallConditionOnly() throws Exception {
         String xml = "<error type='continue' xmlns='jabber:client'>\n\t" + "<forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>" + "</error>";
         StringReader reader = new StringReader(xml);
-        IBindingFactory bfact = BindingDirectory.getFactory(StanzaErrorPacket.class);
-        IUnmarshallingContext ctx = bfact.createUnmarshallingContext();
-        StanzaErrorPacket msg = (StanzaErrorPacket) ctx.unmarshalDocument(reader);
+        StanzaErrorPacket msg = (StanzaErrorPacket) unmarshallObject(reader, StanzaErrorPacket.class);
         assertEquals(ErrorCode.C_FORBIDDEN, msg.getCondition());
         assertNull(msg.getText());
         assertNull(msg.getApplicationCondition());
@@ -61,12 +53,9 @@ public class StanzaErrorPacketTest extends TestCase {
     }
 
     public void testUnmarshallNoText() throws Exception {
-        String xml = "<error type='continue' xmlns='jabber:client'>\n\t" + "<forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>"
-                + "<escape-your-data xmlns='application-ns'/></error>";
+        String xml = "<error type='continue' xmlns='jabber:client'>\n\t" + "<forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>" + "<escape-your-data xmlns='application-ns'/></error>";
         StringReader reader = new StringReader(xml);
-        IBindingFactory bfact = BindingDirectory.getFactory(StanzaErrorPacket.class);
-        IUnmarshallingContext ctx = bfact.createUnmarshallingContext();
-        StanzaErrorPacket msg = (StanzaErrorPacket) ctx.unmarshalDocument(reader);
+        StanzaErrorPacket msg = (StanzaErrorPacket) unmarshallObject(reader, StanzaErrorPacket.class);
         assertEquals(ErrorCode.C_FORBIDDEN, msg.getCondition());
         assertNull(msg.getText());
         assertEquals("continue", msg.getErrorType());
@@ -82,14 +71,7 @@ public class StanzaErrorPacketTest extends TestCase {
         packet.setApplicationCondition(new NSI("escape-your-data", "application-ns"));
         packet.setErrorType(StanzaErrorPacket.CANCEL);
         packet.setText("diagnostic");
-        IBindingFactory bfact = BindingDirectory.getFactory(StanzaErrorPacket.class);
-        IMarshallingContext ctx = bfact.createMarshallingContext();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ctx.setOutput(bos, "UTF-8");
-        ctx.marshalDocument(packet);
-        String str = bos.toString();
-        StringReader brdr = new StringReader(str);
-        DocumentComparator comp = new DocumentComparator(System.err);
-        assertTrue("Invalid Output String: " + str, comp.compare(reader, brdr));
+        marshallObject(packet, StanzaErrorPacket.class);
+        compare(reader);
     }
 }

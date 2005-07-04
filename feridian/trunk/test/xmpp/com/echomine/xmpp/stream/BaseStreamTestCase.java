@@ -1,41 +1,24 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.stream;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.jibx.runtime.impl.UnmarshallingContext;
-
-import com.echomine.BasicTestCase;
-import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.xmpp.stream.XMPPConnectionContext;
+import com.echomine.XMPPTestCase;
+import com.echomine.xmpp.IXMPPStream;
+import com.echomine.xmpp.XMPPException;
 
 /**
  * Base class for stream test cases to extend from that provides many common
  * functionality.
  */
-public class XMPPTestCase extends BasicTestCase implements XMPPConstants {
-    protected UnmarshallingContext uctx;
-    protected XMPPClientContext clientCtx;
-    protected XMPPConnectionContext connCtx;
-    protected XMPPStreamWriter writer;
-
-    public XMPPTestCase() {
-        super();
-    }
+public class BaseStreamTestCase extends XMPPTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        clientCtx = new XMPPClientContext();
-        connCtx = new XMPPConnectionContext();
-        uctx = new UnmarshallingContext();
-        writer = new XMPPStreamWriter(STREAM_URIS);
-        writer.setOutput(os);
     }
 
     protected void tearDown() throws Exception {
         super.tearDown();
-        writer.close();
-        uctx.reset();
     }
 
     /**

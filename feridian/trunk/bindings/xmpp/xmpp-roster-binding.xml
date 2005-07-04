@@ -1,0 +1,27 @@
+<!-- 
+	binding file for working with the XMPP roster management
+-->
+<binding>
+	<namespace uri="jabber:iq:roster" default="elements"/>
+
+	<!-- setup serializers/deserializers -->
+	<format type="com.echomine.xmpp.JID" serializer="com.echomine.xmpp.JID.toString"
+		deserializer="com.echomine.xmpp.JID.parseJID"/>
+
+	<mapping name="query" ns="jabber:iq:roster"
+		class="com.echomine.xmpp.IQRosterPacket">
+		<collection field="rosterItems" type="java.util.ArrayList"
+			item-type="com.echomine.xmpp.RosterItem" usage="optional"/>
+	</mapping>
+
+	<mapping name="item" ns="jabber:iq:roster" value-style="attribute"
+		class="com.echomine.xmpp.RosterItem">
+		<value name="ask" field="ask" usage="optional"/>
+		<value name="jid" field="jid"/>
+		<value name="name" field="name" usage="optional"/>
+		<value name="subscription" field="subscription" usage="optional"/>
+		<collection field="groups" type="java.util.ArrayList" usage="optional">
+			<value name="group" style="element"/>
+		</collection>
+	</mapping>
+</binding>

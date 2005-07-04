@@ -1,17 +1,21 @@
 package com.echomine.xmpp.jibx;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
-import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
+import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.muse.MuseConfiguration;
 import com.echomine.xmpp.IQPacket;
-import com.echomine.xmpp.MessagePacket;
+import com.echomine.xmpp.StanzaErrorPacket;
 
 /**
  * Mapper for all IQ packets. This mapper will (un)marshall the common IQ packet
@@ -21,6 +25,8 @@ import com.echomine.xmpp.MessagePacket;
  * wrapper for the inner real packet. All IQ packets must extend from IQPacket.
  */
 public class IQPacketMapper extends StanzaPacketMapper {
+    private final static Log log = LogFactory.getLog(IQPacketMapper.class);
+
     /**
      * @param uri the uri of the element working with
      * @param index the index for the namespace
@@ -42,52 +48,73 @@ public class IQPacketMapper extends StanzaPacketMapper {
         } else {
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
-            MessagePacket packet = (MessagePacket) obj;
-            IXMLWriter writer = ctx.getXmlWriter();
-            ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-            //marshall attributes
-            marshallStanzaAttributes(packet, ctx);
-            ctx.closeStartContent();
-            //marshall the real message encapsulated in the message
-            JiBXUtil.marshallObject(ctx, obj, 1);
-            if (packet.getError() != null)
-                marshallStanzaError(packet.getError(), ctx);
-            ctx.endTag(index, name);
+            IQPacket packet = (IQPacket) obj;
             try {
+                XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
+                ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
+                //marshall attributes
+                marshallStanzaAttributes(packet, ctx);
+                ctx.closeStartContent();
+                //if obj is more than a simple IQPacket, then marshall real
+                // data
+                if (packet.getClass() != IQPacket.class) {
+                    //marshall the packet's real contents
+                    StringWriter strWriter = new StringWriter(256);
+                    JiBXUtil.marshallObject(strWriter, packet);
+                    writer.writeMarkup(strWriter.toString());
+                }
+                if (packet.getError() != null)
+                    marshallStanzaError(packet.getError(), ctx);
+                ctx.endTag(index, name);
                 writer.flush();
             } catch (IOException ex) {
-                throw new JiBXException("Error flushing stream", ex);
+                throw new JiBXException("Error writing to stream", ex);
             }
         }
     }
 
     /**
-     * Unmarshalls the error packet. The reason for this is that the error
-     * packet uses different condition elements and may also condition
-     * application-specific conditions. Due to the highly non-conforming nature
-     * of the error message, a custom mapper is required.
+     * Unmarshalls the iq packet. It will unmarshall the iq header attributes,
+     * and then subsequently call the binding directory to separately unmarshall
+     * the inner stanza.
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
         //make sure we're at the right start tag
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
-        if (!ctx.isAt(uri, name)) {
+        if (!ctx.isAt(uri, name))
             ctx.throwStartTagNameError(uri, name);
-        }
-        MessagePacket packet = (MessagePacket) obj;
-        if (packet == null)
-            packet = new MessagePacket();
-        //unmarshall base packet attributes
-        unmarshallStanzaAttributes(packet, ctx);
-        ctx.parsePastStartTag(uri, name);
+        if (obj == null)
+            obj = new IQPacket();
+        IQPacket tpkt = (IQPacket) obj;
+        IQPacket packet = null;
+        unmarshallStanzaAttributes(tpkt, ctx);
+        //unmarshall real packet's contents
+        ctx.parsePastStartTag(NS_XMPP_CLIENT, "iq");
         do {
-            if (ctx.isAt(uri, ERROR_ELEMENT_NAME)) {
-                packet.setError(unmarshallStanzaError(ctx));
-            } else {
+            if (ctx.isAt(NS_XMPP_CLIENT, "error")) {
+                tpkt.setError((StanzaErrorPacket) JiBXUtil.unmarshallObject(ctx, StanzaErrorPacket.class));
+            } else if (ctx.isEnd()) {
                 break;
+            } else {
+                Class iqClass = MuseConfiguration.getConfig().getClassForURI(ctx.getNamespace());
+                if (packet != null) {
+                    ctx.parseElementText(ctx.getNamespace(), ctx.getElementName());
+                    if (log.isWarnEnabled())
+                        log.warn("Invalid IQ Packet.  Already unmarshalled one child element, but found more than one.  This does not conform to XMPP specs.  Ignoring this child element");
+                } else if (iqClass != null) {
+                    packet = (IQPacket) JiBXUtil.unmarshallObject(ctx, iqClass);
+                } else {
+                    String unknownText = ctx.parseElementText(ctx.getNamespace(), ctx.getElementName());
+                    if (log.isWarnEnabled())
+                        log.warn("Found and Ignoring Unknown Element Data: " + unknownText);
+                }
             }
         } while (true);
-        //parse to end
         ctx.toEnd();
-        return packet;
+        if (packet != null) {
+            tpkt.copyTo(packet);
+            return packet;
+        }
+        return tpkt;
     }
 }

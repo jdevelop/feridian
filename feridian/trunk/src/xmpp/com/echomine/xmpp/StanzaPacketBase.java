@@ -6,6 +6,11 @@ package com.echomine.xmpp;
  * this base packet exists.
  */
 public class StanzaPacketBase implements IStanzaPacket {
+    protected static final String TYPE_ATTRIBUTE_NAME = "type";
+    protected static final String ID_ATTRIBUTE_NAME = "id";
+    protected static final String FROM_ATTRIBUTE_NAME = "from";
+    protected static final String TO_ATTRIBUTE_NAME = "to";
+    protected static final String ERROR_ELEMENT_NAME = "error";
     protected JID to;
     protected JID from;
     protected String id;
