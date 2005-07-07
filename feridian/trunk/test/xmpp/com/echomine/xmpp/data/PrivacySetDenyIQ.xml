@@ -1,0 +1,7 @@
+<query xmlns='jabber:iq:privacy'>
+  <list name='iq-global-example'>
+    <item action='deny' order='6'>
+      <iq/>
+    </item>
+  </list>
+</query>

@@ -8,6 +8,7 @@ import java.util.EventObject;
  * the source/model itself.
  */
 public class FileEvent extends EventObject {
+    private static final long serialVersionUID = 3203072545539847643L;
     public final static int FILESIZE_CHANGED = 1;
     public final static int FILEINFO_CHANGED = 2;
     public final static int TRANSFER_STARTING = 3;

@@ -1,7 +1,5 @@
 package com.echomine.xmpp.stream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
@@ -26,8 +24,6 @@ import com.echomine.xmpp.XMPPException;
  * (recommended for servers).
  */
 public class XMPPResourceBindingStream implements IXMPPStream, XMPPConstants {
-    private static final Log log = LogFactory.getLog(XMPPResourceBindingStream.class);
-
     /*
      * (non-Javadoc)
      * 
@@ -40,12 +36,12 @@ public class XMPPResourceBindingStream implements IXMPPStream, XMPPConstants {
         if (!connCtx.isResourceBindingRequired())
             return;
         try {
-            //send bind request
+            // send bind request
             IQResourceBindPacket request = new IQResourceBindPacket();
             request.setType(IQPacket.TYPE_SET);
             request.setResourceName(clientCtx.getResource());
             JiBXUtil.marshallIQPacket(writer, request);
-            //process result
+            // process result
             IQResourceBindPacket result = (IQResourceBindPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");

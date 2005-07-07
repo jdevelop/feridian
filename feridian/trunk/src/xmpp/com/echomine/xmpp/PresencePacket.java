@@ -52,9 +52,9 @@ public class PresencePacket extends StanzaPacketBase {
     public static final String SHOW_DND = "dnd";
     public static final String SHOW_XA = "xa";
 
-    protected String show;
-    protected String status;
-    protected int priority;
+    private String show;
+    private String status;
+    private int priority;
 
     public PresencePacket() {
         super();

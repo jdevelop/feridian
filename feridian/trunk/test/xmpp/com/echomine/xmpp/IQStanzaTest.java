@@ -17,7 +17,7 @@ public class IQStanzaTest extends XMPPTestCase {
         super.tearDown();
     }
 
-    public void testIQResultWithNoChild() throws Exception {
+    public void testUnmarshallIQResultWithNoChild() throws Exception {
         String xml = "<iq xmlns='jabber:client' type='result' id='iq_001'/>";
         StringReader rdr = new StringReader(xml);
         IQPacket packet = (IQPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);

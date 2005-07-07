@@ -14,8 +14,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.XMPPStreamWriter;
@@ -39,12 +37,7 @@ import com.echomine.xmpp.XMPPException;
  * closing our side of the stream and connection.
  */
 public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
-    private static Log log = LogFactory.getLog(TLSHandshakeStream.class);
     private static final String STARTTLS_ELEMENT_NAME = "starttls";
-
-    public TLSHandshakeStream() {
-        super();
-    }
 
     /*
      * (non-Javadoc)
@@ -61,12 +54,12 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.pushExtensionNamespaces(extns);
         int idx = writer.getNamespaces().length;
         try {
-            //send starttls
+            // send starttls
             writer.startTagNamespaces(idx, STARTTLS_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
             writer.closeEmptyTag();
             writer.flush();
-            //check for error or proceed
-            int eventType = uctx.next();
+            // check for error or proceed
+            uctx.next();
             if (uctx.isAt(NS_STREAM_TLS, "failure"))
                 throw new XMPPException("TLS Failure");
             if (!uctx.isAt(NS_STREAM_TLS, "proceed"))

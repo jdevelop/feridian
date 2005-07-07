@@ -4,6 +4,7 @@ import java.util.EventObject;
 
 /** contains connection event codes */
 public class ConnectionEvent extends EventObject {
+    private static final long serialVersionUID = -767358705381792702L;
     public final static int CONNECTION_OPENED = 1;
     public final static int CONNECTION_CLOSED = 2;
     public final static int CONNECTION_ERRORED = 3;

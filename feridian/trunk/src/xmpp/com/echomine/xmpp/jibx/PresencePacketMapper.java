@@ -52,21 +52,16 @@ public class PresencePacketMapper extends StanzaPacketMapper {
             //marshall attributes
             marshallStanzaAttributes(packet, ctx);
             //if packet has no show, status, etc, then close tag
-            if (packet.getStatus() == null && packet.getShow() == null && packet.getPriority() == 0 && packet.getError() == null) {
-                ctx.closeStartEmpty();
-            } else {
-                ctx.closeStartContent();
-                //marshall out the message
-                if (packet.getShow() != null)
-                    ctx.element(index, SHOW_ELEMENT_NAME, packet.getShow());
-                if (packet.getStatus() != null)
-                    ctx.element(index, STATUS_ELEMENT_NAME, packet.getStatus());
-                if (packet.getPriority() != 0)
-                    ctx.element(index, PRIORITY_ELEMENT_NAME, packet.getPriority());
-                if (packet.getError() != null)
-                    marshallStanzaError(packet.getError(), ctx);
-                ctx.endTag(index, name);
-            }
+            ctx.closeStartContent();
+            if (packet.getShow() != null)
+                ctx.element(index, SHOW_ELEMENT_NAME, packet.getShow());
+            if (packet.getStatus() != null)
+                ctx.element(index, STATUS_ELEMENT_NAME, packet.getStatus());
+            if (packet.getPriority() != 0)
+                ctx.element(index, PRIORITY_ELEMENT_NAME, packet.getPriority());
+            if (packet.getError() != null)
+                marshallStanzaError(packet.getError(), ctx);
+            ctx.endTag(index, name);
             try {
                 writer.flush();
             } catch (IOException ex) {

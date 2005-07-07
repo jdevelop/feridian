@@ -24,6 +24,7 @@ import com.echomine.xmpp.stream.XMPPConnectionContext;
  */
 public class XMPPConnectionHandler implements SocketHandler {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
+    
     protected final static int SOCKETBUF = 8192;
     protected XMPPClientContext clientCtx;
     protected XMPPConnectionContext connCtx;

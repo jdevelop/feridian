@@ -7,8 +7,8 @@ package com.echomine.xmpp;
  * is simply an element with a custom defined namespace.
  */
 public class NSI {
-    String name;
-    String uri;
+    private String name;
+    private String uri;
     
     /**
      * Creates an NSI with the specified name and URI

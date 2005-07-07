@@ -5,7 +5,9 @@ package com.echomine.xmpp;
  * base exception class for all XMPP related errors.
  */
 public class XMPPException extends Exception {
-    ErrorPacket errorPacket;
+    private static final long serialVersionUID = 567800071603787344L;
+    
+    private ErrorPacket errorPacket;
 
     public XMPPException() {
         super();

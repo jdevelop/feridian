@@ -4,8 +4,8 @@ package com.echomine.xmpp;
  * This packet maps to the resource binding IQ stanza.
  */
 public class IQResourceBindPacket extends IQPacket {
-    String resourceName;
-    JID jid;
+    private String resourceName;
+    private JID jid;
 
     public IQResourceBindPacket() {
         super();

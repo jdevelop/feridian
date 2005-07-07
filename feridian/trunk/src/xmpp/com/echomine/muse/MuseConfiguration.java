@@ -75,13 +75,4 @@ public class MuseConfiguration {
             return null;
         }
     }
-
-    /**
-     * resets all the configuration settings back to its pristine state so that
-     * the configuration object can be reused.
-     */
-    private void reset() {
-        if (nsMappings != null)
-            nsMappings.clear();
-    }
 }

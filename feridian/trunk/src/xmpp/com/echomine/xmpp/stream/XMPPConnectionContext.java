@@ -20,9 +20,6 @@ public class XMPPConnectionContext {
     private boolean resourceBindingRequired;
     private boolean sessionRequired;
 
-    public XMPPConnectionContext() {
-    }
-
     /**
      * Resets the session data. This will reset all data acquired.
      */

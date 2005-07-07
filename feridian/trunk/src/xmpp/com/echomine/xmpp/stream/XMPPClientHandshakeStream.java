@@ -2,8 +2,6 @@ package com.echomine.xmpp.stream;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
@@ -25,7 +23,6 @@ import com.echomine.xmpp.XMPPException;
  * stream features.
  */
 public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
-    private static final Log log = LogFactory.getLog(XMPPClientHandshakeStream.class);
     private static final String STREAM_ELEMENT_NAME = "stream";
 
     /*
@@ -43,16 +40,16 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
             writer.addAttribute(IDX_XMPP_CLIENT, "to", clientCtx.getHost());
             writer.closeStartTag();
             writer.flush();
-            //now read in the xml stream
+            // now read in the xml stream
             if (!uctx.isAt(NS_JABBER_STREAM, STREAM_ELEMENT_NAME))
                 uctx.throwStartTagNameError(NS_JABBER_STREAM, STREAM_ELEMENT_NAME);
-            //parse out the incoming info
+            // parse out the incoming info
             if (uctx.hasAttribute(null, "from"))
                 connCtx.setHost(uctx.attributeText(null, "from"));
             connCtx.setSessionId(uctx.attributeText(null, "id"));
-            //parse past start tag
-            int eventType = uctx.next();
-            //read in any possible error element
+            // parse past start tag
+            uctx.next();
+            // read in any possible error element
             if (uctx.isAt(NS_JABBER_STREAM, "error")) {
                 ErrorPacket packet = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
                 throw new XMPPException("Error message received for handshake", packet);

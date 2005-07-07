@@ -98,6 +98,19 @@ public class RosterItem {
     }
 
     /**
+     * obtains the group name for the specified index
+     * 
+     * @param idx the index of the group name to retrieve
+     * @return the group name or null if no groups exist
+     * @throws ArrayIndexOutOfBoundsException
+     */
+    public String getGroup(int idx) {
+        if (groups == null)
+            return null;
+        return (String) groups.get(idx);
+    }
+
+    /**
      * Adds this roster item to a group
      * 
      * @param groupName the name of the group

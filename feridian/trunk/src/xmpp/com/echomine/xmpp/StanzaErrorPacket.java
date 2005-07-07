@@ -9,6 +9,7 @@ public class StanzaErrorPacket extends ErrorPacket {
     public static final String MODIFY = "modify";
     public static final String AUTH = "auth";
     public static final String WAIT = "wait";
+    
     private String errorType;
 
     /**

@@ -8,15 +8,6 @@ import com.echomine.XMPPTestCase;
  * Tests the roster iq packet and roster item
  */
 public class IQRosterTest extends XMPPTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testRosterRequest() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterRequest.xml";
         Reader rdr = getResourceAsReader(inRes);

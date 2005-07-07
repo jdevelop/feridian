@@ -1,13 +1,6 @@
 package com.echomine.xmpp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
-
-import org.jibx.extras.DocumentComparator;
-import org.jibx.runtime.BindingDirectory;
-import org.jibx.runtime.IBindingFactory;
-import org.jibx.runtime.IMarshallingContext;
-import org.jibx.runtime.IUnmarshallingContext;
 
 import com.echomine.XMPPTestCase;
 

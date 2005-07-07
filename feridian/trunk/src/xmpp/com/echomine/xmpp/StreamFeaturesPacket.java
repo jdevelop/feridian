@@ -5,10 +5,10 @@ package com.echomine.xmpp;
  * It contains a list of features supported by the server.
  */
 public class StreamFeaturesPacket implements IPacket {
-    boolean tlsRequired;
-    boolean tlsSupported;
-    boolean sessionRequired;
-    boolean bindingRequired;
+    private boolean tlsRequired;
+    private boolean tlsSupported;
+    private boolean sessionRequired;
+    private boolean bindingRequired;
 
     public StreamFeaturesPacket() {
         super();

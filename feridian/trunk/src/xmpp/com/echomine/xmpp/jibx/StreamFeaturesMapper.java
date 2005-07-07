@@ -2,8 +2,6 @@ package com.echomine.xmpp.jibx;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.IAliasable;
 import org.jibx.runtime.IMarshaller;
 import org.jibx.runtime.IMarshallingContext;
@@ -21,16 +19,15 @@ import com.echomine.xmpp.XMPPConstants;
  * The custom mapper for the stream features element.
  */
 public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasable, XMPPConstants {
-    private static final Log log = LogFactory.getLog(StreamFeaturesMapper.class);
-    private static final String FEATURES_ELEMENT_NAME = "features";
-    private static final String STARTTLS_ELEMENT_NAME = "starttls";
-    private static final String REQUIRED_ELEMENT_NAME = "required";
-    private static final String BINDING_ELEMENT_NAME = "bind";
-    private static final String SESSION_ELEMENT_NAME = "session";
+    protected static final String FEATURES_ELEMENT_NAME = "features";
+    protected static final String STARTTLS_ELEMENT_NAME = "starttls";
+    protected static final String REQUIRED_ELEMENT_NAME = "required";
+    protected static final String BINDING_ELEMENT_NAME = "bind";
+    protected static final String SESSION_ELEMENT_NAME = "session";
 
-    private String uri;
-    private String name;
-    private int index;
+    protected String uri;
+    protected String name;
+    protected int index;
 
     public StreamFeaturesMapper() {
         uri = NS_STREAM_TLS;
@@ -79,9 +76,9 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
             StreamFeaturesPacket packet = (StreamFeaturesPacket) obj;
             IXMLWriter writer = ctx.getXmlWriter();
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
-            //now check if tls should be marshalled
+            // now check if tls should be marshalled
             marshallStartTLSFeature(ctx, packet);
-            //now check for session and resource binding elements
+            // now check for session and resource binding elements
             marshallSessionFeature(ctx, packet);
             ctx.endTag(index, name);
             try {
@@ -131,14 +128,14 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
         int tlsIdx = ctx.getNamespaces().length;
         ctx.getXmlWriter().pushExtensionNamespaces(extns);
         ctx.startTagNamespaces(tlsIdx, STARTTLS_ELEMENT_NAME, new int[] { tlsIdx }, new String[] { "" });
-        //if tls is not required, close tag
+        // if tls is not required, close tag
         if (!packet.isTLSRequired()) {
             ctx.closeStartEmpty();
         } else {
             ctx.closeStartContent();
-            //write out the <required/> element
+            // write out the <required/> element
             ctx.startTagAttributes(tlsIdx, "required").closeStartEmpty();
-            //close tag
+            // close tag
             ctx.endTag(tlsIdx, STARTTLS_ELEMENT_NAME);
         }
         ctx.getXmlWriter().popExtensionNamespaces();
@@ -151,14 +148,14 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
      *      org.jibx.runtime.IUnmarshallingContext)
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
-        //make sure we're at the right start tag
+        // make sure we're at the right start tag
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
         if (!ctx.isAt(uri, name))
             ctx.throwStartTagNameError(uri, name);
         StreamFeaturesPacket packet = (StreamFeaturesPacket) obj;
         if (packet == null)
             packet = new StreamFeaturesPacket();
-        //parse past the features element
+        // parse past the features element
         ctx.parsePastStartTag(uri, name);
         do {
             if (ctx.isAt(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME)) {
@@ -189,7 +186,7 @@ public class StreamFeaturesMapper implements IMarshaller, IUnmarshaller, IAliasa
             ctx.throwStartTagNameError(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
         ctx.parsePastStartTag(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
         packet.setTLSSupported(true);
-        //find optional required element text
+        // find optional required element text
         int eventType = ctx.toTag();
         if (eventType == UnmarshallingContext.START_TAG && REQUIRED_ELEMENT_NAME.equals(ctx.getName())) {
             packet.setTLSRequired(true);
