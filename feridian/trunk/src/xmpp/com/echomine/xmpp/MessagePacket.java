@@ -43,7 +43,7 @@ public class MessagePacket extends StanzaPacketBase {
 
     public MessagePacket() {
         super();
-        type = TYPE_NORMAL;
+        setType(TYPE_NORMAL);
     }
 
     /**

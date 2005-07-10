@@ -13,7 +13,7 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.muse.MuseConfiguration;
+import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.xmpp.IQPacket;
 import com.echomine.xmpp.StanzaErrorPacket;
 
@@ -96,7 +96,7 @@ public class IQPacketMapper extends StanzaPacketMapper {
             } else if (ctx.isEnd()) {
                 break;
             } else {
-                Class iqClass = MuseConfiguration.getConfig().getClassForURI(ctx.getNamespace());
+                Class iqClass = FeridianConfiguration.getConfig().getClassForURI(ctx.getNamespace());
                 if (packet != null) {
                     ctx.parseElementText(ctx.getNamespace(), ctx.getElementName());
                     if (log.isWarnEnabled())
