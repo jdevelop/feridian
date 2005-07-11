@@ -1,9 +1,10 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 import java.io.Reader;
 import java.io.StringReader;
 
 import com.echomine.XMPPTestCase;
+import com.echomine.xmpp.ErrorCode;
 
 /**
  * Tests the message packet

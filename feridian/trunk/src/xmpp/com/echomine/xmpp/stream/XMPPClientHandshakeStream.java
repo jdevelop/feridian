@@ -7,12 +7,12 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.xmpp.ErrorPacket;
 import com.echomine.xmpp.IXMPPStream;
-import com.echomine.xmpp.StreamFeaturesPacket;
 import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.packet.ErrorPacket;
+import com.echomine.xmpp.packet.StreamFeaturesPacket;
 
 /**
  * This is the initial handshaking stream to work with XMPP. Its job is to send

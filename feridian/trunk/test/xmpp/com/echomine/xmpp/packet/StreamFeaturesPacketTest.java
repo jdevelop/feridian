@@ -1,4 +1,4 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 import java.io.StringReader;
 
@@ -7,7 +7,7 @@ import com.echomine.XMPPTestCase;
 /**
  * Tests the stream features packet
  */
-public class StreamFeaturesPacketTest extends XMPPTestCase implements XMPPConstants {
+public class StreamFeaturesPacketTest extends XMPPTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();

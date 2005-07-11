@@ -1,4 +1,6 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
+
+import com.echomine.xmpp.IPacket;
 
 /**
  * This represents the stream:features packet used during handshake negotiation.

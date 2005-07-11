@@ -12,8 +12,8 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.PrivacyItem;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.packet.PrivacyItem;
 
 /**
  * Mapper for the privacy item class. Since the class requires special

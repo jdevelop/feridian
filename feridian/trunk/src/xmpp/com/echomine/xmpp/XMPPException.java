@@ -1,5 +1,7 @@
 package com.echomine.xmpp;
 
+import com.echomine.xmpp.packet.ErrorPacket;
+
 
 /**
  * base exception class for all XMPP related errors.

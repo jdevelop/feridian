@@ -1,4 +1,7 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
+
+import com.echomine.xmpp.IPacket;
+import com.echomine.xmpp.NSI;
 
 /**
  * This packet defines the stream level error packet.

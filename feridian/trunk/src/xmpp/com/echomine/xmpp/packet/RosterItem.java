@@ -1,8 +1,10 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.echomine.xmpp.JID;
 
 /**
  * This is the main class containing information for each roster item.

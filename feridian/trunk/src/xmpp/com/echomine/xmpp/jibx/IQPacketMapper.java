@@ -15,7 +15,7 @@ import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.xmpp.IQPacket;
-import com.echomine.xmpp.StanzaErrorPacket;
+import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * Mapper for all IQ packets. This mapper will (un)marshall the common IQ packet

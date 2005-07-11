@@ -10,9 +10,9 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.xmpp.JID;
 import com.echomine.xmpp.ParseException;
-import com.echomine.xmpp.StanzaErrorPacket;
 import com.echomine.xmpp.StanzaPacketBase;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * Mapper for the basic stanza packet. This mapper is the base class for all the

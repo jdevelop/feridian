@@ -6,11 +6,11 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IQPacket;
-import com.echomine.xmpp.IQResourceBindPacket;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.packet.IQResourceBindPacket;
 
 /**
  * This stream checks to see if resource binding is required. Under XMPP specs,

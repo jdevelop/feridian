@@ -20,6 +20,7 @@ import com.echomine.jibx.JiBXUtil;
 public class FeridianConfiguration {
     private static final Log log = LogFactory.getLog(FeridianConfiguration.class);
     private static final String CONFIG_FILENAME = "feridian-config.xml";
+    private static final String DEFAULT_CONFIG_FILENAME = "feridian-config-default.xml";
     private static FeridianConfiguration config;
     private HashMap nsMappings;
 
@@ -28,12 +29,15 @@ public class FeridianConfiguration {
             InputStream is = FeridianConfiguration.class.getResourceAsStream("/" + CONFIG_FILENAME);
             if (is == null)
                 is = FeridianConfiguration.class.getResourceAsStream("/META-INF/" + CONFIG_FILENAME);
+            if (is == null)
+                is = FeridianConfiguration.class.getResourceAsStream("/META-INF/" + DEFAULT_CONFIG_FILENAME);
             if (is != null) {
                 Reader rdr = new InputStreamReader(is);
                 config = getConfig(rdr);
             } else {
                 if (log.isWarnEnabled())
                     log.warn("Unable to find feridian-config.xml in / or /META-INF.  Using empty config");
+                config = new FeridianConfiguration();
             }
         }
         return config;
@@ -64,7 +68,7 @@ public class FeridianConfiguration {
      * @return the class associated with the NS or null if not found
      */
     public Class getClassForURI(String ns) {
-        if (ns == null)
+        if (ns == null || nsMappings == null)
             return null;
         String className = (String) nsMappings.get(ns);
         if (className == null)

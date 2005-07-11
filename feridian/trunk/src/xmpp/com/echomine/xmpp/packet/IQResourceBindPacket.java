@@ -1,4 +1,7 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
+
+import com.echomine.xmpp.IQPacket;
+import com.echomine.xmpp.JID;
 
 /**
  * This packet maps to the resource binding IQ stanza.

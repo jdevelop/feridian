@@ -1,4 +1,4 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.impl;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -13,6 +13,8 @@ import com.echomine.jibx.JiBXOutputStreamWrapper;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.SocketHandler;
 import com.echomine.util.IOUtil;
+import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.stream.TLSHandshakeStream;
 import com.echomine.xmpp.stream.XMPPClientHandshakeStream;
 import com.echomine.xmpp.stream.XMPPConnectionContext;

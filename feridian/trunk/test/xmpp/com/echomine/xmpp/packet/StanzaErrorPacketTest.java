@@ -1,8 +1,10 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 import java.io.StringReader;
 
 import com.echomine.XMPPTestCase;
+import com.echomine.xmpp.ErrorCode;
+import com.echomine.xmpp.NSI;
 
 /**
  * This will test both stanza and stream error packets.

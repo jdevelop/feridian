@@ -1,4 +1,4 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 /**
  * Extends the error packet to add in stanza-specific error packet data

@@ -1,4 +1,4 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 import java.util.ArrayList;
 import java.util.Collections;

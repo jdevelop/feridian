@@ -12,9 +12,9 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.ErrorPacket;
 import com.echomine.xmpp.NSI;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.packet.ErrorPacket;
 
 public class StreamErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
     protected static final String TEXT_ELEMENT_NAME = "text";

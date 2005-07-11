@@ -9,13 +9,14 @@
 	<namespace uri="jabber:client" default="elements"/>
 	
 	<!-- stream error support -->
-	<mapping name="error" class="com.echomine.xmpp.ErrorPacket"
+	<mapping name="error" class="com.echomine.xmpp.packet.ErrorPacket"
 		marshaller="com.echomine.xmpp.jibx.StreamErrorPacketMapper"
 		unmarshaller="com.echomine.xmpp.jibx.StreamErrorPacketMapper"
 		ns="http://etherx.jabber.org/streams"/>
 			
 	<!-- features support -->
-	<mapping name="features" class="com.echomine.xmpp.StreamFeaturesPacket"
+	<mapping name="features" 
+        class="com.echomine.xmpp.packet.StreamFeaturesPacket"
 		marshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"
 		unmarshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"
 		ns="http://etherx.jabber.org/streams"/>

@@ -9,8 +9,8 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.StanzaErrorPacket;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * Mapper for the stanza error packet.

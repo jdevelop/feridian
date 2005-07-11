@@ -10,7 +10,7 @@
 
 	<!-- iq resource binding packet support -->
 	<mapping name="bind" ns="urn:ietf:params:xml:ns:xmpp-bind"
-		class="com.echomine.xmpp.IQResourceBindPacket" ordered="false">
+		class="com.echomine.xmpp.packet.IQResourceBindPacket" ordered="false">
 		<value name="resource" field="resourceName" usage="optional"/>
 		<value name="jid" field="jid" usage="optional"/> 
 	</mapping>

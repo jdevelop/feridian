@@ -1,5 +1,7 @@
 package com.echomine.xmpp;
 
+import com.echomine.xmpp.packet.StanzaErrorPacket;
+
 /**
  * This is the base packet for the main stanzas -- message, presence, and iq.
  * All these stanzas share the following common attributes, hence the reason why
