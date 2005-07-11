@@ -1,11 +1,13 @@
 package com.echomine.net;
 
-import java.net.Socket;
-
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
-/** a handler that writes a string to the remote connection and disconnects immediately. */
+/**
+ * a handler that writes a string to the remote connection and disconnects
+ * immediately.
+ */
 public class StringSocketWriterHandler extends StringSocketHandler {
     public StringSocketWriterHandler() {
     }
@@ -16,14 +18,13 @@ public class StringSocketWriterHandler extends StringSocketHandler {
     }
 
     /**
-     * writes out a string.  The connection will be closed
-     * by the caller of this method.  Any exception will also be handled
-     * by the caller.
+     * writes out a string. The connection will be closed by the caller of this
+     * method. Any exception will also be handled by the caller.
      */
     public void handle(Socket socket) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream(), SOCKETBUF);
         bos.write(data.getBytes(), 0, data.length());
-        //must manually flush
+        // must manually flush
         bos.flush();
     }
 }

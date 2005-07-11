@@ -9,12 +9,12 @@ public class StanzaErrorPacket extends ErrorPacket {
     public static final String MODIFY = "modify";
     public static final String AUTH = "auth";
     public static final String WAIT = "wait";
-    
+
     private String errorType;
 
     /**
-     * This is only used for stanza-level errors. It will return null if property
-     * does not exist.
+     * This is only used for stanza-level errors. It will return null if
+     * property does not exist.
      * 
      * @return Returns the errorType.
      */

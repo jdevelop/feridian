@@ -15,7 +15,7 @@ import com.echomine.jibx.JiBXUtil;
  * Holds all the configuration information. The feridian-config.xml file is
  * searched inside the "/" classpath first. If none is found, it then searches
  * in the META-INF/.
- *  
+ * 
  */
 public class FeridianConfiguration {
     private static final Log log = LogFactory.getLog(FeridianConfiguration.class);
@@ -53,9 +53,10 @@ public class FeridianConfiguration {
      * @throws JiBXException
      */
     public static FeridianConfiguration getConfig(Reader rdr) throws JiBXException {
-        if (rdr == null) throw new IllegalArgumentException("Reader stream cannot be null");
+        if (rdr == null)
+            throw new IllegalArgumentException("Reader stream cannot be null");
         if (config == null)
-	        config = (FeridianConfiguration) JiBXUtil.unmarshallObject(rdr, FeridianConfiguration.class);
+            config = (FeridianConfiguration) JiBXUtil.unmarshallObject(rdr, FeridianConfiguration.class);
         return config;
     }
 

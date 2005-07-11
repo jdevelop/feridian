@@ -47,10 +47,10 @@ public class MessagePacketMapper extends StanzaPacketMapper {
             MessagePacket packet = (MessagePacket) obj;
             IXMLWriter writer = ctx.getXmlWriter();
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-            //marshall attributes
+            // marshall attributes
             marshallStanzaAttributes(packet, ctx);
             ctx.closeStartContent();
-            //marshall out the message
+            // marshall out the message
             if (packet.getSubject() != null)
                 ctx.element(index, SUBJECT_ELEMENT_NAME, packet.getSubject());
             if (packet.getBody() != null)
@@ -75,7 +75,7 @@ public class MessagePacketMapper extends StanzaPacketMapper {
      * of the error message, a custom mapper is required.
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
-        //make sure we're at the right start tag
+        // make sure we're at the right start tag
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
         if (!ctx.isAt(uri, name)) {
             ctx.throwStartTagNameError(uri, name);
@@ -83,7 +83,7 @@ public class MessagePacketMapper extends StanzaPacketMapper {
         MessagePacket packet = (MessagePacket) obj;
         if (packet == null)
             packet = new MessagePacket();
-        //unmarshall base packet attributes
+        // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
         ctx.parsePastStartTag(uri, name);
         do {
@@ -99,7 +99,7 @@ public class MessagePacketMapper extends StanzaPacketMapper {
                 break;
             }
         } while (true);
-        //parse to end
+        // parse to end
         ctx.toEnd();
         return packet;
     }

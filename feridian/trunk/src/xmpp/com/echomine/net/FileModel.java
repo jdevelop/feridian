@@ -1,10 +1,16 @@
 package com.echomine.net;
 
 /**
- * <p>Contains data and information used by the Handler.  This may include information such as filename, filesize, current
- * transfer file size, current status, etc.  Default class is basically an empty class that contains no data.</p>
- * <p>Just as a note, the current filesize acts as both the current file transferred size and also as the initial resume
- * offset before transfer begins.</p>
+ * <p>
+ * Contains data and information used by the Handler. This may include
+ * information such as filename, filesize, current transfer file size, current
+ * status, etc. Default class is basically an empty class that contains no data.
+ * </p>
+ * <p>
+ * Just as a note, the current filesize acts as both the current file
+ * transferred size and also as the initial resume offset before transfer
+ * begins.
+ * </p>
  */
 public class FileModel {
     String filename = "";
@@ -34,7 +40,8 @@ public class FileModel {
 
     /**
      * @param filename the name of the file to request
-     * @param saveLocation the location (path + filename) to store the file locally
+     * @param saveLocation the location (path + filename) to store the file
+     *            locally
      */
     public FileModel(String filename, String saveLocation) {
         this(filename, saveLocation, 0, null);
@@ -42,7 +49,8 @@ public class FileModel {
 
     /**
      * @param filename the name of the file to request
-     * @param saveLocation the location (path + filename) to store the file locally
+     * @param saveLocation the location (path + filename) to store the file
+     *            locally
      * @param resumeOffset the filesize from where to resume
      */
     public FileModel(String filename, String saveLocation, long resumeOffset) {
@@ -51,7 +59,8 @@ public class FileModel {
 
     /**
      * @param filename the name of the file to request
-     * @param saveLocation the location (path + filename) to store the file locally
+     * @param saveLocation the location (path + filename) to store the file
+     *            locally
      * @param resumeOffset the filesize from where to resume
      * @param throttler the throttler, null if no throttling is done
      */
@@ -82,21 +91,21 @@ public class FileModel {
     }
 
     /**
-     * Sets the filesize or resume offset depending on whether
-     * you are sending or receiving a file
+     * Sets the filesize or resume offset depending on whether you are sending
+     * or receiving a file
      */
     public void setFilesize(long filesize) {
         this.filesize = filesize;
     }
 
     /**
-     * Sets the CURRENT filesize or resume offset depending on whether
-     * you are sending or receiving a file
+     * Sets the CURRENT filesize or resume offset depending on whether you are
+     * sending or receiving a file
      */
     public void setCurrentFilesize(long currentFilesize) {
         this.currentFilesize = currentFilesize;
-        //set the start file size to be the same as the current file size
-        //for more accurate bps rate calculation
+        // set the start file size to be the same as the current file size
+        // for more accurate bps rate calculation
         if (startFileSize == 0 && currentFilesize != 0) {
             startFileSize = currentFilesize;
         }
@@ -122,9 +131,9 @@ public class FileModel {
     }
 
     /**
-     * sets the location on where to save the file.  This is normally called
-     * before the real transfer is started.  However, you can still make
-     * changes during the fileTransferStarting event.
+     * sets the location on where to save the file. This is normally called
+     * before the real transfer is started. However, you can still make changes
+     * during the fileTransferStarting event.
      */
     public void setSaveLocation(String saveLocation) {
         this.saveLocation = saveLocation;
@@ -135,23 +144,25 @@ public class FileModel {
      */
     public void setStartTime(long startTime) {
         this.startTime = startTime;
-        //reset end time since start time got changed
+        // reset end time since start time got changed
         endTime = 0;
     }
 
     /** @return the transfer rate in KBytes/sec */
     public float getTransferKBPS() {
-        if (endTime > 0) return 0;
+        if (endTime > 0)
+            return 0;
         float kbps = (float) (getTransferBPS() / 1024);
         return kbps;
     }
 
     /** @return the transfer rate in Bytes/sec. */
     public long getTransferBPS() {
-        if (endTime > 0) return 0;
+        if (endTime > 0)
+            return 0;
         if (endTime == 0) {
-            //file transfer not yet complete, calculate our rate
-            //rate = current filesize / delta time
+            // file transfer not yet complete, calculate our rate
+            // rate = current filesize / delta time
             bps = (long) (((float) (currentFilesize - startFileSize)) / ((float) ((System.currentTimeMillis() - startTime) / 1000)));
         }
         return bps;
@@ -159,16 +170,18 @@ public class FileModel {
 
     /** @return the estimated time left to finish, in the format of HH:MM:SS */
     public String getTimeLeft() {
-        //if transfer ended, then just return zeros
-        if (endTime > 0) return "00:00:00";
-        //otherwise, get current time and calculate the time left
-        //time left = (filesize - current filesize) / rate (bytes/s)
+        // if transfer ended, then just return zeros
+        if (endTime > 0)
+            return "00:00:00";
+        // otherwise, get current time and calculate the time left
+        // time left = (filesize - current filesize) / rate (bytes/s)
         long left;
         if (bps == 0)
             left = 99 * 3600 + 99 * 60 + 99;
         else
             left = (filesize - currentFilesize) / bps;
-        if (left <= 0) return "00:00:00";
+        if (left <= 0)
+            return "00:00:00";
         int hour, min, sec;
         hour = (int) (left / 3600);
         left = left % 3600;
@@ -181,7 +194,10 @@ public class FileModel {
         return buffer.toString();
     }
 
-    /** Resets all the data fields back to the initial state.  This is good when the model is to be reused. */
+    /**
+     * Resets all the data fields back to the initial state. This is good when
+     * the model is to be reused.
+     */
     public void reset() {
         filename = "";
         filesize = 0;
@@ -194,11 +210,12 @@ public class FileModel {
 
     /** the objects are equal if filename, filesize, and savelocation are equal. */
     public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (!(obj instanceof FileModel)) return false;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof FileModel))
+            return false;
         FileModel model = (FileModel) obj;
-        if (filename.equals(model.getFilename()) && filesize == model.getFilesize() &&
-            saveLocation.equals(model.getSaveLocation()))
+        if (filename.equals(model.getFilename()) && filesize == model.getFilesize() && saveLocation.equals(model.getSaveLocation()))
             return true;
         return false;
     }

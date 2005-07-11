@@ -15,8 +15,8 @@ import com.echomine.xmpp.StanzaPacketBase;
  * Text Pane's text to contained XHTML content.
  * </p>
  * <p>
- * Processing of extended Messages are supported, but it is up to the
- * developer to implement capabilities to work with custom Message types.
+ * Processing of extended Messages are supported, but it is up to the developer
+ * to implement capabilities to work with custom Message types.
  * </p>
  * <p>
  * Thread IDs is easy to work with. Normally, if you initiate a chat for the

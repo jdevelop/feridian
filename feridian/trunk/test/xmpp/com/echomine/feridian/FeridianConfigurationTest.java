@@ -17,11 +17,11 @@ public class FeridianConfigurationTest extends XMPPTestCase {
         FeridianConfiguration config = FeridianConfiguration.getConfig(rdr);
         assertEquals(IQResourceBindPacket.class, config.getClassForURI("urn:ietf:params:xml:ns:xmpp-bind"));
     }
-    
+
     public void testGetClassForURINPE() throws Exception {
         FeridianConfiguration config = FeridianConfiguration.getConfig();
         try {
-            config.getClassForURI("test");            
+            config.getClassForURI("test");
         } catch (NullPointerException ex) {
             fail("getClassForURI should not throw NPE when default config is used");
         }

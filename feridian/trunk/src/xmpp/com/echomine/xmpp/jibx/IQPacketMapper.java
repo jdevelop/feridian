@@ -11,9 +11,9 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.xmpp.IQPacket;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
@@ -52,13 +52,13 @@ public class IQPacketMapper extends StanzaPacketMapper {
             try {
                 XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
                 ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-                //marshall attributes
+                // marshall attributes
                 marshallStanzaAttributes(packet, ctx);
                 ctx.closeStartContent();
-                //if obj is more than a simple IQPacket, then marshall real
+                // if obj is more than a simple IQPacket, then marshall real
                 // data
                 if (packet.getClass() != IQPacket.class) {
-                    //marshall the packet's real contents
+                    // marshall the packet's real contents
                     StringWriter strWriter = new StringWriter(256);
                     JiBXUtil.marshallObject(strWriter, packet);
                     writer.writeMarkup(strWriter.toString());
@@ -79,7 +79,7 @@ public class IQPacketMapper extends StanzaPacketMapper {
      * the inner stanza.
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
-        //make sure we're at the right start tag
+        // make sure we're at the right start tag
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
         if (!ctx.isAt(uri, name))
             ctx.throwStartTagNameError(uri, name);
@@ -88,7 +88,7 @@ public class IQPacketMapper extends StanzaPacketMapper {
         IQPacket tpkt = (IQPacket) obj;
         IQPacket packet = null;
         unmarshallStanzaAttributes(tpkt, ctx);
-        //unmarshall real packet's contents
+        // unmarshall real packet's contents
         ctx.parsePastStartTag(NS_XMPP_CLIENT, "iq");
         do {
             if (ctx.isAt(NS_XMPP_CLIENT, "error")) {

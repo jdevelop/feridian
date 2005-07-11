@@ -77,7 +77,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
             startOutgoingStreamHeader();
         if (stripHeaders)
             stripIncomingStreamHeader();
-        //if processing is fine, no exception will be thrown
+        // if processing is fine, no exception will be thrown
         try {
             stream.process(clientCtx, connCtx, uctx, writer);
         } catch (XMPPException ex) {
@@ -86,7 +86,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
         if (addHeaders)
             endOutgoingStreamHeader();
         writer.flush();
-        //check that the stream sent by the stream is proper.
+        // check that the stream sent by the stream is proper.
         compare(outReader);
     }
 

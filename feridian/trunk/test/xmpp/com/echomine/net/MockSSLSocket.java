@@ -150,7 +150,7 @@ public class MockSSLSocket extends SSLSocket {
      * @see javax.net.ssl.SSLSocket#startHandshake()
      */
     public void startHandshake() throws IOException {
-        if (!handshakeSuccess) 
+        if (!handshakeSuccess)
             throw new IOException("Mock Handshake Exception");
     }
 

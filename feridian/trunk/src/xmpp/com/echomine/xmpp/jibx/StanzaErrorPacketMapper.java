@@ -17,7 +17,7 @@ import com.echomine.xmpp.packet.StanzaErrorPacket;
  */
 public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements XMPPConstants {
     protected static final String TYPE_ATTRIBUTE_NAME = "type";
-    
+
     /**
      * @param uri the uri of the element working with
      * @param index the index for the namespace
@@ -43,10 +43,10 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
             MarshallingContext ctx = (MarshallingContext) ictx;
             StanzaErrorPacket packet = (StanzaErrorPacket) obj;
             IXMLWriter writer = ctx.getXmlWriter();
-            //validate
+            // validate
             if (packet.getErrorType() == null)
                 throw new JiBXException("XMPP requires the error type to be set for stanza errors");
-            //add extension namespaces
+            // add extension namespaces
             int stanzasIdx = writer.getNamespaces().length;
             String[] extns;
             if (packet.getApplicationCondition() == null)
@@ -57,8 +57,8 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
             ctx.attribute(index, "type", packet.getErrorType());
             ctx.closeStartContent();
-            marshallErrorCondition(ctx, stanzasIdx, stanzasIdx+1, packet);
-            //close error tag
+            marshallErrorCondition(ctx, stanzasIdx, stanzasIdx + 1, packet);
+            // close error tag
             ctx.endTag(index, name);
             writer.popExtensionNamespaces();
             try {
@@ -76,7 +76,7 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
      * of the error message, a custom mapper is required.
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
-        //make sure we're at the right start tag
+        // make sure we're at the right start tag
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
         if (!ctx.isAt(uri, name)) {
             ctx.throwStartTagNameError(uri, name);
@@ -84,9 +84,9 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
         StanzaErrorPacket packet = (StanzaErrorPacket) obj;
         if (packet == null)
             packet = new StanzaErrorPacket();
-        //parse required type argument
+        // parse required type argument
         packet.setErrorType(ctx.attributeText(null, TYPE_ATTRIBUTE_NAME));
-        //parse past the error element
+        // parse past the error element
         ctx.parsePastStartTag(uri, name);
         unmarshallErrorCondition(ctx, NS_STANZA_ERROR, packet);
         ctx.toEnd();

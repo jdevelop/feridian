@@ -37,7 +37,7 @@ public class TLSHandshakeStreamTest extends BaseStreamTestCase {
             runAndCompare(inRes, outRes, stream, true, true);
             fail("Test should throw exception on TLS negotiation failure");
         } catch (XMPPException ex) {
-            //test passed
+            // test passed
         }
     }
 
@@ -56,7 +56,7 @@ public class TLSHandshakeStreamTest extends BaseStreamTestCase {
             runAndCompare(inRes, outRes, stream, true, true);
             fail("Test should throw exception on TLS negotiation failure");
         } catch (XMPPException ex) {
-            //test passed
+            // test passed
         }
     }
 

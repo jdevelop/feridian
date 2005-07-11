@@ -31,12 +31,12 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
     public void testHandshakeWithError() throws Exception {
         String inRes = "com/echomine/xmpp/data/XMPPErrorStream.xml";
         try {
-            //the processing should throw error indicating stream failure
-            //due to an error
+            // the processing should throw error indicating stream failure
+            // due to an error
             run(inRes, stream);
             fail("The stream processing with error should throw an exception");
         } catch (XMPPException ex) {
-            //assert that the error is properly parsed
+            // assert that the error is properly parsed
             assertNotNull(ex.getErrorPacket());
             assertEquals(ErrorCode.S_UNSUPPORTED_VERSION, ex.getErrorCondition());
         }

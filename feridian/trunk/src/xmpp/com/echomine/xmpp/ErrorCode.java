@@ -4,9 +4,10 @@ package com.echomine.xmpp;
  * Contains the codes for all errors.
  */
 public interface ErrorCode {
-    //xmpp error conditions (S_ for server jabber:stream namespace)
-    //these only happen at the server level
-    //if you get one of these errors, likely the server will close the connection.
+    // xmpp error conditions (S_ for server jabber:stream namespace)
+    // these only happen at the server level
+    // if you get one of these errors, likely the server will close the
+    // connection.
     public static final String S_BAD_FORMAT = "bad-format";
     public static final String S_BAD_NAMESPACE_PREFIX = "bad-namespace-prefix";
     public static final String S_CONFLICT = "conflict";
@@ -32,8 +33,8 @@ public interface ErrorCode {
     public static final String S_UNSUPPORTED_VERSION = "unsupported-version";
     public static final String S_XML_NOT_WELL_FORMED = "xml-not-well-formed";
 
-    //xmpp stanza error conditions (C_ for jabber:client namespace)
-    //these errors are used for stanza errors (not server errors).
+    // xmpp stanza error conditions (C_ for jabber:client namespace)
+    // these errors are used for stanza errors (not server errors).
     public static final String C_BAD_REQUEST = "bad-request";
     public static final String C_CONFLICT = "conflict";
     public static final String C_FEATURE_NOT_IMPLEMENTED = "feature-not-implemented";

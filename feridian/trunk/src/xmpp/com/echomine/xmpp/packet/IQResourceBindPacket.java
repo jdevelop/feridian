@@ -27,8 +27,7 @@ public class IQResourceBindPacket extends IQPacket {
     public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
-    
-    
+
     /**
      * @return Returns the jid.
      */

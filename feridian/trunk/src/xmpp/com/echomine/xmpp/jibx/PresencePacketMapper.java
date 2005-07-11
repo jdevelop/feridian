@@ -49,9 +49,9 @@ public class PresencePacketMapper extends StanzaPacketMapper {
             PresencePacket packet = (PresencePacket) obj;
             IXMLWriter writer = ctx.getXmlWriter();
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-            //marshall attributes
+            // marshall attributes
             marshallStanzaAttributes(packet, ctx);
-            //if packet has no show, status, etc, then close tag
+            // if packet has no show, status, etc, then close tag
             ctx.closeStartContent();
             if (packet.getShow() != null)
                 ctx.element(index, SHOW_ELEMENT_NAME, packet.getShow());
@@ -77,7 +77,7 @@ public class PresencePacketMapper extends StanzaPacketMapper {
      *      org.jibx.runtime.IUnmarshallingContext)
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
-        //make sure we're at the right start tag
+        // make sure we're at the right start tag
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
         if (!ctx.isAt(uri, name)) {
             ctx.throwStartTagNameError(uri, name);
@@ -85,7 +85,7 @@ public class PresencePacketMapper extends StanzaPacketMapper {
         PresencePacket packet = (PresencePacket) obj;
         if (packet == null)
             packet = new PresencePacket();
-        //unmarshall base packet attributes
+        // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
         int eventType = ctx.next();
         if (eventType == UnmarshallingContext.END_TAG)
@@ -103,7 +103,7 @@ public class PresencePacketMapper extends StanzaPacketMapper {
                 break;
             }
         } while (true);
-        //parse to end
+        // parse to end
         ctx.toEnd();
         return packet;
     }

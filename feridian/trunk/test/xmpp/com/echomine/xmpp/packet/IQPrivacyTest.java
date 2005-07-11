@@ -4,9 +4,6 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import com.echomine.XMPPTestCase;
-import com.echomine.xmpp.packet.IQPrivacyPacket;
-import com.echomine.xmpp.packet.PrivacyItem;
-import com.echomine.xmpp.packet.PrivacyList;
 
 /**
  * Tests the iq privacy packet and its associated functions
@@ -119,5 +116,4 @@ public class IQPrivacyTest extends XMPPTestCase {
         assertEquals("special", ((PrivacyList) packet.getPrivacyLists().get(2)).getName());
     }
 
-    
 }

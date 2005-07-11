@@ -13,7 +13,7 @@ public class StanzaPacketBase implements IStanzaPacket {
     protected static final String FROM_ATTRIBUTE_NAME = "from";
     protected static final String TO_ATTRIBUTE_NAME = "to";
     protected static final String ERROR_ELEMENT_NAME = "error";
-    
+
     private JID to;
     private JID from;
     private String id;

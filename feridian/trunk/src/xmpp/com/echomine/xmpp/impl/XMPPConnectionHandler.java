@@ -13,8 +13,8 @@ import com.echomine.jibx.JiBXOutputStreamWrapper;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.SocketHandler;
 import com.echomine.util.IOUtil;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPClientContext;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.stream.TLSHandshakeStream;
 import com.echomine.xmpp.stream.XMPPClientHandshakeStream;
 import com.echomine.xmpp.stream.XMPPConnectionContext;
@@ -26,7 +26,7 @@ import com.echomine.xmpp.stream.XMPPConnectionContext;
  */
 public class XMPPConnectionHandler implements SocketHandler {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
-    
+
     protected final static int SOCKETBUF = 8192;
     protected XMPPClientContext clientCtx;
     protected XMPPConnectionContext connCtx;
@@ -60,51 +60,51 @@ public class XMPPConnectionHandler implements SocketHandler {
         connCtx.setHost(clientCtx.getHost());
         connCtx.setSocket(socket);
         try {
-            //set socket keepalive
+            // set socket keepalive
             socket.setKeepAlive(true);
-            //by setting output and document, the writer and unmarshalling
+            // by setting output and document, the writer and unmarshalling
             // context will get resetted
             writer.setOutput(new JiBXOutputStreamWrapper(socket.getOutputStream()));
             uctx.setDocument(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-            //handshake processing
+            // handshake processing
             XMPPClientHandshakeStream handshakeStream = new XMPPClientHandshakeStream();
             handshakeStream.process(clientCtx, connCtx, uctx, writer);
-            //Determine whether to do TLS processing
+            // Determine whether to do TLS processing
             if (connCtx.isTLSSupported()) {
                 tlsStream.process(clientCtx, connCtx, uctx, writer);
                 socket = connCtx.getSocket();
                 InputStreamReader bis = new InputStreamReader(socket.getInputStream(), "UTF-8");
                 BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream(), SOCKETBUF);
-                //Workaround for JiBX's reset() not resetting prefix
-                //Thus, a new stream writer must be created
+                // Workaround for JiBX's reset() not resetting prefix
+                // Thus, a new stream writer must be created
                 writer.close();
                 writer = new XMPPStreamWriter();
                 writer.setOutput(bos);
                 uctx.setDocument(bis);
                 connCtx.reset();
-                //redo the handshake process
+                // redo the handshake process
                 handshakeStream.process(clientCtx, connCtx, uctx, writer);
             }
-            //TODO: SASL processing
-            //Resource binding MUST be done if set
+            // TODO: SASL processing
+            // Resource binding MUST be done if set
             if (connCtx.isResourceBindingRequired()) {
-                
+
             }
             if (connCtx.isSessionRequired()) {
-                
+
             }
-            //Start normal session processing
+            // Start normal session processing
         } catch (Exception ex) {
             if (log.isWarnEnabled())
                 log.warn("Exception occurred during socket processing", ex);
         } finally {
             try {
                 endStream();
-                //disconnected from server, close streams but not the socket
+                // disconnected from server, close streams but not the socket
                 if (writer != null)
                     writer.close();
             } catch (IOException ex) {
-                //intentionally left blank
+                // intentionally left blank
             }
             shutdown();
         }

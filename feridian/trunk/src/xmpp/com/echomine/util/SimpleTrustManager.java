@@ -1,7 +1,10 @@
 package com.echomine.util;
 
-import javax.net.ssl.X509TrustManager;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -9,15 +12,16 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
+import javax.net.ssl.X509TrustManager;
+
 /**
  * This sub_class implements the X509TrustManager interface. MyTrustManager
  * trusts known certificate chains, and queries the user to approve unknown
- * chains. It will add trusted chains to the keystore.
- * This class is provided as an example implementation. Depending upon
- * the calling application, it is likely that this would be reimplemented
- * to graphically display and prompt for data. Set the property
- * com.echomine.util.SimpleTrustManager.prompt to "true" (default is "false")
- * if you want the class to prompt for acceptance.
+ * chains. It will add trusted chains to the keystore. This class is provided as
+ * an example implementation. Depending upon the calling application, it is
+ * likely that this would be reimplemented to graphically display and prompt for
+ * data. Set the property com.echomine.util.SimpleTrustManager.prompt to "true"
+ * (default is "false") if you want the class to prompt for acceptance.
  */
 public class SimpleTrustManager implements X509TrustManager {
     /**
@@ -34,20 +38,17 @@ public class SimpleTrustManager implements X509TrustManager {
     private char[] keyStorePassword;
 
     /**
-     * SimpleTrustManager constructor. Save the keyStore object along with
-     * the path to the keystore (keyStorePath) and its password
-     * (keyStorePassword). If you reimplement this class be warned
-     * that SocketConnector assumes there is only one constructor
-     * that can be passed the same three arguments as below.
+     * SimpleTrustManager constructor. Save the keyStore object along with the
+     * path to the keystore (keyStorePath) and its password (keyStorePassword).
+     * If you reimplement this class be warned that SocketConnector assumes
+     * there is only one constructor that can be passed the same three arguments
+     * as below.
      */
-    public SimpleTrustManager(KeyStore keyStore,
-            String keyStorePath,
-            char[] keyStorePassword) {
+    public SimpleTrustManager(KeyStore keyStore, String keyStorePath, char[] keyStorePassword) {
         this.keyStore = keyStore;
         this.keyStorePath = keyStorePath;
         this.keyStorePassword = keyStorePassword;
     }
-
 
     /**
      * isClientTrusted checks to see if the chain is in the keyStore object.
@@ -58,37 +59,36 @@ public class SimpleTrustManager implements X509TrustManager {
     }
 
     /**
-     * checks to see if the chain is in the keyStore object.
-     * This is done with a call to checkChainTrusted. If not it queries the
-     * user to see if the chain should be trusted and stored into the
-     * keyStore object. The keyStore is then saved in the file whose path
-     * is keyStorePath. Examines the system property com.echomine.util.SimpleTrustManager.prompt
-     * to determine whether user should be prompted.
+     * checks to see if the chain is in the keyStore object. This is done with a
+     * call to checkChainTrusted. If not it queries the user to see if the chain
+     * should be trusted and stored into the keyStore object. The keyStore is
+     * then saved in the file whose path is keyStorePath. Examines the system
+     * property com.echomine.util.SimpleTrustManager.prompt to determine whether
+     * user should be prompted.
      */
     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         String promptVal = System.getProperty(KEY_PROMPT, VALUE_PROMPT);
         boolean prompt = true;
-        if (promptVal.compareToIgnoreCase("false") == 0 ||
-                promptVal.compareToIgnoreCase("no") == 0)
+        if (promptVal.compareToIgnoreCase("false") == 0 || promptVal.compareToIgnoreCase("no") == 0)
             prompt = false;
         try {
-            checkChainTrusted(chain); // Is the chain is in the keyStore object?
+            checkChainTrusted(chain); // Is the chain is in the keyStore
+                                        // object?
         } catch (CertificateException ex) {
-            if (prompt) System.out.println("Untrusted Certificate chain:");
+            if (prompt)
+                System.out.println("Untrusted Certificate chain:");
             for (int i = 0; i < chain.length; i++) {
                 // display certificate chain information
-                if (prompt) System.out.println("Certificate chain[" + i + "]:");
                 if (prompt)
-                    System.out.println("Subject: "
-                            + chain[i].getSubjectDN().toString());
+                    System.out.println("Certificate chain[" + i + "]:");
                 if (prompt)
-                    System.out.println("Issuer: "
-                            + chain[i].getIssuerDN().toString());
+                    System.out.println("Subject: " + chain[i].getSubjectDN().toString());
+                if (prompt)
+                    System.out.println("Issuer: " + chain[i].getIssuerDN().toString());
             }
             // Ask the user if the certificate should be trusted.
             if (prompt)
-                System.out.println("Trust this certificate chain and"
-                        + " add it to the keystore? (y or n) ");
+                System.out.println("Trust this certificate chain and" + " add it to the keystore? (y or n) ");
             String s = new String("y");
             if (prompt) {
                 try {
@@ -101,14 +101,16 @@ public class SimpleTrustManager implements X509TrustManager {
             if (s.compareToIgnoreCase("y") == 0) {
                 // Trust the chain.
                 try {
-                    for (int i = 0; i < chain.length; i++) { // Add Chain to the keyStore.
-                        keyStore.setCertificateEntry
-                                (chain[i].getIssuerDN().toString(), chain[i]); // throws KeyStoreException
+                    for (int i = 0; i < chain.length; i++) { // Add Chain to
+                                                                // the keyStore.
+                        keyStore.setCertificateEntry(chain[i].getIssuerDN().toString(), chain[i]); // throws
+                                                                                                    // KeyStoreException
                     }
                 } catch (KeyStoreException kse) {
                     System.err.println("Unable to add a certificate to the keystore");
                 }
-                if (prompt) System.out.println("Saving the certificate chain to the keystore.");
+                if (prompt)
+                    System.out.println("Saving the certificate chain to the keystore.");
                 FileOutputStream keyStoreOStream = null;
                 try {
                     keyStoreOStream = new FileOutputStream(keyStorePath);
@@ -161,16 +163,13 @@ public class SimpleTrustManager implements X509TrustManager {
                 // via the alias name.
                 int i = 0;
                 while (aliases.hasMoreElements()) {
-                    X509Certs[i] =
-                            (X509Certificate) keyStore.
-                            getCertificate((String) aliases.nextElement());
+                    X509Certs[i] = (X509Certificate) keyStore.getCertificate((String) aliases.nextElement());
                     i++;
                 }
 
             }
         } catch (Exception e) {
-            System.out.println("getAcceptedIssuers Exception: "
-                    + e.toString());
+            System.out.println("getAcceptedIssuers Exception: " + e.toString());
             X509Certs = null;
         }
         return X509Certs;
@@ -179,7 +178,7 @@ public class SimpleTrustManager implements X509TrustManager {
     /**
      * checkChainTrusted searches the keyStore for any certificate in the
      * certificate chain.
-     *
+     * 
      * @throws CertificateException if the chain is not trusted
      */
     private void checkChainTrusted(X509Certificate[] chain) throws CertificateException {
@@ -187,7 +186,8 @@ public class SimpleTrustManager implements X509TrustManager {
             // Start with the root and see if it is in the Keystore.
             // The root is at the end of the chain.
             for (int i = chain.length - 1; i >= 0; i--)
-                if (keyStore.getCertificateAlias(chain[i]) != null) break;
+                if (keyStore.getCertificateAlias(chain[i]) != null)
+                    break;
         } catch (Exception ex) {
             System.out.println("checkChainTrusted Exception: " + ex.toString());
             throw new CertificateException("Chain is not trusted: " + ex.getMessage());

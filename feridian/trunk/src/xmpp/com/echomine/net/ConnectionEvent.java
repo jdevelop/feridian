@@ -11,8 +11,8 @@ public class ConnectionEvent extends EventObject {
     public final static int CONNECTION_STARTING = 4;
     public final static int CONNECTION_VETOED = 5;
     public final static int CONNECTION_REJECTED = 6;
-    public final static int CONNECTION_HANDSHAKE = 7;   // SSL support
-    public final static int CONNECTION_HANDSHOOK = 8;   // SSL support
+    public final static int CONNECTION_HANDSHAKE = 7; // SSL support
+    public final static int CONNECTION_HANDSHOOK = 8; // SSL support
     private String errormsg;
     private int status;
 
@@ -43,7 +43,8 @@ public class ConnectionEvent extends EventObject {
 
     /** @return the error message if event is an error, empty string if no error */
     public String getErrorMessage() {
-        if (errormsg == null) return "";
+        if (errormsg == null)
+            return "";
         return errormsg;
     }
 

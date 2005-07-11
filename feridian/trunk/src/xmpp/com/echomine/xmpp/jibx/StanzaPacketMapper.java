@@ -72,7 +72,7 @@ public abstract class StanzaPacketMapper implements IUnmarshaller, IMarshaller, 
      * @throws JiBXException
      */
     public void marshallStanzaAttributes(StanzaPacketBase packet, MarshallingContext ctx) throws JiBXException {
-        //write out the attributes
+        // write out the attributes
         if (packet.getTo() != null)
             ctx.attribute(0, TO_ATTRIBUTE_NAME, packet.getTo().toString());
         if (packet.getFrom() != null)

@@ -88,7 +88,7 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
      * @throws Exception
      */
     protected void compare(Reader outReader) throws Exception {
-        //check that the stream sent by the stream is proper.
+        // check that the stream sent by the stream is proper.
         String str = os.toString("UTF-8");
         InputStreamReader brdr = new InputStreamReader(new ByteArrayInputStream(os.toByteArray()), "UTF-8");
         DocumentComparator comp = new DocumentComparator(System.err);

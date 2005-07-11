@@ -70,6 +70,7 @@ public class StreamFeaturesPacket implements IPacket {
 
     /**
      * Whether the stream supports session establishment
+     * 
      * @return Returns the sessionRequired.
      */
     public boolean isSessionRequired() {

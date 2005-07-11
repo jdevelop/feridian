@@ -3,9 +3,10 @@ package com.echomine.net;
 import java.util.EventObject;
 
 /**
- * Contains event information regarding a file activity.  There are convenience methods added for easier retrieval of certain
- * basic information such as filename and filesize.  The other detailed information will need to be extracted from
- * the source/model itself.
+ * Contains event information regarding a file activity. There are convenience
+ * methods added for easier retrieval of certain basic information such as
+ * filename and filesize. The other detailed information will need to be
+ * extracted from the source/model itself.
  */
 public class FileEvent extends EventObject {
     private static final long serialVersionUID = 3203072545539847643L;
@@ -69,6 +70,7 @@ public class FileEvent extends EventObject {
 
     /**
      * obtains the status of the file event
+     * 
      * @return the file event status, as provided in this class
      */
     public int getStatus() {

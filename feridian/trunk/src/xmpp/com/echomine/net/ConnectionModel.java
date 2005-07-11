@@ -4,10 +4,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * Contains all the data that are needed by Connector to make a connection.  Subclasses can store additional details such as
- * protocol version (ie. HTTP 1.1).  This connection model also adds support
- * for throttling and bandwidth management.  Not all uses of this model will
- * make use of such feature, but the feature is there is a need for it.
+ * Contains all the data that are needed by Connector to make a connection.
+ * Subclasses can store additional details such as protocol version (ie. HTTP
+ * 1.1). This connection model also adds support for throttling and bandwidth
+ * management. Not all uses of this model will make use of such feature, but the
+ * feature is there is a need for it.
  */
 public class ConnectionModel {
     long startTime;
@@ -19,9 +20,9 @@ public class ConnectionModel {
     boolean secure = false;
 
     /**
-     * Normally used to create a listener for incoming connections.  This is
-     * used so that acceptors can bind to 0.0.0.0, and not to a specific
-     * interface.
+     * Normally used to create a listener for incoming connections. This is used
+     * so that acceptors can bind to 0.0.0.0, and not to a specific interface.
+     * 
      * @param port the port to connect to/receive from
      */
     public ConnectionModel(int port) {
@@ -79,13 +80,15 @@ public class ConnectionModel {
 
     /** Convenience Method for obtaining the hostname from the InetAddress */
     public String getHostName() {
-        if (host == null) return null;
+        if (host == null)
+            return null;
         return host.getHostName();
     }
 
     /** Convenience Method for obtaining the host IP from the InetAddress */
     public String getHostAddress() {
-        if (host == null) return null;
+        if (host == null)
+            return null;
         return host.getHostAddress();
     }
 
@@ -110,21 +113,25 @@ public class ConnectionModel {
     }
 
     public boolean equals(Object obj) {
-        if (obj == null) return false;
-        //same reference always true
-        if (this == obj) return true;
-        //must be the same sort of instance
-        if (!(obj instanceof ConnectionModel)) return false;
+        if (obj == null)
+            return false;
+        // same reference always true
+        if (this == obj)
+            return true;
+        // must be the same sort of instance
+        if (!(obj instanceof ConnectionModel))
+            return false;
         ConnectionModel model = (ConnectionModel) obj;
         if ((host == null && model.getHost() == null) && (port == model.getPort()) && (secure == model.isSSL()))
             return true;
-        else if (host != null && host.equals(((ConnectionModel) obj).getHost()) && port == ((ConnectionModel) obj).getPort() && (secure == model.isSSL())) return true;
+        else if (host != null && host.equals(((ConnectionModel) obj).getHost()) && port == ((ConnectionModel) obj).getPort() && (secure == model.isSSL()))
+            return true;
         return false;
     }
 
     /**
-     * sets the throttler for the connection bandwidth.
-     * Set to null if no throttling is required.
+     * sets the throttler for the connection bandwidth. Set to null if no
+     * throttling is required.
      */
     public void setThrottler(ConnectionThrottler throttler) {
         this.throttler = throttler;
@@ -143,8 +150,8 @@ public class ConnectionModel {
     }
 
     /**
-     * increments the bytes transferred for calculation of throttling
-     * as well as the bandwidth BPS
+     * increments the bytes transferred for calculation of throttling as well as
+     * the bandwidth BPS
      */
     public void incrementBytesTransferred(long increment) {
         bytesTransferred += increment;
@@ -152,16 +159,18 @@ public class ConnectionModel {
 
     /** @return the bandwidth rate in KBytes/sec */
     public float getTransferKBPS() {
-        if (endTime > 0) return 0;
+        if (endTime > 0)
+            return 0;
         float kbps = (float) (getTransferBPS() / 1024);
         return kbps;
     }
 
     /** @return the bandwidth rate in Bytes/sec. */
     public long getTransferBPS() {
-        if (endTime > 0) return 0;
-        //file transfer not yet complete, calculate our rate
-        //rate = current data transferred / delta time
+        if (endTime > 0)
+            return 0;
+        // file transfer not yet complete, calculate our rate
+        // rate = current data transferred / delta time
         return (long) (((float) bytesTransferred) / ((float) ((System.currentTimeMillis() - startTime) / 1000)));
     }
 
@@ -169,15 +178,18 @@ public class ConnectionModel {
      * @return the time online in milliseconds
      */
     public long getTimeOnlineMillis() {
-        if (startTime <= 0) return 0;
-        if (endTime > 0) return endTime - startTime;
+        if (startTime <= 0)
+            return 0;
+        if (endTime > 0)
+            return endTime - startTime;
         return System.currentTimeMillis() - startTime;
     }
 
     /** @return the estimated time online, in the format of HH:MM:SS */
     public String getTimeOnlineString() {
         long timeOnline = getTimeOnlineMillis() / 1000;
-        if (timeOnline <= 0) return "00:00:00";
+        if (timeOnline <= 0)
+            return "00:00:00";
         int hour, min, sec;
         hour = (int) (timeOnline / 3600);
         timeOnline = timeOnline % 3600;
@@ -190,7 +202,10 @@ public class ConnectionModel {
         return buffer.toString();
     }
 
-    /** Resets all the data fields back to the initial state.  This is good when the model is to be reused. */
+    /**
+     * Resets all the data fields back to the initial state. This is good when
+     * the model is to be reused.
+     */
     public void reset() {
         bytesTransferred = 0;
         startTime = 0;
@@ -198,7 +213,7 @@ public class ConnectionModel {
     }
 
     /**
-     * Sets the start time when the connection begins.  This will effectively
+     * Sets the start time when the connection begins. This will effectively
      * reset all the other stats automatically
      */
     public void setStartTime(long startTime) {

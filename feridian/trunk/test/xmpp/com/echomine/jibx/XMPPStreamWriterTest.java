@@ -2,9 +2,9 @@ package com.echomine.jibx;
 
 import java.io.ByteArrayOutputStream;
 
-import com.echomine.xmpp.XMPPConstants;
-
 import junit.framework.TestCase;
+
+import com.echomine.xmpp.XMPPConstants;
 
 /**
  * Tests the xmpp stream writer to see that it does handles XMPP special cases
@@ -12,6 +12,7 @@ import junit.framework.TestCase;
  */
 public class XMPPStreamWriterTest extends TestCase implements XMPPConstants {
     private XMPPStreamWriter writer;
+
     /*
      * @see TestCase#setUp()
      */

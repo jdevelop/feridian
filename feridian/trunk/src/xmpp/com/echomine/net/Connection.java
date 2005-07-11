@@ -3,8 +3,9 @@ package com.echomine.net;
 import javax.swing.event.EventListenerList;
 
 /**
- *  Base class for all network connection related services.  Specifies necessary
- * methods to be implemented by subclasses plus add the foundation for dispatching connection events.
+ * Base class for all network connection related services. Specifies necessary
+ * methods to be implemented by subclasses plus add the foundation for
+ * dispatching connection events.
  */
 public abstract class Connection {
     protected EventListenerList listenerList = new EventListenerList();
@@ -20,10 +21,10 @@ public abstract class Connection {
     }
 
     /**
-     * convenience method to fire off connection starting events.  If a
+     * convenience method to fire off connection starting events. If a
      * connection is vetoed, it will automatically broadcast connection closed
-     * events to the listeners that already processed the starting event.
-     * It will also throw the exception when a connectio is vetoed.
+     * events to the listeners that already processed the starting event. It
+     * will also throw the exception when a connectio is vetoed.
      */
     protected void fireConnectionStarting(ConnectionEvent event, ConnectionEvent vetoEvent) throws ConnectionVetoException {
         Object[] listeners = listenerList.getListenerList();
@@ -37,9 +38,9 @@ public abstract class Connection {
                 }
             }
         } catch (ConnectionVetoException ex) {
-            //connection vetoed, so we need to notify listeners that processed
-            //events before vetoe occurred to let them know that connection
-            //has been vetoed and closed
+            // connection vetoed, so we need to notify listeners that processed
+            // events before vetoe occurred to let them know that connection
+            // has been vetoed and closed
             for (int j = listeners.length - 2; j >= i; j -= 2) {
                 if (listeners[i] == ConnectionListener.class) {
                     ((ConnectionListener) listeners[i + 1]).connectionClosed(vetoEvent);
@@ -50,13 +51,14 @@ public abstract class Connection {
     }
 
     /**
-     * this method is specially designed to fire off the event without capturing the veto exception.
-     * The reason for using this is when the subclasses wraps the connection
-     * listening event caused by another connection event.  This passing of the
-     * connection events should be captured at only one level, the base level
-     * where connection event was first fired.  The difference between this
-     * method and the fireConnectionStarting() method is that the latter will
-     * automatically call connection closed events while this method does not.
+     * this method is specially designed to fire off the event without capturing
+     * the veto exception. The reason for using this is when the subclasses
+     * wraps the connection listening event caused by another connection event.
+     * This passing of the connection events should be captured at only one
+     * level, the base level where connection event was first fired. The
+     * difference between this method and the fireConnectionStarting() method is
+     * that the latter will automatically call connection closed events while
+     * this method does not.
      */
     protected void fireConnectionStartingWithoutVeto(ConnectionEvent event) throws ConnectionVetoException {
         Object[] listeners = listenerList.getListenerList();

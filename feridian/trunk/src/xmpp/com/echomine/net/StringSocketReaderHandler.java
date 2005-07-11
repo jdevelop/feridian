@@ -1,9 +1,8 @@
 package com.echomine.net;
 
-import java.net.Socket;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 /** an easy handler that reads in a string and then disconnects immediately */
 public class StringSocketReaderHandler extends StringSocketHandler {
@@ -15,9 +14,8 @@ public class StringSocketReaderHandler extends StringSocketHandler {
     }
 
     /**
-     * reads in a string.  The connection will be closed
-     * by the caller of this method.  Any exception will also be handled
-     * by the caller.
+     * reads in a string. The connection will be closed by the caller of this
+     * method. Any exception will also be handled by the caller.
      */
     public void handle(Socket socket) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(socket.getInputStream(), SOCKETBUF);

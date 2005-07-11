@@ -8,7 +8,7 @@ package com.echomine.xmpp;
  */
 public interface IStanzaPacket extends IPacket {
     public static final String TYPE_ERROR = "error";
-    
+
     /**
      * @return the JID this packet is destined for.
      */

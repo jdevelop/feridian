@@ -101,7 +101,8 @@ public class IQPrivacyPacket extends IQPacket {
      * @throws ArrayIndexOutOfBoundsException if idx is not within the list size
      */
     public PrivacyList getPrivacyList(int idx) {
-        if (privacyLists == null) return null;
+        if (privacyLists == null)
+            return null;
         return (PrivacyList) privacyLists.get(idx);
     }
 

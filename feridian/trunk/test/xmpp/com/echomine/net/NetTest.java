@@ -1,9 +1,9 @@
 package com.echomine.net;
 
-import junit.framework.TestCase;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import junit.framework.TestCase;
 
 public class NetTest extends TestCase {
     public NetTest(String name) {
@@ -11,7 +11,8 @@ public class NetTest extends TestCase {
     }
 
     /**
-     * Tests the connection model to see whether it is inputting and outputting correctly
+     * Tests the connection model to see whether it is inputting and outputting
+     * correctly
      */
     public void testConnectionModel() {
         try {
@@ -21,7 +22,7 @@ public class NetTest extends TestCase {
             ConnectionModel dmodel = new ConnectionModel(7000);
             InetAddress addr = InetAddress.getByName("127.0.0.1");
             ConnectionModel emodel = new ConnectionModel(addr, 7000);
-            //check whether equals() works correctly
+            // check whether equals() works correctly
             assertEquals(amodel, bmodel);
             assertEquals(cmodel, dmodel);
             assertEquals(amodel, emodel);

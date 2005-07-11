@@ -1,8 +1,8 @@
 package com.echomine.net;
 
 /**
- * The exception thrown when connection handshake fails.  This only
- * applies to those classes that works with HandshakeableSocketHandler
+ * The exception thrown when connection handshake fails. This only applies to
+ * those classes that works with HandshakeableSocketHandler
  */
 public class HandshakeFailedException extends ConnectionException {
     private static final long serialVersionUID = 8665676278693066882L;
