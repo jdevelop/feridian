@@ -22,7 +22,7 @@ import com.echomine.xmpp.packet.StreamFeaturesPacket;
  * works with sending the initiating stream tag as well as receiving up to the
  * stream features.
  */
-public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
+public class XMPPClientHandshakeStream implements IXMPPStream {
     private static final String STREAM_ELEMENT_NAME = "stream";
 
     /*
@@ -35,14 +35,14 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
      */
     public void process(XMPPClientContext clientCtx, XMPPConnectionContext connCtx, UnmarshallingContext uctx, XMPPStreamWriter writer) throws XMPPException {
         try {
-            writer.startTagNamespaces(IDX_JABBER_STREAM, STREAM_ELEMENT_NAME, new int[] { 2, 3 }, new String[] { "stream", "" });
-            writer.addAttribute(IDX_XMPP_CLIENT, "version", "1.0");
-            writer.addAttribute(IDX_XMPP_CLIENT, "to", clientCtx.getHost());
+            writer.startTagNamespaces(XMPPStreamWriter.IDX_JABBER_STREAM, STREAM_ELEMENT_NAME, new int[] { 2, 3 }, new String[] { "stream", "" });
+            writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "version", "1.0");
+            writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", clientCtx.getHost());
             writer.closeStartTag();
             writer.flush();
             // now read in the xml stream
-            if (!uctx.isAt(NS_JABBER_STREAM, STREAM_ELEMENT_NAME))
-                uctx.throwStartTagNameError(NS_JABBER_STREAM, STREAM_ELEMENT_NAME);
+            if (!uctx.isAt(XMPPConstants.NS_JABBER_STREAM, STREAM_ELEMENT_NAME))
+                uctx.throwStartTagNameError(XMPPConstants.NS_JABBER_STREAM, STREAM_ELEMENT_NAME);
             // parse out the incoming info
             if (uctx.hasAttribute(null, "from"))
                 connCtx.setHost(uctx.attributeText(null, "from"));
@@ -50,16 +50,16 @@ public class XMPPClientHandshakeStream implements IXMPPStream, XMPPConstants {
             // parse past start tag
             uctx.next();
             // read in any possible error element
-            if (uctx.isAt(NS_JABBER_STREAM, "error")) {
+            if (uctx.isAt(XMPPConstants.NS_JABBER_STREAM, "error")) {
                 ErrorPacket packet = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
                 throw new XMPPException("Error message received for handshake", packet);
             }
-            if (uctx.isAt(NS_JABBER_STREAM, "features")) {
+            if (uctx.isAt(XMPPConstants.NS_JABBER_STREAM, "features")) {
                 StreamFeaturesPacket packet = (StreamFeaturesPacket) JiBXUtil.unmarshallObject(uctx, StreamFeaturesPacket.class);
                 connCtx.setTLSSupported(packet.isTLSSupported());
                 connCtx.setTLSRequired(packet.isTLSRequired());
-                connCtx.setResourceBindingRequired(packet.isBindingRequired());
-                connCtx.setSessionRequired(packet.isSessionRequired());
+                connCtx.setResourceBindingRequired(packet.isBindingSupported());
+                connCtx.setSessionRequired(packet.isSessionSupported());
                 return;
             }
         } catch (IOException ex) {

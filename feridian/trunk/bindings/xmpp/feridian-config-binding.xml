@@ -1,7 +1,7 @@
-<!-- Binding file for muse's own configuration file -->
+<!-- Binding file for feridian's own configuration file -->
 <binding direction="input">
-	<mapping name="muse" class="com.echomine.feridian.FeridianConfiguration">
-		<structure name="nsmappings" field="nsMappings" type="java.util.HashMap" 
+	<mapping name="feridian" class="com.echomine.feridian.FeridianConfiguration">
+		<structure name="iqmappings" field="iqMappings" type="java.util.HashMap" 
 			marshaller="org.jibx.extras.HashMapperStringToSchemaType"
 			unmarshaller="org.jibx.extras.HashMapperStringToSchemaType"/>
 	</mapping>

@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 import com.echomine.XMPPTestCase;
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPException;
 
@@ -12,6 +13,7 @@ import com.echomine.xmpp.XMPPException;
  * functionality.
  */
 public class BaseStreamTestCase extends XMPPTestCase {
+    private static final String NS_JABBER_STREAM = "http://etherx.jabber.org/streams";
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -72,7 +74,6 @@ public class BaseStreamTestCase extends XMPPTestCase {
      */
     protected void runAndCompare(Reader inReader, Reader outReader, IXMPPStream stream, boolean addHeaders, boolean stripHeaders) throws Exception {
         uctx.setDocument(inReader);
-        Exception thrownEx = null;
         if (addHeaders)
             startOutgoingStreamHeader();
         if (stripHeaders)
@@ -126,9 +127,9 @@ public class BaseStreamTestCase extends XMPPTestCase {
      * @throws Exception
      */
     protected void startOutgoingStreamHeader() throws Exception {
-        writer.startTagNamespaces(IDX_JABBER_STREAM, "stream", new int[] { 2, 3 }, new String[] { "stream", "" });
-        writer.addAttribute(IDX_XMPP_CLIENT, "version", "1.0");
-        writer.addAttribute(IDX_XMPP_CLIENT, "to", clientCtx.getHost());
+        writer.startTagNamespaces(XMPPStreamWriter.IDX_JABBER_STREAM, "stream", new int[] { 2, 3 }, new String[] { "stream", "" });
+        writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "version", "1.0");
+        writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", clientCtx.getHost());
         writer.closeStartTag();
         writer.flush();
     }

@@ -17,13 +17,12 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.XMPPClientContext;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.stream.XMPPConnectionContext;
 
 /**
  * A basic test case that simply provides a set of convenient methods.
  */
-public class XMPPTestCase extends TestCase implements XMPPConstants {
+public class XMPPTestCase extends TestCase {
     protected ByteArrayOutputStream os;
     protected UnmarshallingContext uctx;
     protected XMPPClientContext clientCtx;
@@ -41,7 +40,7 @@ public class XMPPTestCase extends TestCase implements XMPPConstants {
         clientCtx = new XMPPClientContext();
         connCtx = new XMPPConnectionContext();
         uctx = new UnmarshallingContext();
-        writer = new XMPPStreamWriter(STREAM_URIS);
+        writer = new XMPPStreamWriter();
         writer.setOutput(os);
     }
 

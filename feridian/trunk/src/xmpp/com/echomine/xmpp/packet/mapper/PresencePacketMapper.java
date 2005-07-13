@@ -1,4 +1,4 @@
-package com.echomine.xmpp.jibx;
+package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
 
@@ -9,54 +9,56 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.packet.MessagePacket;
+import com.echomine.xmpp.packet.PresencePacket;
 
 /**
- * Mapper for the stanza error packet.
+ * This is the mapper for the presence packet.
  * <p>
  * FIXME: Support xml:lang and arbitrary extension children.
  * </p>
  */
-public class MessagePacketMapper extends StanzaPacketMapper {
-    protected static final String TYPE_ATTRIBUTE_NAME = "type";
-    protected static final String SUBJECT_ELEMENT_NAME = "subject";
-    protected static final String BODY_ELEMENT_NAME = "body";
-    protected static final String THREAD_ELEMENT_NAME = "thread";
+public class PresencePacketMapper extends AbstractStanzaPacketMapper {
+    protected static final String SHOW_ELEMENT_NAME = "show";
+    protected static final String STATUS_ELEMENT_NAME = "status";
+    protected static final String PRIORITY_ELEMENT_NAME = "priority";
 
     /**
-     * @param uri the uri of the element working with
-     * @param index the index for the namespace
-     * @param name the element name
+     * @param uri the uri associated with this element
+     * @param index the index of this uri
+     * @param name the name of the element
      */
-    public MessagePacketMapper(String uri, int index, String name) {
+    public PresencePacketMapper(String uri, int index, String name) {
         super(uri, index, name);
     }
 
-    /**
-     * marshalls the data into an xml string
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jibx.runtime.IMarshaller#marshal(java.lang.Object,
+     *      org.jibx.runtime.IMarshallingContext)
      */
     public void marshal(Object obj, IMarshallingContext ictx) throws JiBXException {
         // make sure the parameters are as expected
-        if (!(obj instanceof MessagePacket)) {
+        if (!(obj instanceof PresencePacket)) {
             throw new JiBXException("Invalid object type for marshaller");
         } else if (!(ictx instanceof MarshallingContext)) {
             throw new JiBXException("Invalid object type for marshalling context");
         } else {
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
-            MessagePacket packet = (MessagePacket) obj;
+            PresencePacket packet = (PresencePacket) obj;
             IXMLWriter writer = ctx.getXmlWriter();
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
             // marshall attributes
             marshallStanzaAttributes(packet, ctx);
+            // if packet has no show, status, etc, then close tag
             ctx.closeStartContent();
-            // marshall out the message
-            if (packet.getSubject() != null)
-                ctx.element(index, SUBJECT_ELEMENT_NAME, packet.getSubject());
-            if (packet.getBody() != null)
-                ctx.element(index, BODY_ELEMENT_NAME, packet.getBody());
-            if (packet.getThreadID() != null)
-                ctx.element(index, THREAD_ELEMENT_NAME, packet.getThreadID());
+            if (packet.getShow() != null)
+                ctx.element(index, SHOW_ELEMENT_NAME, packet.getShow());
+            if (packet.getStatus() != null)
+                ctx.element(index, STATUS_ELEMENT_NAME, packet.getStatus());
+            if (packet.getPriority() != 0)
+                ctx.element(index, PRIORITY_ELEMENT_NAME, packet.getPriority());
             if (packet.getError() != null)
                 marshallStanzaError(packet.getError(), ctx);
             ctx.endTag(index, name);
@@ -68,11 +70,11 @@ public class MessagePacketMapper extends StanzaPacketMapper {
         }
     }
 
-    /**
-     * Unmarshalls the error packet. The reason for this is that the error
-     * packet uses different condition elements and may also condition
-     * application-specific conditions. Due to the highly non-conforming nature
-     * of the error message, a custom mapper is required.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jibx.runtime.IUnmarshaller#unmarshal(java.lang.Object,
+     *      org.jibx.runtime.IUnmarshallingContext)
      */
     public Object unmarshal(Object obj, IUnmarshallingContext ictx) throws JiBXException {
         // make sure we're at the right start tag
@@ -80,19 +82,21 @@ public class MessagePacketMapper extends StanzaPacketMapper {
         if (!ctx.isAt(uri, name)) {
             ctx.throwStartTagNameError(uri, name);
         }
-        MessagePacket packet = (MessagePacket) obj;
+        PresencePacket packet = (PresencePacket) obj;
         if (packet == null)
-            packet = new MessagePacket();
+            packet = new PresencePacket();
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
-        ctx.parsePastStartTag(uri, name);
+        int eventType = ctx.next();
+        if (eventType == UnmarshallingContext.END_TAG)
+            return packet;
         do {
-            if (ctx.isAt(uri, SUBJECT_ELEMENT_NAME)) {
-                packet.setSubject(ctx.parseElementText(uri, SUBJECT_ELEMENT_NAME));
-            } else if (ctx.isAt(uri, BODY_ELEMENT_NAME)) {
-                packet.setBody(ctx.parseElementText(uri, BODY_ELEMENT_NAME));
-            } else if (ctx.isAt(uri, THREAD_ELEMENT_NAME)) {
-                packet.setThreadID(ctx.parseElementText(uri, THREAD_ELEMENT_NAME));
+            if (ctx.isAt(uri, SHOW_ELEMENT_NAME)) {
+                packet.setShow(ctx.parseElementText(uri, SHOW_ELEMENT_NAME));
+            } else if (ctx.isAt(uri, STATUS_ELEMENT_NAME)) {
+                packet.setStatus(ctx.parseElementText(uri, STATUS_ELEMENT_NAME));
+            } else if (ctx.isAt(uri, PRIORITY_ELEMENT_NAME)) {
+                packet.setPriority(ctx.parseElementInt(uri, PRIORITY_ELEMENT_NAME));
             } else if (ctx.isAt(uri, ERROR_ELEMENT_NAME)) {
                 packet.setError(unmarshallStanzaError(ctx));
             } else {

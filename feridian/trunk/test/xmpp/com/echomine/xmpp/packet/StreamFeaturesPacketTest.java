@@ -1,22 +1,16 @@
 package com.echomine.xmpp.packet;
 
+import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import com.echomine.XMPPTestCase;
+import com.echomine.xmpp.XMPPConstants;
 
 /**
  * Tests the stream features packet
  */
-public class StreamFeaturesPacketTest extends XMPPTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+public class StreamFeaturesPacketTest extends XMPPTestCase implements XMPPConstants {
     public void testUnmarshallRequiredTLS() throws Exception {
         String xml = "<stream:features xmlns:stream='http://etherx.jabber.org/streams'>" + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>\n\t<required/></starttls></stream:features>";
         StringReader reader = new StringReader(xml);
@@ -46,7 +40,6 @@ public class StreamFeaturesPacketTest extends XMPPTestCase {
                 + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>\n\t<required/></starttls></stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
-        packet.setTLSSupported(true);
         packet.setTLSRequired(true);
         marshallObject(packet, StreamFeaturesPacket.class);
         compare(reader);
@@ -56,7 +49,7 @@ public class StreamFeaturesPacketTest extends XMPPTestCase {
         String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>" + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'/></stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
-        packet.setTLSSupported(true);
+        packet.addFeature(NS_STREAM_TLS, "starttls", null);
         packet.setTLSRequired(false);
         marshallObject(packet, StreamFeaturesPacket.class);
         compare(reader);
@@ -66,7 +59,6 @@ public class StreamFeaturesPacketTest extends XMPPTestCase {
         String xml = "<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>" + "</stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
-        packet.setTLSSupported(false);
         packet.setTLSRequired(false);
         marshallObject(packet, StreamFeaturesPacket.class);
         compare(reader);
@@ -77,8 +69,8 @@ public class StreamFeaturesPacketTest extends XMPPTestCase {
                 + "\n\t<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>\n\t<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>\n\t</stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = (StreamFeaturesPacket) unmarshallObject(reader, StreamFeaturesPacket.class);
-        assertTrue(packet.isBindingRequired());
-        assertTrue(packet.isSessionRequired());
+        assertTrue(packet.isBindingSupported());
+        assertTrue(packet.isSessionSupported());
     }
 
     public void testMarshallSessionAndBinding() throws Exception {
@@ -86,8 +78,40 @@ public class StreamFeaturesPacketTest extends XMPPTestCase {
                 + "\n\t<bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>\n\t<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>\n\t</stream:features>";
         StringReader reader = new StringReader(xml);
         StreamFeaturesPacket packet = new StreamFeaturesPacket();
-        packet.setBindingRequired(true);
-        packet.setSessionRequired(true);
+        packet.addFeature(NS_STREAM_BINDING, "bind", null);
+        packet.addFeature(NS_STREAM_SESSION, "session", null);
+        marshallObject(packet, StreamFeaturesPacket.class);
+        compare(reader);
+    }
+
+    public void testUnmarshallAll() throws Exception {
+        String inRes = "com/echomine/xmpp/data/StreamFeatures.xml";
+        Reader reader = getResourceAsReader(inRes);
+        StreamFeaturesPacket packet = (StreamFeaturesPacket) unmarshallObject(reader, StreamFeaturesPacket.class);
+        assertTrue(packet.isTLSSupported());
+        assertTrue(packet.isTLSRequired());
+        assertTrue(packet.isSaslSupported());
+        assertTrue(packet.isSaslMechanismSupported("DIGEST-MD5"));
+        assertTrue(packet.isSaslMechanismSupported("PLAIN"));
+        assertTrue(packet.isBindingSupported());
+        assertTrue(packet.isSessionSupported());
+        assertTrue(packet.isFeatureSupported(NS_STREAM_IQ_AUTH));
+        assertTrue(packet.isFeatureSupported(NS_STREAM_IQ_REGISTER));
+    }
+
+    public void testMarshallAll() throws Exception {
+        String inRes = "com/echomine/xmpp/data/StreamFeatures.xml";
+        Reader reader = getResourceAsReader(inRes);
+        StreamFeaturesPacket packet = new StreamFeaturesPacket();
+        packet.setTLSRequired(true);
+        ArrayList list = new ArrayList(5);
+        list.add("DIGEST-MD5");
+        list.add("PLAIN");
+        packet.addFeature(NS_STREAM_SASL, "mechanisms", list);
+        packet.addFeature(NS_STREAM_BINDING, "bind", null);
+        packet.addFeature(NS_STREAM_SESSION, "session", null);
+        packet.addFeature(NS_STREAM_IQ_AUTH, "iq-auth", null);
+        packet.addFeature(NS_STREAM_IQ_REGISTER, "iq-register", null);
         marshallObject(packet, StreamFeaturesPacket.class);
         compare(reader);
     }

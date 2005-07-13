@@ -1,25 +1,21 @@
-package com.echomine.xmpp.jibx;
+package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
 
-import org.jibx.runtime.IAliasable;
-import org.jibx.runtime.IMarshaller;
 import org.jibx.runtime.IMarshallingContext;
-import org.jibx.runtime.IUnmarshaller;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.PrivacyItem;
 
 /**
  * Mapper for the privacy item class. Since the class requires special
  * marshalling and unmarshalling, the a custom mapper is required.
  */
-public abstract class PrivacyItemMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
+public abstract class PrivacyItemMapper extends AbstractPacketMapper {
     protected static final String BLOCK_IQ = "iq";
     protected static final String BLOCK_MESSAGE = "message";
     protected static final String BLOCK_PRESENCE_IN = "presence-in";
@@ -31,37 +27,13 @@ public abstract class PrivacyItemMapper implements IUnmarshaller, IMarshaller, I
     protected static final String ACTION_ALLOW = "allow";
     protected static final String ACTION_DENY = "deny";
 
-    protected String uri;
-    protected String name;
-    protected int index;
-
     /**
      * @param uri the uri of the element working with
      * @param index the index for the namespace
      * @param name the element name
      */
     public PrivacyItemMapper(String uri, int index, String name) {
-        this.uri = uri;
-        this.name = name;
-        this.index = index;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jibx.runtime.IMarshaller#isExtension(int)
-     */
-    public boolean isExtension(int index) {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jibx.runtime.IUnmarshaller#isPresent(org.jibx.runtime.IUnmarshallingContext)
-     */
-    public boolean isPresent(IUnmarshallingContext ictx) throws JiBXException {
-        return ictx.isAt(uri, name);
+        super(uri, index, name);
     }
 
     /*

@@ -22,7 +22,7 @@ public class FeridianConfiguration {
     private static final String CONFIG_FILENAME = "feridian-config.xml";
     private static final String DEFAULT_CONFIG_FILENAME = "feridian-config-default.xml";
     private static FeridianConfiguration config;
-    private HashMap nsMappings;
+    private HashMap iqMappings;
 
     public static FeridianConfiguration getConfig() throws JiBXException {
         if (config == null) {
@@ -61,17 +61,18 @@ public class FeridianConfiguration {
     }
 
     /**
-     * Obtains the class that is associated with the specified URI. If the class
-     * cannot be found or if the URI cannot be found, then null is returned. No
-     * exceptions are thrown.
+     * Obtains the class that is associated with the specified IQ URI. If the
+     * class cannot be found or if the URI cannot be found, then null is
+     * returned. No exceptions are thrown. This is used only to obtain the Class
+     * associated with IQ packets URIs
      * 
      * @param ns the namespace URI to look up
      * @return the class associated with the NS or null if not found
      */
-    public Class getClassForURI(String ns) {
-        if (ns == null || nsMappings == null)
+    public Class getClassForIQUri(String ns) {
+        if (ns == null || iqMappings == null)
             return null;
-        String className = (String) nsMappings.get(ns);
+        String className = (String) iqMappings.get(ns);
         if (className == null)
             return null;
         try {
@@ -79,5 +80,17 @@ public class FeridianConfiguration {
         } catch (ClassNotFoundException ex) {
             return null;
         }
+    }
+
+    /**
+     * This is used to retrieve the class associated with a specific stream
+     * feature URI.
+     * 
+     * @param namespace the namespace uri to look up
+     * @return the class associated with the namespace or null if not found
+     */
+    public Class getClassForFeatureUri(String namespace) {
+        // TODO: Implement
+        return null;
     }
 }

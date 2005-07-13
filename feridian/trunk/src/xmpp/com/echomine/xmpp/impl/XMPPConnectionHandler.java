@@ -14,7 +14,6 @@ import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.SocketHandler;
 import com.echomine.util.IOUtil;
 import com.echomine.xmpp.XMPPClientContext;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.stream.TLSHandshakeStream;
 import com.echomine.xmpp.stream.XMPPClientHandshakeStream;
 import com.echomine.xmpp.stream.XMPPConnectionContext;
@@ -137,6 +136,6 @@ public class XMPPConnectionHandler implements SocketHandler {
      * underlying stream.
      */
     protected void endStream() throws IOException {
-        writer.endTag(XMPPConstants.IDX_JABBER_STREAM, "stream");
+        writer.endTag(XMPPStreamWriter.IDX_JABBER_STREAM, "stream");
     }
 }

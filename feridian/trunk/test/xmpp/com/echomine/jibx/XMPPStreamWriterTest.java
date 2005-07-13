@@ -4,13 +4,11 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestCase;
 
-import com.echomine.xmpp.XMPPConstants;
-
 /**
  * Tests the xmpp stream writer to see that it does handles XMPP special cases
  * properly
  */
-public class XMPPStreamWriterTest extends TestCase implements XMPPConstants {
+public class XMPPStreamWriterTest extends TestCase {
     private XMPPStreamWriter writer;
 
     /*

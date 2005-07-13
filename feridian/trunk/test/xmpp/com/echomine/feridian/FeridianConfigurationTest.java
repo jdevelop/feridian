@@ -15,13 +15,13 @@ public class FeridianConfigurationTest extends XMPPTestCase {
         InputStream is = getClass().getResourceAsStream("/com/echomine/feridian/feridian-test-config.xml");
         Reader rdr = new InputStreamReader(is);
         FeridianConfiguration config = FeridianConfiguration.getConfig(rdr);
-        assertEquals(IQResourceBindPacket.class, config.getClassForURI("urn:ietf:params:xml:ns:xmpp-bind"));
+        assertEquals(IQResourceBindPacket.class, config.getClassForIQUri("urn:ietf:params:xml:ns:xmpp-bind"));
     }
 
     public void testGetClassForURINPE() throws Exception {
         FeridianConfiguration config = FeridianConfiguration.getConfig();
         try {
-            config.getClassForURI("test");
+            config.getClassForIQUri("test");
         } catch (NullPointerException ex) {
             fail("getClassForURI should not throw NPE when default config is used");
         }

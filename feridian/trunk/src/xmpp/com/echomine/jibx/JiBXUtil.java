@@ -5,20 +5,18 @@ import java.io.Writer;
 
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;
-import org.jibx.runtime.IMarshaller;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.xmpp.IQPacket;
-import com.echomine.xmpp.XMPPConstants;
-import com.echomine.xmpp.jibx.IQPacketMapper;
+import com.echomine.xmpp.packet.IQPacket;
+import com.echomine.xmpp.packet.mapper.IQPacketMapper;
 
 /**
  * The class provides some useful utility functions to work with jibx.
  */
 public class JiBXUtil {
-    private static IQPacketMapper iqPacketMapper = new IQPacketMapper(XMPPConstants.NS_XMPP_CLIENT, XMPPConstants.IDX_XMPP_CLIENT, "iq");
+    private static IQPacketMapper iqPacketMapper = new IQPacketMapper();
 
     /**
      * unmarshalls a document. This is a convenience method to unmarshall a
@@ -65,17 +63,15 @@ public class JiBXUtil {
      * @param parentCtx the parent marshalling context
      * @param obj the object to marshall
      * @param cls the object's class type
-     * @param idx the index of the marshaller
      * @throws JiBXException
      */
-    public static void marshallObject(MarshallingContext parentCtx, Object obj, int idx) throws JiBXException {
+    public static void marshallObject(MarshallingContext parentCtx, Object obj) throws JiBXException {
         if (parentCtx == null || obj == null)
             throw new IllegalArgumentException("Context or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
         MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
         fctx.setFromContext(parentCtx);
-        IMarshaller marshaller = fctx.getMarshaller(idx, obj.getClass().getName());
-        marshaller.marshal(obj, fctx);
+        fctx.marshalDocument(obj);
     }
 
     /**

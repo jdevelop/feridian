@@ -1,42 +1,36 @@
-package com.echomine.xmpp.jibx;
+package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
 
-import org.jibx.runtime.IAliasable;
-import org.jibx.runtime.IMarshaller;
 import org.jibx.runtime.IMarshallingContext;
-import org.jibx.runtime.IUnmarshaller;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.NSI;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.ErrorPacket;
 
-public class StreamErrorPacketMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
+public class StreamErrorPacketMapper extends AbstractPacketMapper {
     protected static final String TEXT_ELEMENT_NAME = "text";
     protected static final String ERROR_ELEMENT_NAME = "error";
-
-    protected String uri;
-    protected String name;
-    protected int index;
-
+    private static final String NS_STREAMS_ERROR = "urn:ietf:params:xml:ns:xmpp-streams";
+    
     public StreamErrorPacketMapper(String uri, int index, String name) {
-        this.uri = uri;
-        this.name = name;
-        this.index = index;
+        super(uri, index, name);
+        if (index == 0)
+            this.index = getNamespaceIndex();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jibx.runtime.IMarshaller#isExtension(int)
+    /**
+     * Override to return the namespace index number to obtain if the index passed
+     * into this mapper is 0.
+     * @return the namespace index number
      */
-    public boolean isExtension(int index) {
-        return false;
+    protected int getNamespaceIndex() {
+        return XMPPStreamWriter.IDX_JABBER_STREAM;
     }
 
     /**
@@ -61,10 +55,10 @@ public class StreamErrorPacketMapper implements IUnmarshaller, IMarshaller, IAli
             else
                 extns = new String[] { NS_STREAMS_ERROR, packet.getApplicationCondition().getNamespaceURI() };
             writer.pushExtensionNamespaces(extns);
-            ctx.startTagNamespaces(IDX_JABBER_STREAM, name, new int[] { IDX_JABBER_STREAM }, new String[] { "stream" }).closeStartContent();
+            ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
             marshallErrorCondition(ctx, idx, idx + 1, packet);
             // close error tag
-            ctx.endTag(IDX_JABBER_STREAM, name);
+            ctx.endTag(index, name);
             writer.popExtensionNamespaces();
             try {
                 writer.flush();
@@ -100,15 +94,6 @@ public class StreamErrorPacketMapper implements IUnmarshaller, IMarshaller, IAli
             NSI nsi = packet.getApplicationCondition();
             ctx.startTagNamespaces(appIdx, nsi.getName(), new int[] { appIdx }, new String[] { "" }).closeStartEmpty();
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jibx.runtime.IUnmarshaller#isPresent(org.jibx.runtime.IUnmarshallingContext)
-     */
-    public boolean isPresent(IUnmarshallingContext ictx) throws JiBXException {
-        return ictx.isAt(uri, name);
     }
 
     /**

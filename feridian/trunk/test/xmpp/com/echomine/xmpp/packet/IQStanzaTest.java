@@ -1,9 +1,10 @@
-package com.echomine.xmpp;
+package com.echomine.xmpp.packet;
 
 import java.io.StringReader;
 
 import com.echomine.XMPPTestCase;
 import com.echomine.jibx.JiBXUtil;
+import com.echomine.xmpp.packet.IQPacket;
 
 /**
  * Base class containing convenience methods to test IQ packets

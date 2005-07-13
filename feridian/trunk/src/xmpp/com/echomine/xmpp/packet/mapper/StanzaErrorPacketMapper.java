@@ -1,4 +1,4 @@
-package com.echomine.xmpp.jibx;
+package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
 
@@ -9,13 +9,14 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * Mapper for the stanza error packet.
  */
-public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements XMPPConstants {
+public class StanzaErrorPacketMapper extends StreamErrorPacketMapper {
     protected static final String TYPE_ATTRIBUTE_NAME = "type";
 
     /**
@@ -25,8 +26,15 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
      */
     public StanzaErrorPacketMapper(String uri, int index, String name) {
         super(uri, index, name);
-        if (index == 0)
-            this.index = IDX_XMPP_CLIENT;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.echomine.xmpp.packet.mapper.StreamErrorPacketMapper#getNamespaceIndex()
+     */
+    protected int getNamespaceIndex() {
+        return XMPPStreamWriter.IDX_XMPP_CLIENT;
     }
 
     /**
@@ -50,12 +58,12 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
             int stanzasIdx = writer.getNamespaces().length;
             String[] extns;
             if (packet.getApplicationCondition() == null)
-                extns = new String[] { NS_STANZA_ERROR };
+                extns = new String[] { XMPPConstants.NS_STANZA_ERROR };
             else
-                extns = new String[] { NS_STANZA_ERROR, packet.getApplicationCondition().getNamespaceURI() };
+                extns = new String[] { XMPPConstants.NS_STANZA_ERROR, packet.getApplicationCondition().getNamespaceURI() };
             writer.pushExtensionNamespaces(extns);
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-            ctx.attribute(index, "type", packet.getErrorType());
+            ctx.attribute(0, "type", packet.getErrorType());
             ctx.closeStartContent();
             marshallErrorCondition(ctx, stanzasIdx, stanzasIdx + 1, packet);
             // close error tag
@@ -88,7 +96,7 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper implements 
         packet.setErrorType(ctx.attributeText(null, TYPE_ATTRIBUTE_NAME));
         // parse past the error element
         ctx.parsePastStartTag(uri, name);
-        unmarshallErrorCondition(ctx, NS_STANZA_ERROR, packet);
+        unmarshallErrorCondition(ctx, XMPPConstants.NS_STANZA_ERROR, packet);
         ctx.toEnd();
         return packet;
     }

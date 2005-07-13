@@ -1,6 +1,5 @@
 package com.echomine.xmpp.packet;
 
-import com.echomine.xmpp.IQPacket;
 import com.echomine.xmpp.JID;
 
 /**

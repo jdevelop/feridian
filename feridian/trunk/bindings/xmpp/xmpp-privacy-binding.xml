@@ -24,6 +24,6 @@
 	</mapping>
 	
 	<mapping name="item" ns="jabber:iq:privacy" class="com.echomine.xmpp.packet.PrivacyItem"
-		marshaller="com.echomine.xmpp.jibx.PrivacyItemMapper"
-		unmarshaller="com.echomine.xmpp.jibx.PrivacyItemMapper"/>
+		marshaller="com.echomine.xmpp.packet.mapper.PrivacyItemMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.PrivacyItemMapper"/>
 </binding>

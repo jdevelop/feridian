@@ -1,4 +1,4 @@
-package com.echomine.xmpp.jibx;
+package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -14,7 +14,8 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.xmpp.IQPacket;
+import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
@@ -24,8 +25,16 @@ import com.echomine.xmpp.packet.StanzaErrorPacket;
  * inner data. As with all IQ packets, the main IQ stanza itself is really a
  * wrapper for the inner real packet. All IQ packets must extend from IQPacket.
  */
-public class IQPacketMapper extends StanzaPacketMapper {
+public class IQPacketMapper extends AbstractStanzaPacketMapper {
     private final static Log log = LogFactory.getLog(IQPacketMapper.class);
+
+    /**
+     * This constructor uses default uri, index, and name for the packet mapper.
+     * Useful for the API when direct instantiation is required.
+     */
+    public IQPacketMapper() {
+        this(XMPPConstants.NS_XMPP_CLIENT, XMPPStreamWriter.IDX_XMPP_CLIENT, "iq");
+    }
 
     /**
      * @param uri the uri of the element working with
@@ -89,14 +98,14 @@ public class IQPacketMapper extends StanzaPacketMapper {
         IQPacket packet = null;
         unmarshallStanzaAttributes(tpkt, ctx);
         // unmarshall real packet's contents
-        ctx.parsePastStartTag(NS_XMPP_CLIENT, "iq");
+        ctx.parsePastStartTag(XMPPConstants.NS_XMPP_CLIENT, "iq");
         do {
-            if (ctx.isAt(NS_XMPP_CLIENT, "error")) {
+            if (ctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "error")) {
                 tpkt.setError((StanzaErrorPacket) JiBXUtil.unmarshallObject(ctx, StanzaErrorPacket.class));
             } else if (ctx.isEnd()) {
                 break;
             } else {
-                Class iqClass = FeridianConfiguration.getConfig().getClassForURI(ctx.getNamespace());
+                Class iqClass = FeridianConfiguration.getConfig().getClassForIQUri(ctx.getNamespace());
                 if (packet != null) {
                     ctx.parseElementText(ctx.getNamespace(), ctx.getElementName());
                     if (log.isWarnEnabled())

@@ -10,14 +10,14 @@
 	
 	<!-- stream error support -->
 	<mapping name="error" class="com.echomine.xmpp.packet.ErrorPacket"
-		marshaller="com.echomine.xmpp.jibx.StreamErrorPacketMapper"
-		unmarshaller="com.echomine.xmpp.jibx.StreamErrorPacketMapper"
+		marshaller="com.echomine.xmpp.packet.mapper.StreamErrorPacketMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.StreamErrorPacketMapper"
 		ns="http://etherx.jabber.org/streams"/>
 			
 	<!-- features support -->
 	<mapping name="features" 
         class="com.echomine.xmpp.packet.StreamFeaturesPacket"
-		marshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"
-		unmarshaller="com.echomine.xmpp.jibx.StreamFeaturesMapper"
+		marshaller="com.echomine.xmpp.packet.mapper.StreamFeaturesMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.StreamFeaturesMapper"
 		ns="http://etherx.jabber.org/streams"/>
 </binding>

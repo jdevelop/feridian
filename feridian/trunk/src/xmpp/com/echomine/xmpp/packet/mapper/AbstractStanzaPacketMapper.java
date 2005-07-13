@@ -1,13 +1,10 @@
-package com.echomine.xmpp.jibx;
+package com.echomine.xmpp.packet.mapper;
 
-import org.jibx.runtime.IAliasable;
-import org.jibx.runtime.IMarshaller;
-import org.jibx.runtime.IUnmarshaller;
-import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.JID;
 import com.echomine.xmpp.ParseException;
 import com.echomine.xmpp.StanzaPacketBase;
@@ -19,48 +16,26 @@ import com.echomine.xmpp.packet.StanzaErrorPacket;
  * stanza packet mappers. Specifically, those are the message, presence, and iq
  * packets top level packets.
  */
-public abstract class StanzaPacketMapper implements IUnmarshaller, IMarshaller, IAliasable, XMPPConstants {
+public abstract class AbstractStanzaPacketMapper extends AbstractPacketMapper {
     protected static final String TYPE_ATTRIBUTE_NAME = "type";
     protected static final String ID_ATTRIBUTE_NAME = "id";
     protected static final String FROM_ATTRIBUTE_NAME = "from";
     protected static final String TO_ATTRIBUTE_NAME = "to";
     protected static final String ERROR_ELEMENT_NAME = "error";
 
-    protected String uri;
-    protected String name;
-    protected int index;
-    protected StanzaErrorPacketMapper errorMapper;
+    private StanzaErrorPacketMapper errorMapper = new StanzaErrorPacketMapper(XMPPConstants.NS_XMPP_CLIENT, XMPPStreamWriter.IDX_XMPP_CLIENT, "error");
 
     /**
-     * @param uri the uri of the element working with
-     * @param index the index for the namespace
-     * @param name the element name
-     */
-    public StanzaPacketMapper(String uri, int index, String name) {
-        this.uri = uri;
-        this.name = name;
-        this.index = index;
-        if (index == 0)
-            this.index = IDX_XMPP_CLIENT;
-        errorMapper = new StanzaErrorPacketMapper(NS_XMPP_CLIENT, index, ERROR_ELEMENT_NAME);
-    }
-
-    /*
-     * (non-Javadoc)
+     * Allows super constructor to set values and then checks if index is 0. If
+     * index is 0, it will set it to the default xmpp jabber:client namespace
+     * index.
      * 
-     * @see org.jibx.runtime.IMarshaller#isExtension(int)
+     * @see com.echomine.xmpp.jibx.XMPPStreamWriter
      */
-    public boolean isExtension(int index) {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jibx.runtime.IUnmarshaller#isPresent(org.jibx.runtime.IUnmarshallingContext)
-     */
-    public boolean isPresent(IUnmarshallingContext ictx) throws JiBXException {
-        return ictx.isAt(uri, name);
+    public AbstractStanzaPacketMapper(String uri, int index, String name) {
+        super(uri, index, name);
+        if (this.index == 0)
+            this.index = XMPPStreamWriter.IDX_XMPP_CLIENT;
     }
 
     /**
@@ -129,7 +104,6 @@ public abstract class StanzaPacketMapper implements IUnmarshaller, IMarshaller, 
      * @throws JiBXException
      */
     protected StanzaErrorPacket unmarshallStanzaError(UnmarshallingContext ctx) throws JiBXException {
-        StanzaErrorPacket packet = new StanzaErrorPacket();
-        return (StanzaErrorPacket) errorMapper.unmarshal(packet, ctx);
+        return (StanzaErrorPacket) errorMapper.unmarshal(null, ctx);
     }
 }

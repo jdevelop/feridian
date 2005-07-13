@@ -5,11 +5,10 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.xmpp.IQPacket;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPClientContext;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.IQResourceBindPacket;
 
 /**
@@ -23,7 +22,7 @@ import com.echomine.xmpp.packet.IQResourceBindPacket;
  * previous active resource and allow the current client to bind to the resource
  * (recommended for servers).
  */
-public class XMPPResourceBindingStream implements IXMPPStream, XMPPConstants {
+public class XMPPResourceBindingStream implements IXMPPStream {
     /*
      * (non-Javadoc)
      * 

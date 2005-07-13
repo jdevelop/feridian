@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.echomine.xmpp.IQPacket;
 
 /**
  * Represents the Roster IQ packet. It is simply a class that contains a list of
