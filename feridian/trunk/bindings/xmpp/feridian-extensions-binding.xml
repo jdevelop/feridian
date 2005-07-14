@@ -1,0 +1,13 @@
+<!-- Binding file for feridian's extensions file -->
+<binding direction="input">
+	<mapping name="feridian" class="com.echomine.feridian.FeridianExtensions">
+		<collection name="packets" field="packetList" type="java.util.ArrayList"
+			usage="optional"/>
+	</mapping>
+	
+	<mapping name="packet" value-style="attribute"
+		class="com.echomine.feridian.FeridianPacketExtension">
+		<value name="ns" field="namespace"/>
+		<value name="class" field="cls" deserializer="com.echomine.util.ClassUtil.loadClass"/>
+	</mapping>
+</binding>

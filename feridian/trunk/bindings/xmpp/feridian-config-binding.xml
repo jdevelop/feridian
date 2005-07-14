@@ -1,8 +1,5 @@
 <!-- Binding file for feridian's own configuration file -->
 <binding direction="input">
 	<mapping name="feridian" class="com.echomine.feridian.FeridianConfiguration">
-		<structure name="iqmappings" field="iqMappings" type="java.util.HashMap" 
-			marshaller="org.jibx.extras.HashMapperStringToSchemaType"
-			unmarshaller="org.jibx.extras.HashMapperStringToSchemaType"/>
 	</mapping>
 </binding>

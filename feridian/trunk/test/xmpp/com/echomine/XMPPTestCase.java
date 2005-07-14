@@ -16,6 +16,7 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.util.ClassUtil;
 import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.stream.XMPPConnectionContext;
 
@@ -56,13 +57,14 @@ public class XMPPTestCase extends TestCase {
     }
 
     /**
-     * Obtains the reader for a specified resource in the classpath.
+     * Obtains the reader for a specified resource in the classpath. The default
+     * encoding is UTF-8.
      * 
      * @param res the resource path
      * @throws Exception
      */
     protected Reader getResourceAsReader(String res) throws Exception {
-        return new InputStreamReader(getClass().getClassLoader().getResourceAsStream(res), "UTF-8");
+        return ClassUtil.getResourceAsReader(res, "UTF-8");
     }
 
     /**

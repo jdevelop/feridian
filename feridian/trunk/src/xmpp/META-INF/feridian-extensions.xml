@@ -1,0 +1,7 @@
+<feridian>
+  <packets>
+    <packet ns="urn:ietf:params:xml:ns:xmpp-bind" class="com.echomine.xmpp.packet.IQResourceBindPacket"/>
+    <packet ns="jabber:iq:roster" class="com.echomine.xmpp.packet.IQRosterPacket"/>
+    <packet ns="jabber:iq:privacy" class="com.echomine.xmpp.packet.IQPrivacyPacket"/>
+  </packets>
+</feridian>
