@@ -15,7 +15,7 @@ import com.echomine.util.IOUtil;
  * immediately to caller).
  * </p>
  * <p>
- * The Connection Model basically contains information for creating a new server
+ * The Connection Ctx basically contains information for creating a new server
  * socket. If the host returned is null, then acceptor will bind to all
  * interfaces. Otherwise, the acceptor will bind only to the specified interface
  * IP.
@@ -27,25 +27,25 @@ import com.echomine.util.IOUtil;
  */
 public class SocketAcceptor extends TimeableConnection {
     protected ServerSocket socket;
-    private ConnectionModel connectionModel;
+    private ConnectionContext connectionCtx;
 
     public SocketAcceptor() {
     }
 
-    public SocketAcceptor(ConnectionModel model) throws IOException {
-        this(model, 20);
+    public SocketAcceptor(ConnectionContext context) throws IOException {
+        this(context, 20);
     }
 
-    public SocketAcceptor(ConnectionModel model, int backlog) throws IOException {
-        this.connectionModel = model;
+    public SocketAcceptor(ConnectionContext context, int backlog) throws IOException {
+        this.connectionCtx = context;
         this.open(backlog);
     }
 
     public void open(int backlog) throws IOException {
-        if (connectionModel.getHost() == null)
-            socket = new ServerSocket(connectionModel.getPort(), backlog);
+        if (connectionCtx.getHost() == null)
+            socket = new ServerSocket(connectionCtx.getPort(), backlog);
         else
-            socket = new ServerSocket(connectionModel.getPort(), backlog, connectionModel.getHost());
+            socket = new ServerSocket(connectionCtx.getPort(), backlog, connectionCtx.getHost());
     }
 
     /**
@@ -66,19 +66,16 @@ public class SocketAcceptor extends TimeableConnection {
         Socket s = null;
         try {
             s = socket.accept();
-            ConnectionEvent e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-            ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
             try {
-                socketHandler.start();
-                fireConnectionStarting(e, vetoEvent);
-                e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_OPENED);
-                fireConnectionEstablished(e);
-                socketHandler.handle(s);
-                e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_CLOSED);
-                fireConnectionClosed(e);
+                startingConnection(socketHandler, connectionCtx);
+                establishingConnection(s, socketHandler, connectionCtx);
+                handleConnection(s, socketHandler, connectionCtx);
             } catch (IOException ex) {
                 // handle threw the exception, fire connection closed
-                e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
+                ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
+                fireConnectionClosed(e);
+            } catch (ConnectionException ex) {
+                ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
                 fireConnectionClosed(e);
             } catch (ConnectionVetoException ex) {
                 // do nothing as connection closed event is already fired
@@ -106,19 +103,16 @@ public class SocketAcceptor extends TimeableConnection {
                 Socket s = null;
                 try {
                     s = socket.accept();
-                    ConnectionEvent e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-                    ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
                     try {
-                        socketHandler.start();
-                        fireConnectionStarting(e, vetoEvent);
-                        e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_OPENED);
-                        fireConnectionEstablished(e);
-                        socketHandler.handle(s);
-                        e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_CLOSED);
-                        fireConnectionClosed(e);
+                        startingConnection(socketHandler, connectionCtx);
+                        establishingConnection(s, socketHandler, connectionCtx);
+                        handleConnection(s, socketHandler, connectionCtx);
                     } catch (IOException ex) {
                         // handle threw the exception, fire connection closed
-                        e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
+                        ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
+                        fireConnectionClosed(e);
+                    } catch (ConnectionException ex) {
+                        ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
                         fireConnectionClosed(e);
                     } catch (ConnectionVetoException ex) {
                         // do nothing as connection closed event is already
@@ -153,31 +147,67 @@ public class SocketAcceptor extends TimeableConnection {
         }
     }
 
-    public ConnectionModel getConnectionModel() {
-        return connectionModel;
+    public ConnectionContext getConnectionContext() {
+        return connectionCtx;
     }
 
     /**
      * <p>
-     * use a new connection model. The current server socket will be closed and
-     * then a new server socket will be created. Once a connection model is
-     * passed in through the constructor, it's not usually changed. However, the
-     * Acceptor can be reused in this way if the situation requires it.
+     * use a new connection context. The current server socket will be closed
+     * and then a new server socket will be created. Once a connection context
+     * is passed in through the constructor, it's not usually changed. However,
+     * the Acceptor can be reused in this way if the situation requires it.
      * </p>
      */
-    public void setConnectionModel(ConnectionModel connectionModel) throws IOException {
-        setConnectionModel(connectionModel, 20);
+    public void setConnectionContext(ConnectionContext connectionCtx) throws IOException {
+        setConnectionContext(connectionCtx, 20);
     }
 
     /**
-     * sets the connection model plus the backlog for the port that the listener
-     * should bind to and listen on.
+     * sets the connection context plus the backlog for the port that the
+     * listener should bind to and listen on.
      */
-    public void setConnectionModel(ConnectionModel connectionModel, int backlog) throws IOException {
-        this.connectionModel = connectionModel;
+    public void setConnectionContext(ConnectionContext connectionCtx, int backlog) throws IOException {
+        this.connectionCtx = connectionCtx;
         // close the current server socket
         close();
         // open with backlog of 20
         open(backlog);
+    }
+
+    /**
+     * starts the connection. This does not in any way deal with any connecting
+     * or establishing, which is handled in another method.
+     * 
+     * @param socketHandler the handler
+     * @throws ConnectionVetoException
+     */
+    protected void startingConnection(SocketHandler socketHandler, ConnectionContext connectionCtx) throws ConnectionVetoException {
+        ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_STARTING);
+        ConnectionEvent vetoEvent = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_VETOED);
+        socketHandler.start();
+        fireConnectionStarting(e, vetoEvent);
+    }
+
+    /**
+     * establishes the connection. This involves connecting to remote and
+     * performing handshakes.
+     */
+    protected void establishingConnection(Socket socket, SocketHandler socketHandler, ConnectionContext connectionCtx) throws IOException, ConnectionException {
+        ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_OPENED);
+        fireConnectionEstablished(e);
+    }
+
+    /**
+     * handles the main meat of the connection processing.
+     * 
+     * @param socketHandler the handler
+     * @param s the socket
+     * @throws IOException
+     */
+    protected void handleConnection(Socket s, SocketHandler socketHandler, ConnectionContext connectionCtx) throws IOException {
+        socketHandler.handle(s, connectionCtx);
+        ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_CLOSED);
+        fireConnectionClosed(e);
     }
 }

@@ -8,7 +8,17 @@ public class ConnectionException extends Exception {
         super();
     }
 
-    public ConnectionException(String par1) {
-        super(par1);
+    public ConnectionException(String message) {
+        super(message);
+    }
+
+    public ConnectionException(String message, Throwable cause) {
+        super(message, cause);
+
+    }
+
+    public ConnectionException(Throwable cause) {
+        super(cause);
+
     }
 }

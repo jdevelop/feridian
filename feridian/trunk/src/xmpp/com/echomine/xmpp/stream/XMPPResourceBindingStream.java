@@ -6,8 +6,9 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IXMPPStream;
-import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.IQResourceBindPacket;
 
@@ -26,19 +27,19 @@ public class XMPPResourceBindingStream implements IXMPPStream {
     /*
      * (non-Javadoc)
      * 
-     * @see com.echomine.xmpp.IXMPPStream#process(com.echomine.xmpp.XMPPClientContext,
-     *      com.echomine.xmpp.stream.XMPPConnectionContext,
-     *      org.jibx.runtime.impl.UnmarshallingContext,
-     *      com.echomine.jibx.XMPPStreamWriter)
+     * @see com.echomine.xmpp.IXMPPStream#process(com.echomine.xmpp.XMPPSessionContext,
+     *      com.echomine.xmpp.XMPPStreamContext)
      */
-    public void process(XMPPClientContext clientCtx, XMPPConnectionContext connCtx, UnmarshallingContext uctx, XMPPStreamWriter writer) throws XMPPException {
-        if (!connCtx.isResourceBindingRequired())
-            return;
+    public void process(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException {
         try {
+            if (!streamCtx.getFeatures().isBindingSupported())
+                return;
+            XMPPStreamWriter writer = streamCtx.getWriter();
+            UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
             // send bind request
             IQResourceBindPacket request = new IQResourceBindPacket();
             request.setType(IQPacket.TYPE_SET);
-            request.setResourceName(clientCtx.getResource());
+            request.setResourceName(sessCtx.getResource());
             JiBXUtil.marshallIQPacket(writer, request);
             // process result
             IQResourceBindPacket result = (IQResourceBindPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
@@ -48,7 +49,7 @@ public class XMPPResourceBindingStream implements IXMPPStream {
                 throw new XMPPException(result.getError());
             if (result.getJid() == null)
                 throw new XMPPException("Resource Binding result does not include a JID.  Possibly bad server implementation");
-            clientCtx.setResource(result.getJid().getResource());
+            sessCtx.setResource(result.getJid().getResource());
         } catch (JiBXException ex) {
             throw new XMPPException(ex);
         }

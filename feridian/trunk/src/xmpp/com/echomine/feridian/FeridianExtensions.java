@@ -7,6 +7,7 @@ import java.util.List;
  * Represents one feridian-extensions.xml config file.
  */
 public class FeridianExtensions {
+    private List streamList;
     private List packetList;
 
     /**
@@ -16,5 +17,14 @@ public class FeridianExtensions {
      */
     public List getPacketExtensions() {
         return Collections.unmodifiableList(packetList);
+    }
+
+    /**
+     * Retrieves non-modifiable list of streams
+     * 
+     * @return list of streams registered in the config
+     */
+    public List getStreamList() {
+        return Collections.unmodifiableList(streamList);
     }
 }

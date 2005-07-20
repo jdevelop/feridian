@@ -4,6 +4,9 @@ package com.echomine.xmpp;
  * Contains useful constants used by XMPP classes.
  */
 public interface XMPPConstants {
+    // custom API namespaces
+    static final String NS_STREAM_HANDSHAKE = "urn:echomine:feridian:xmpp-handshake";
+
     // namespace constants
     static final String NS_XML = "http://www.w3.org/XML/1998/namespace";
     static final String NS_JABBER_STREAM = "http://etherx.jabber.org/streams";

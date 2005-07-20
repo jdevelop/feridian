@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * <p>
  * The iq packet that works with privacy as specified in XMPP specs. This packet
@@ -73,7 +72,7 @@ public class IQPrivacyPacket extends IQPacket {
     /**
      * Retrieves an array of PrivacyList objects. May possibly be empty.
      * 
-     * @see PrivacyList
+     * @see com.echomine.xmpp.packet.PrivacyList
      * @return Returns a non-null array of privacy lists
      */
     public List getPrivacyLists() {

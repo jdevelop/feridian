@@ -17,8 +17,7 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.ClassUtil;
-import com.echomine.xmpp.XMPPClientContext;
-import com.echomine.xmpp.stream.XMPPConnectionContext;
+import com.echomine.xmpp.XMPPSessionContext;
 
 /**
  * A basic test case that simply provides a set of convenient methods.
@@ -26,8 +25,7 @@ import com.echomine.xmpp.stream.XMPPConnectionContext;
 public class XMPPTestCase extends TestCase {
     protected ByteArrayOutputStream os;
     protected UnmarshallingContext uctx;
-    protected XMPPClientContext clientCtx;
-    protected XMPPConnectionContext connCtx;
+    protected XMPPSessionContext sessCtx;
     protected XMPPStreamWriter writer;
 
     /*
@@ -38,8 +36,7 @@ public class XMPPTestCase extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         os = new ByteArrayOutputStream(256);
-        clientCtx = new XMPPClientContext();
-        connCtx = new XMPPConnectionContext();
+        sessCtx = new XMPPSessionContext();
         uctx = new UnmarshallingContext();
         writer = new XMPPStreamWriter();
         writer.setOutput(os);

@@ -2,17 +2,14 @@ package com.echomine.xmpp;
 
 import com.echomine.net.ConnectionEvent;
 import com.echomine.net.ConnectionListener;
-import com.echomine.net.ConnectionModel;
 import com.echomine.net.ConnectionVetoException;
-import com.echomine.net.SocketConnector;
 
 public class SimpleXMPPClient {
     private String username;
     private String password;
     private String serverName;
-    private int port = XMPPClientContext.DEFAULT_PORT;
-    private XMPPClientContext context;
-    private XMPPConnectionHandler handler;
+    private int port = IXMPPConnection.DEFAULT_XMPP_PORT;
+    private IXMPPConnection conn;
 
     public SimpleXMPPClient(String username, String password, String server) {
         this.username = username;
@@ -20,9 +17,8 @@ public class SimpleXMPPClient {
         this.serverName = server;
     }
 
-    protected void setUp() {
-        context = new XMPPClientContext(username, serverName);
-        handler = new XMPPConnectionHandler(context);
+    protected void setUp() throws Exception {
+        conn = XMPPConnectionFactory.getFactory().createXMPPConnection();
     }
 
     public static void main(String[] args) throws Exception {
@@ -44,23 +40,21 @@ public class SimpleXMPPClient {
      * having to recompile the test class
      */
     public void runConsole() throws Exception {
-        SocketConnector connector = new SocketConnector();
-        connector.addConnectionListener(new DefaultConnectionListener());
-        ConnectionModel model = new ConnectionModel(context.getHost(), XMPPClientContext.DEFAULT_PORT);
-        connector.connect(handler, model);
+        conn.connect(serverName, port, true);
+        Thread.sleep(4000);
     }
 
     class DefaultConnectionListener implements ConnectionListener {
         public void connectionStarting(ConnectionEvent event) throws ConnectionVetoException {
-            System.out.println("Connection starting: " + event.getConnectionModel());
+            System.out.println("Connection starting: " + event.getConnectionContext());
         }
 
         public void connectionEstablished(ConnectionEvent event) {
-            System.out.println("Connection established: " + event.getConnectionModel());
+            System.out.println("Connection established: " + event.getConnectionContext());
         }
 
         public void connectionClosed(ConnectionEvent event) {
-            System.out.println("Connection closed: " + event.getConnectionModel());
+            System.out.println("Connection closed: " + event.getConnectionContext());
         }
     }
 }

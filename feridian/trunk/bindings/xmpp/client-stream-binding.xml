@@ -16,7 +16,7 @@
 			
 	<!-- features support -->
 	<mapping name="features" 
-        class="com.echomine.xmpp.packet.StreamFeaturesPacket"
+        class="com.echomine.xmpp.packet.StreamFeatures"
 		marshaller="com.echomine.xmpp.packet.mapper.StreamFeaturesMapper"
 		unmarshaller="com.echomine.xmpp.packet.mapper.StreamFeaturesMapper"
 		ns="http://etherx.jabber.org/streams"/>

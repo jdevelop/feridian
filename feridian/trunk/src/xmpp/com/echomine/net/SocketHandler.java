@@ -14,9 +14,11 @@ public interface SocketHandler {
      * the caller of this method to close the socket when all processing is
      * done.
      * 
+     * @param connCtx The connection context
+     * @param socket the socket
      * @throws IOException when any processing error occurs
      */
-    void handle(Socket socket) throws IOException;
+    void handle(Socket socket, ConnectionContext connCtx) throws IOException;
 
     /**
      * starts the connection. This will give the handler a chance to reset any
@@ -30,4 +32,11 @@ public interface SocketHandler {
      * before/after socket close.
      */
     void shutdown();
+
+    /**
+     * Checks whether connection is still alive.
+     * 
+     * @return true if connection is alive, false otherwise
+     */
+    boolean isConnected();
 }

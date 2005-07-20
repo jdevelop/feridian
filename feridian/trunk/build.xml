@@ -199,7 +199,7 @@
             <formatter type="plain" usefile="false"/>
             <batchtest fork="yes">
                 <fileset dir="${build.dir}/${module.name}/tests/classes">
-                    <include name="**/*Test.class"/>
+                    <include name="${test.fileset}"/>
                 </fileset>
             </batchtest>
         </junit>

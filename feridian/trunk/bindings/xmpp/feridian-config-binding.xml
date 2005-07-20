@@ -1,5 +1,13 @@
 <!-- Binding file for feridian's own configuration file -->
 <binding direction="input">
 	<mapping name="feridian" class="com.echomine.feridian.FeridianConfiguration">
+		<structure name="connection-factory">
+			<value name="class" style="attribute" field="connectionFactoryClass" 
+				deserializer="com.echomine.util.ClassUtil.loadClass"/>
+		</structure>
+		<structure name="stream-factory">
+			<value name="class" style="attribute" field="streamFactoryClass" 
+				deserializer="com.echomine.util.ClassUtil.loadClass"/>
+		</structure>
 	</mapping>
 </binding>

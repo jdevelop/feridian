@@ -11,17 +11,15 @@ public class ConnectionEvent extends EventObject {
     public final static int CONNECTION_STARTING = 4;
     public final static int CONNECTION_VETOED = 5;
     public final static int CONNECTION_REJECTED = 6;
-    public final static int CONNECTION_HANDSHAKE = 7; // SSL support
-    public final static int CONNECTION_HANDSHOOK = 8; // SSL support
     private String errormsg;
     private int status;
 
-    public ConnectionEvent(ConnectionModel source, int status) {
+    public ConnectionEvent(ConnectionContext source, int status) {
         super(source);
         this.status = status;
     }
 
-    public ConnectionEvent(ConnectionModel source, int status, String errormsg) {
+    public ConnectionEvent(ConnectionContext source, int status, String errormsg) {
         this(source, status);
         this.errormsg = errormsg;
     }
@@ -48,9 +46,9 @@ public class ConnectionEvent extends EventObject {
         return errormsg;
     }
 
-    /** @return the connection model associated with this event */
-    public ConnectionModel getConnectionModel() {
-        return (ConnectionModel) getSource();
+    /** @return the connection context associated with this event */
+    public ConnectionContext getConnectionContext() {
+        return (ConnectionContext) getSource();
     }
 
     /** @return the status of the event */
@@ -58,13 +56,13 @@ public class ConnectionEvent extends EventObject {
         return status;
     }
 
-    /** @return the port as reported by the connection model */
+    /** @return the port as reported by the connection context */
     public int getPort() {
-        return ((ConnectionModel) getSource()).getPort();
+        return ((ConnectionContext) getSource()).getPort();
     }
 
-    /** @return the hostname as reported by the connection model */
+    /** @return the hostname as reported by the connection context */
     public String getHostName() {
-        return ((ConnectionModel) getSource()).getHostName();
+        return ((ConnectionContext) getSource()).getHostName();
     }
 }

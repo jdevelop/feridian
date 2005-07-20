@@ -36,4 +36,25 @@ public class ClassUtil {
     public static Reader getResourceAsReader(String res, String enc) throws UnsupportedEncodingException {
         return new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(res), "UTF-8");
     }
+
+    /**
+     * convenience method to check, before instantiating, whether the class is a
+     * subclass or implementing class of the reference class. If not an
+     * exception is thrown. If no reference class is provided (ie. null), then
+     * this method will act the same as the Class.newInstance() method.
+     * 
+     * @param clsToInstantiate the class to instantiate objects from
+     * @param referenceClass checks if the specified class implements or
+     *            subclasses this reference class
+     * @return the instantiated object
+     * @throws IllegalAccessException permission not allowed when creating
+     *             instance of the class
+     * @throws InstantiationException if class does not implement/subclass
+     *             reference class or class cannot be instantiated
+     */
+    public static Object newInstance(Class clsToInstantiate, Class referenceClass) throws InstantiationException, IllegalAccessException {
+        if (referenceClass != null && !referenceClass.isAssignableFrom(clsToInstantiate))
+            throw new InstantiationException("The class to instantiate is not a subclass, or does not implement, the reference class");
+        return clsToInstantiate.newInstance();
+    }
 }

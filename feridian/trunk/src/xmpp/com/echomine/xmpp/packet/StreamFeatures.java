@@ -12,7 +12,7 @@ import com.echomine.xmpp.XMPPConstants;
  * This represents the stream:features packet used during handshake negotiation.
  * It contains a list of features supported by the server.
  */
-public class StreamFeaturesPacket implements IPacket {
+public class StreamFeatures implements IPacket {
     private boolean tlsRequired;
     private LinkedHashMap features = new LinkedHashMap();
 

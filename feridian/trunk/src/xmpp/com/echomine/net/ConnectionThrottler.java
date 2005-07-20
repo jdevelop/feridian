@@ -9,8 +9,8 @@ package com.echomine.net;
 public interface ConnectionThrottler {
     /**
      * Throttles the data transfer rate based on the information provided by the
-     * connection model. Most likely you'll be using the calculated transfer
+     * connection context. Most likely you'll be using the calculated transfer
      * rate and do some sort of sleep to slow down the transfer rate.
      */
-    void throttle(ConnectionModel cmodel);
+    void throttle(ConnectionContext ccontext);
 }

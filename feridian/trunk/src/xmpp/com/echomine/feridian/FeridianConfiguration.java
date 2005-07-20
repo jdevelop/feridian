@@ -32,8 +32,18 @@ public class FeridianConfiguration {
     private static final String DEFAULT_CONFIG_FILENAME = "feridian-config-default.xml";
     private static final String EXTENSIONS_FILENAME = "feridian-extensions.xml";
     private static FeridianConfiguration config;
-    private HashMap iqMappings = new HashMap();
 
+    private HashMap iqMappings = new HashMap();
+    private HashMap streamMappings = new HashMap();
+    private Class connectionFactoryClass;
+    private Class streamFactoryClass;
+
+    /**
+     * Obtains the config file.
+     * 
+     * @return the config instance
+     * @throws JiBXException when error occurs during loading of configuration
+     */
     public static FeridianConfiguration getConfig() throws JiBXException {
         if (config == null) {
             InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILENAME);
@@ -50,6 +60,22 @@ public class FeridianConfiguration {
                 config = new FeridianConfiguration();
             }
         }
+        config.loadExtensions();
+        return config;
+    }
+
+    /**
+     * This will retrieve the configuration based on the provided InputStream.
+     * If a configuration already exists, then this replace the current config.
+     * 
+     * @param rdr the input stream with the file
+     * @return the configuration
+     * @throws JiBXException if error occurs when loading config
+     */
+    public static FeridianConfiguration getConfig(Reader rdr) throws JiBXException {
+        if (rdr == null)
+            throw new IllegalArgumentException("Reader stream cannot be null");
+        config = (FeridianConfiguration) JiBXUtil.unmarshallObject(rdr, FeridianConfiguration.class);
         config.loadExtensions();
         return config;
     }
@@ -76,8 +102,16 @@ public class FeridianConfiguration {
                     while (iter.hasNext()) {
                         ext = (FeridianPacketExtension) iter.next();
                         if (log.isInfoEnabled())
-                            log.info("Extension Found: URI=" + ext.getNamespace() + ", class=" + ext.getPacketClass().getName());
+                            log.info("Packet Extension Found: URI=" + ext.getNamespace() + ", class=" + ext.getPacketClass().getName());
                         iqMappings.put(ext.getNamespace(), ext.getPacketClass());
+                    }
+                    iter = extensions.getStreamList().iterator();
+                    FeridianStreamExtension stream;
+                    while (iter.hasNext()) {
+                        stream = (FeridianStreamExtension) iter.next();
+                        if (log.isInfoEnabled())
+                            log.info("Stream Extension Found: URI=" + stream.getNamespace() + ", class=" + stream.getStreamClass().getName());
+                        streamMappings.put(stream.getNamespace(), stream);
                     }
                 } catch (Throwable thr) {
                     if (log.isWarnEnabled())
@@ -91,22 +125,6 @@ public class FeridianConfiguration {
     }
 
     /**
-     * This will retrieve the configuration based on the provided InputStream.
-     * If a configuration already exists, then this replace the current config.
-     * 
-     * @param rdr the input stream with the file
-     * @return the configuration
-     * @throws JiBXException
-     */
-    public static FeridianConfiguration getConfig(Reader rdr) throws JiBXException {
-        if (rdr == null)
-            throw new IllegalArgumentException("Reader stream cannot be null");
-        config = (FeridianConfiguration) JiBXUtil.unmarshallObject(rdr, FeridianConfiguration.class);
-        config.loadExtensions();
-        return config;
-    }
-
-    /**
      * Obtains the class that is associated with the specified IQ URI. If the
      * class cannot be found or if the URI cannot be found, then null is
      * returned. No exceptions are thrown. This is used only to obtain the Class
@@ -116,20 +134,57 @@ public class FeridianConfiguration {
      * @return the class associated with the NS or null if not found
      */
     public Class getClassForIQUri(String ns) {
-        if (ns == null || iqMappings == null)
+        if (ns == null)
             return null;
         return (Class) iqMappings.get(ns);
+    }
+
+    /**
+     * Retrieves the stream class for the specified feature namespace.
+     * 
+     * @param ns the namespace uri to look up
+     * @return the class associated with the namespace or null if not found
+     */
+    public Class getStreamForFeature(String ns) {
+        if (ns == null)
+            return null;
+        FeridianStreamExtension ext = (FeridianStreamExtension) streamMappings.get(ns);
+        if (ext != null)
+            return ext.getStreamClass();
+        return null;
     }
 
     /**
      * This is used to retrieve the class associated with a specific stream
      * feature URI.
      * 
-     * @param namespace the namespace uri to look up
+     * @param ns the namespace uri to look up
      * @return the class associated with the namespace or null if not found
      */
-    public Class getClassForFeatureUri(String namespace) {
-        // TODO: Implement
+    public Class getUnmarshallerForFeature(String ns) {
+        if (ns == null)
+            return null;
+        FeridianStreamExtension ext = (FeridianStreamExtension) streamMappings.get(ns);
+        if (ext != null)
+            return ext.getUnmarshallerClass();
         return null;
+    }
+
+    /**
+     * Retrieves the factory for creating xmpp connections.
+     * 
+     * @return the connection factory
+     */
+    public Class getXMPPConnectionFactory() {
+        return connectionFactoryClass;
+    }
+
+    /**
+     * Retrieves the facotry for creating xmpp stream objects.
+     * 
+     * @return the stream factory
+     */
+    public Class getXMPPStreamFactory() {
+        return streamFactoryClass;
     }
 }

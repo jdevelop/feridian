@@ -7,6 +7,7 @@ import com.echomine.XMPPTestCase;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.XMPPStreamContext;
 
 /**
  * Base class for stream test cases to extend from that provides many common
@@ -14,13 +15,13 @@ import com.echomine.xmpp.XMPPException;
  */
 public class BaseStreamTestCase extends XMPPTestCase {
     private static final String NS_JABBER_STREAM = "http://etherx.jabber.org/streams";
+    XMPPStreamContext streamCtx;
 
     protected void setUp() throws Exception {
         super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
+        streamCtx = new XMPPStreamContext();
+        streamCtx.setWriter(writer);
+        streamCtx.setUnmarshallingContext(uctx);
     }
 
     /**
@@ -80,7 +81,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
             stripIncomingStreamHeader();
         // if processing is fine, no exception will be thrown
         try {
-            stream.process(clientCtx, connCtx, uctx, writer);
+            stream.process(sessCtx, streamCtx);
         } catch (XMPPException ex) {
             throw ex;
         }
@@ -102,7 +103,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
      */
     protected void run(String inRes, IXMPPStream stream) throws Exception {
         uctx.setDocument(getClass().getClassLoader().getResourceAsStream(inRes), "UTF-8");
-        stream.process(clientCtx, connCtx, uctx, writer);
+        stream.process(sessCtx, streamCtx);
     }
 
     /**
@@ -116,7 +117,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
      */
     protected void run(Reader rdr, IXMPPStream stream) throws Exception {
         uctx.setDocument(rdr);
-        stream.process(clientCtx, connCtx, uctx, writer);
+        stream.process(sessCtx, streamCtx);
     }
 
     /**
@@ -129,7 +130,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
     protected void startOutgoingStreamHeader() throws Exception {
         writer.startTagNamespaces(XMPPStreamWriter.IDX_JABBER_STREAM, "stream", new int[] { 2, 3 }, new String[] { "stream", "" });
         writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "version", "1.0");
-        writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", clientCtx.getHost());
+        writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", sessCtx.getHostName());
         writer.closeStartTag();
         writer.flush();
     }

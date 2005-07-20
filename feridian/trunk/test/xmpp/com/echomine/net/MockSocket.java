@@ -1,9 +1,13 @@
 package com.echomine.net;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * Mock socket that overrides certain methods that is used by the tests
@@ -11,22 +15,41 @@ import java.net.Socket;
 public class MockSocket extends Socket {
     InputStream is;
     OutputStream os;
+    InetAddress address;
+    int port;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.net.Socket#getInputStream()
+    public MockSocket() {
+        super();
+
+    }
+
+    public MockSocket(InetAddress address, int port) throws IOException {
+        this.address = address;
+        this.port = port;
+    }
+
+    public MockSocket(String host, int port) throws UnknownHostException, IOException {
+        this.address = InetAddress.getByName(host);
+        this.port = port;
+    }
+
+    /**
+     * obtains an input stream. If the input stream is empty, then an empty
+     * StringBufferInputStream is created.
      */
     public InputStream getInputStream() throws IOException {
+        if (is == null)
+            is = new ByteArrayInputStream("".getBytes());
         return is;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.net.Socket#getOutputStream()
+    /**
+     * obtains an output stream. If the output stream is empty, then a default
+     * ByteArrayOutputStream is created.
      */
     public OutputStream getOutputStream() throws IOException {
+        if (os == null)
+            os = new ByteArrayOutputStream();
         return os;
     }
 
@@ -36,5 +59,13 @@ public class MockSocket extends Socket {
 
     public void setOutputStream(OutputStream stream) throws IOException {
         this.os = stream;
+    }
+
+    public InetAddress getInetAddress() {
+        return address;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

@@ -36,12 +36,12 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
         super();
     }
 
-    public PerpetualSocketAcceptor(ConnectionModel model) throws IOException {
-        super(model);
+    public PerpetualSocketAcceptor(ConnectionContext context) throws IOException {
+        super(context);
     }
 
-    public PerpetualSocketAcceptor(ConnectionModel model, int backlog) throws IOException {
-        super(model, backlog);
+    public PerpetualSocketAcceptor(ConnectionContext context, int backlog) throws IOException {
+        super(context, backlog);
     }
 
     /**
@@ -66,20 +66,17 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
                     Socket s = null;
                     while (!shutdown) {
                         s = socket.accept();
-                        ConnectionModel connectionModel = new ConnectionModel(s.getInetAddress(), s.getPort());
-                        ConnectionEvent e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-                        ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
+                        ConnectionContext connectionCtx = new ConnectionContext(s.getInetAddress(), s.getPort());
                         try {
-                            socketHandler.start();
-                            fireConnectionStarting(e, vetoEvent);
-                            e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_OPENED);
-                            fireConnectionEstablished(e);
-                            socketHandler.handle(s);
-                            e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_CLOSED);
-                            fireConnectionClosed(e);
+                            startingConnection(socketHandler, connectionCtx);
+                            establishingConnection(s, socketHandler, connectionCtx);
+                            handleConnection(s, socketHandler, connectionCtx);
                         } catch (IOException ex) {
                             // handle threw exception, fire closed event
-                            e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
+                            ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
+                            fireConnectionClosed(e);
+                        } catch (ConnectionException ex) {
+                            ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
                             fireConnectionClosed(e);
                         } catch (ConnectionVetoException ex) {
                             // do nothing because connection closed is already
@@ -119,8 +116,8 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
                     Socket s;
                     while (!shutdown) {
                         s = socket.accept();
-                        ConnectionModel model = new ConnectionModel(s.getInetAddress(), s.getPort());
-                        AcceptorThread athread = new AcceptorThread(socketHandler, s, model);
+                        ConnectionContext context = new ConnectionContext(s.getInetAddress(), s.getPort());
+                        AcceptorThread athread = new AcceptorThread(socketHandler, s, context);
                         athread.start();
                     }
                 } catch (Exception ex) {
@@ -147,29 +144,26 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
 
     class AcceptorThread extends Thread {
         Socket s;
-        ConnectionModel connectionModel;
+        ConnectionContext connectionCtx;
         SocketHandler handler;
 
-        public AcceptorThread(SocketHandler handler, Socket s, ConnectionModel model) {
+        public AcceptorThread(SocketHandler handler, Socket s, ConnectionContext context) {
             this.s = s;
-            this.connectionModel = model;
+            this.connectionCtx = context;
             this.handler = handler;
         }
 
         public void run() {
-            ConnectionEvent e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-            ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
             try {
-                handler.start();
-                fireConnectionStarting(e, vetoEvent);
-                e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_OPENED);
-                fireConnectionEstablished(e);
-                handler.handle(s);
-                e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_CLOSED);
-                fireConnectionClosed(e);
+                startingConnection(handler, connectionCtx);
+                establishingConnection(s, handler, connectionCtx);
+                handleConnection(s, handler, connectionCtx);
             } catch (IOException ex) {
                 // handle threw exception, fire closed event
-                e = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
+                ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
+                fireConnectionClosed(e);
+            } catch (ConnectionException ex) {
+                ConnectionEvent e = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error during handling: " + ex.getMessage());
                 fireConnectionClosed(e);
             } catch (ConnectionVetoException ex) {
                 // do nothing as connection closed event is already fired

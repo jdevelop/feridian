@@ -1,6 +1,8 @@
 package com.echomine.xmpp.stream;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -19,9 +21,10 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.SimpleTrustManager;
 import com.echomine.xmpp.IXMPPStream;
-import com.echomine.xmpp.XMPPClientContext;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStreamContext;
 
 /**
  * This stream will handle all the TLS handshaking. It will first determine if
@@ -34,22 +37,28 @@ import com.echomine.xmpp.XMPPException;
  * </ol>
  * <br/>The stream handler will process up to the point of successful TLS
  * handshake. If handshaking fails, then an exception will be thrown, in effect
- * closing our side of the stream and connection.
+ * closing our side of the stream and connection. <br/>Once TLS negotiation
+ * succeeds, the entire writer and unmarshalling context will be redone to use
+ * the new input/output streams from the SSL socket. The original socket will
+ * also be replaced with the new SSL socket. This stream will NOT redo the
+ * handshake. Thus, the caller must subsequently redo the handshake after TLS
+ * negotiation succeeds.
  */
 public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
     private static final String STARTTLS_ELEMENT_NAME = "starttls";
+    protected final static int SOCKETBUF = 8192;
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.echomine.xmpp.IXMPPStream#process(com.echomine.xmpp.XMPPClientContext,
-     *      com.echomine.xmpp.stream.XMPPConnectionContext,
-     *      org.jibx.runtime.impl.UnmarshallingContext,
-     *      com.echomine.jibx.XMPPStreamWriter)
+     * @see com.echomine.xmpp.IXMPPStream#process(com.echomine.xmpp.XMPPSessionContext,
+     *      com.echomine.xmpp.XMPPStreamContext)
      */
-    public void process(XMPPClientContext clientCtx, XMPPConnectionContext connCtx, UnmarshallingContext uctx, XMPPStreamWriter writer) throws XMPPException {
-        if (!connCtx.isTLSSupported())
+    public void process(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException {
+        if (!streamCtx.getFeatures().isTLSSupported())
             return;
+        XMPPStreamWriter writer = streamCtx.getWriter();
+        UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
         String[] extns = new String[] { NS_STREAM_TLS };
         writer.pushExtensionNamespaces(extns);
         int idx = writer.getNamespaces().length;
@@ -65,8 +74,19 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             if (!uctx.isAt(NS_STREAM_TLS, "proceed"))
                 throw new XMPPException("Expecting <proceed> tag, but found: " + uctx.getName());
             uctx.toEnd();
-            SSLSocket tlsSocket = startTLSHandshake(connCtx.getSocket());
-            connCtx.setSocket(tlsSocket);
+            SSLSocket tlsSocket = startTLSHandshake(streamCtx.getSocket());
+            streamCtx.setSocket(tlsSocket);
+            InputStreamReader bis = new InputStreamReader(tlsSocket.getInputStream(), "UTF-8");
+            BufferedOutputStream bos = new BufferedOutputStream(tlsSocket.getOutputStream(), SOCKETBUF);
+            // Workaround for JiBX's reset() not resetting prefix
+            // Thus, a new stream writer must be created
+            writer.close();
+            writer = new XMPPStreamWriter();
+            writer.setOutput(bos);
+            uctx.setDocument(bis);
+            streamCtx.setSocket(tlsSocket);
+            streamCtx.setWriter(writer);
+            streamCtx.setUnmarshallingContext(uctx);
         } catch (Exception ex) {
             if (ex instanceof XMPPException)
                 throw (XMPPException) ex;

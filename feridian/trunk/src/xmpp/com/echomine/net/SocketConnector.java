@@ -99,29 +99,199 @@ public class SocketConnector extends TimeableConnection {
      * Synchronous connect method using internal socket handler. The method will
      * return when handling of the connection is finished.
      */
-    public void connect(ConnectionModel connectionModel) throws ConnectionFailedException {
-        connect(socketHandler, connectionModel);
+    public void connect(ConnectionContext connectionCtx) throws ConnectionFailedException {
+        connect(socketHandler, connectionCtx);
     }
 
     /**
-     * helper to return the String array of all ciphers we could use
+     * makes a connection asynchronously using internal socket handler. This
+     * means that the method will be run in a separate thread and return control
+     * to the caller of the method immediately.
      */
-    private String[] getCiphers(SSLSocket s) {
-        int num = 0;
-        String[] supported = s.getSupportedCipherSuites(); // cipher suites
-                                                            // supported by the
-                                                            // implementation
-        int[] cipherIndexes = new int[supported.length]; // indexes to
-                                                            // supported ciphers
-        for (int i = 0; i < supported.length; i++) {
-            if (supported[i].toLowerCase().indexOf("null") < 0)
-                cipherIndexes[num++] = i;
+    public void aconnect(ConnectionContext connectionCtx) {
+        aconnect(socketHandler, connectionCtx);
+    }
+
+    /**
+     * Synchronous connect method. The method will return when handling of the
+     * connection is finished.
+     */
+    public void connect(SocketHandler socketHandler, ConnectionContext connectionCtx) throws ConnectionFailedException {
+        try {
+            startingConnection(socketHandler, connectionCtx);
+            Socket socket = establishingConnection(socketHandler, connectionCtx);
+            try {
+                handleConnection(socket, socketHandler, connectionCtx);
+            } catch (IOException ex) {
+                ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error while processing connection: " + ex.getMessage());
+                fireConnectionClosed(event);
+            } finally {
+                IOUtil.closeSocket(socket);
+            }
+        } catch (IOException ex) {
+            ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error connecting to host: " + ex.getMessage());
+            fireConnectionClosed(event);
+            throw new ConnectionFailedException("Cannot Connect to remote host");
+        } catch (ConnectionException ex) {
+            ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());
+            fireConnectionClosed(event);
+        } catch (ConnectionVetoException ex) {
+            // do nothing, connection closed event already fired
         }
-        String[] wesupport = new String[num];
-        for (int i = 0; i < num; i++) {
-            wesupport[i] = supported[cipherIndexes[i]];
+    }
+
+    /**
+     * makes a connection asynchronously. This means that the method will be run
+     * in a separate thread and return control to the caller of the method
+     * immediately.
+     */
+    public void aconnect(final SocketHandler socketHandler, final ConnectionContext connectionCtx) {
+        Thread thread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    startingConnection(socketHandler, connectionCtx);
+                    Socket socket = establishingConnection(socketHandler, connectionCtx);
+                    try {
+                        handleConnection(socket, socketHandler, connectionCtx);
+                    } catch (IOException ex) {
+                        ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
+                        fireConnectionClosed(event);
+                    } finally {
+                        IOUtil.closeSocket(socket);
+                    }
+                } catch (IOException ex) {
+                    ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());
+                    fireConnectionClosed(event);
+                } catch (ConnectionException ex) {
+                    ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());
+                    fireConnectionClosed(event);
+                } catch (ConnectionVetoException ex) {
+                    // do nothing, connection closed event already fired
+                }
+            }
+        });
+        thread.start();
+    }
+
+    /**
+     * This is a half-synchronized, half-asynchronized connection. It will
+     * connect synchronously, up to the handshake, then switch to asynchronous
+     * mode for all execution of the connection handler's "handle" method. This
+     * method is useful when the calling method would like to block until
+     * "successful connection" is established. Any error that happens in the
+     * handle method will only be fired through listeners. This method will only
+     * throw exception if connecting to remote server failed (ie. unknown host,
+     * unable to connect to port), handshaking failed, or connection process is
+     * vetoed.
+     * 
+     * @param socketHandler the socket handler
+     * @param connectionCtx the connection context
+     * @throws ConnectionVetoException if connection is vetoed
+     * @throws IOException if connection failed or connection errored
+     * @throws HandshakeFailedException Handshaking failed
+     */
+    public void connectWithSynchStart(final HandshakeableSocketHandler socketHandler, final ConnectionContext connectionCtx) throws ConnectionException, ConnectionVetoException, IOException {
+        startingConnection(socketHandler, connectionCtx);
+        Socket socket = null;
+        try {
+            socket = establishingConnection(socketHandler, connectionCtx);
+            SocketRunnable runner = new SocketRunnable() {
+                public void run() {
+                    ConnectionEvent event;
+                    try {
+                        handleConnection(this.socket, socketHandler, connectionCtx);
+                    } catch (IOException ex) {
+                        event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
+                        fireConnectionClosed(event);
+                    } finally {
+                        IOUtil.closeSocket(this.socket);
+                    }
+                }
+            };
+            runner.socket = socket;
+            Thread thread = new Thread(runner);
+            thread.start();
+        } catch (ConnectionException ex) {
+            ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());
+            fireConnectionClosed(event);
+            throw ex;
+        } finally {
+            IOUtil.closeSocket(socket);
         }
-        return wesupport;
+    }
+
+    public SocketHandler getSocketHandler() {
+        return socketHandler;
+    }
+
+    public void setSocketHandler(SocketHandler socketHandler) {
+        this.socketHandler = socketHandler;
+    }
+
+    /**
+     * does the initial connecting code. It only goes up to the point of
+     * creating the socket which basically means connection is starting.
+     * 
+     * @param socketHandler the socket handler
+     * @param connectionCtx the connection context
+     * @throws ConnectionVetoException
+     * @throws IOException
+     */
+    protected void startingConnection(SocketHandler socketHandler, ConnectionContext connectionCtx) throws ConnectionVetoException, IOException {
+        ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_STARTING);
+        ConnectionEvent vetoEvent = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_VETOED);
+        fireConnectionStarting(event, vetoEvent);
+        socketHandler.start();
+    }
+
+    /**
+     * Establishes the connection -- this will connect to the remote connection.
+     * Any handshaking will be done here as well.
+     * 
+     * @param socket the socket
+     * @param socketHandler the socket handler
+     * @param connectionCtx the connection context
+     * @throws IOException if there any errors occur
+     */
+    protected Socket establishingConnection(SocketHandler socketHandler, ConnectionContext connectionCtx) throws IOException, ConnectionException {
+        Socket socket = null;
+        if (connectionCtx.isSSL()) {
+            socket = createSSLSocket(connectionCtx);
+        } else {
+            socket = createSocket(connectionCtx.getHost(), connectionCtx.getPort());
+        }
+        ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_OPENED);
+        fireConnectionEstablished(event);
+        return socket;
+    }
+
+    /**
+     * Handles the connection. This will process the main stuff that is located
+     * in the handler's handle() method.
+     * 
+     * @param socket the socket
+     * @param socketHandler the handler
+     * @param connectionCtx the context
+     * @throws IOException if any errors occur
+     */
+    protected void handleConnection(Socket socket, SocketHandler socketHandler, ConnectionContext connectionCtx) throws IOException {
+        socketHandler.handle(socket, connectionCtx);
+        ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_CLOSED);
+        fireConnectionClosed(event);
+    }
+
+    /**
+     * Override this to offer an alternative socket implementation. Good for
+     * testing purposes where mock sockets can be used.
+     * 
+     * @param address the host to connect
+     * @param port the port to connect
+     * @return a Socket implementation
+     * @throws IOException
+     * @throws UnknownHostException
+     */
+    protected Socket createSocket(InetAddress address, int port) throws IOException {
+        return new Socket(address, port);
     }
 
     /**
@@ -129,9 +299,9 @@ public class SocketConnector extends TimeableConnection {
      * connection handling to the SocketHandler. Throws an IOException if any
      * error occurs in the negotiation.
      */
-    private Socket negotiateSSLConnection(ConnectionModel connectionModel) throws IOException {
-        InetAddress host = connectionModel.getHost();
-        int port = connectionModel.getPort();
+    protected Socket createSSLSocket(ConnectionContext connectionCtx) throws IOException {
+        InetAddress host = connectionCtx.getHost();
+        int port = connectionCtx.getPort();
         String keyStorePath = System.getProperty(KEY_KEYSTORE, VALUE_KEYSTORE);
         String keyStorePassphrase = System.getProperty(KEY_PASSPHRASE, VALUE_PASSPHRASE);
         char[] keyStorePassword = keyStorePassphrase.toCharArray();
@@ -151,8 +321,8 @@ public class SocketConnector extends TimeableConnection {
         KeyStore keyStore = null;
         try {
             keyStore = KeyStore.getInstance(KeyStore.getDefaultType()); // ususally
-                                                                        // returns
-                                                                        // 'jks'}
+            // returns
+            // 'jks'}
         } catch (KeyStoreException e) {
             e.printStackTrace(); // Tell someone
             throw new IOException("Unable to get a keystore of type " + KeyStore.getDefaultType());
@@ -161,7 +331,7 @@ public class SocketConnector extends TimeableConnection {
         // If the input stream is null the keystore is initialized empty.
         try {
             keyStore.load(keyStoreIStream, keyStorePassword); // throws
-                                                                // IOException
+            // IOException
         } catch (NoSuchAlgorithmException nsa) {
             nsa.printStackTrace(); // Tell someone
             throw new IOException("No such algorithm - keystore load");
@@ -187,8 +357,8 @@ public class SocketConnector extends TimeableConnection {
         KeyManagerFactory keyManagerFactory = null;
         try {
             keyManagerFactory = KeyManagerFactory.getInstance("SunX509"); // pass
-                                                                            // algorithm
-                                                                            // name
+            // algorithm
+            // name
         } catch (NoSuchAlgorithmException nsa) {
             nsa.printStackTrace(); // Tell someone
             throw new IOException("No such algorithm - getting keymgr. factory");
@@ -218,12 +388,12 @@ public class SocketConnector extends TimeableConnection {
         // We assume that there is only 1 constuctor with three arguments
         // FIXME: Check for more than 1 constr - throw?
         Constructor[] constrs = tmClass.getConstructors(); // throws
-                                                            // SecurityException
+        // SecurityException
         Object[] args = { keyStore, keyStorePath, keyStorePassword };
         TrustManager tm = null;
         try {
             tm = (TrustManager) constrs[0].newInstance(args); // make a new
-                                                                // TrustManager
+            // TrustManager
         } catch (InstantiationException ie) {
             ie.printStackTrace(); // Give up
             System.exit(4);
@@ -249,111 +419,39 @@ public class SocketConnector extends TimeableConnection {
         SSLSocket socket = null;
         try {
             socket = (SSLSocket) sslSocketfactory.createSocket(host, port); // throws
-                                                                            // IOException
+            // IOException
         } catch (UnknownHostException uhe) {
             throw new IOException("Unknown host exception");
         }
         socket.setUseClientMode(true);
         socket.setEnabledCipherSuites(getCiphers(socket));
         socket.startHandshake(); // synchronous for the first time, throws
-                                    // IOException
+        // IOException
         return socket;
     }
 
     /**
-     * Synchronous connect method. The method will return when handling of the
-     * connection is finished.
+     * helper to return the String array of all ciphers we could use
      */
-    public void connect(SocketHandler socketHandler, ConnectionModel connectionModel) throws ConnectionFailedException {
-        Socket socket = null;
-        try {
-            ConnectionEvent event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-            ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
-            fireConnectionStarting(event, vetoEvent);
-            socketHandler.start();
-            if (connectionModel.isSSL()) {
-                socket = negotiateSSLConnection(connectionModel); // throws
-                                                                    // IOException
-            } else {
-                socket = new Socket(connectionModel.getHost(), connectionModel.getPort());
-            }
-            try {
-                event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_OPENED);
-                fireConnectionEstablished(event);
-                socketHandler.handle(socket);
-                event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_CLOSED);
-                fireConnectionClosed(event);
-            } catch (IOException ex) {
-                event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
-                fireConnectionClosed(event);
-            } finally {
-                IOUtil.closeSocket(socket);
-            }
-        } catch (IOException ex) {
-            ConnectionEvent event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error connecting to host: " + ex.getMessage());
-            fireConnectionClosed(event);
-            throw new ConnectionFailedException("Cannot Connect to remote host");
-        } catch (ConnectionVetoException ex) {
-            // do nothing, connection closed event already fired
+    private String[] getCiphers(SSLSocket s) {
+        int num = 0;
+        String[] supported = s.getSupportedCipherSuites(); // cipher suites
+        // supported by the
+        // implementation
+        int[] cipherIndexes = new int[supported.length]; // indexes to
+        // supported ciphers
+        for (int i = 0; i < supported.length; i++) {
+            if (supported[i].toLowerCase().indexOf("null") < 0)
+                cipherIndexes[num++] = i;
         }
+        String[] wesupport = new String[num];
+        for (int i = 0; i < num; i++) {
+            wesupport[i] = supported[cipherIndexes[i]];
+        }
+        return wesupport;
     }
 
-    /**
-     * makes a connection asynchronously using internal socket handler. This
-     * means that the method will be run in a separate thread and return control
-     * to the caller of the method immediately.
-     */
-    public void aconnect(ConnectionModel connectionModel) {
-        aconnect(socketHandler, connectionModel);
-    }
-
-    /**
-     * makes a connection asynchronously. This means that the method will be run
-     * in a separate thread and return control to the caller of the method
-     * immediately.
-     */
-    public void aconnect(final SocketHandler socketHandler, final ConnectionModel connectionModel) {
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                Socket socket = null;
-                try {
-                    ConnectionEvent event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-                    ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
-                    fireConnectionStarting(event, vetoEvent);
-                    socketHandler.start();
-                    if (connectionModel.isSSL()) {
-                        socket = negotiateSSLConnection(connectionModel);
-                    } else {
-                        socket = new Socket(connectionModel.getHost(), connectionModel.getPort());
-                    }
-                    try {
-                        event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_OPENED);
-                        fireConnectionEstablished(event);
-                        socketHandler.handle(socket);
-                        event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_CLOSED);
-                        fireConnectionClosed(event);
-                    } catch (IOException ex) {
-                        event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error while handling connection: " + ex.getMessage());
-                        fireConnectionClosed(event);
-                    } finally {
-                        IOUtil.closeSocket(socket);
-                    }
-                } catch (IOException ex) {
-                    ConnectionEvent event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());
-                    fireConnectionClosed(event);
-                } catch (ConnectionVetoException ex) {
-                    // do nothing, connection closed event already fired
-                }
-            }
-        });
-        thread.start();
-    }
-
-    public SocketHandler getSocketHandler() {
-        return socketHandler;
-    }
-
-    public void setSocketHandler(SocketHandler socketHandler) {
-        this.socketHandler = socketHandler;
+    abstract class SocketRunnable implements Runnable {
+        Socket socket;
     }
 }

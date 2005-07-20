@@ -134,6 +134,7 @@ public class MockSSLSocket extends SSLSocket {
      * @see javax.net.ssl.SSLSocket#addHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener)
      */
     public void addHandshakeCompletedListener(HandshakeCompletedListener arg0) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /*
@@ -142,6 +143,7 @@ public class MockSSLSocket extends SSLSocket {
      * @see javax.net.ssl.SSLSocket#removeHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener)
      */
     public void removeHandshakeCompletedListener(HandshakeCompletedListener arg0) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /*

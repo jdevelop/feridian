@@ -13,4 +13,16 @@ public class HandshakeFailedException extends ConnectionException {
     public HandshakeFailedException(String msg) {
         super(msg);
     }
+
+    public HandshakeFailedException(String message, Throwable cause) {
+        super(message, cause);
+        
+    }
+
+    public HandshakeFailedException(Throwable cause) {
+        super(cause);
+        
+    }
+    
+    
 }

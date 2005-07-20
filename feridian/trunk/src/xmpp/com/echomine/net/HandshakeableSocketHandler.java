@@ -12,7 +12,9 @@ public interface HandshakeableSocketHandler extends SocketHandler {
      * necessarily have to be closed. Rather, the one calling this method will
      * have to handle the closing of the socket.
      * 
+     * @param connCtx the connection context
+     * @param socket the socket
      * @throws HandshakeFailedException when error occurs during handshaking
      */
-    void handshake(Socket socket) throws HandshakeFailedException;
+    void handshake(Socket socket, ConnectionContext connCtx) throws HandshakeFailedException;
 }

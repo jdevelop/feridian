@@ -19,7 +19,7 @@ import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.StreamFeature;
-import com.echomine.xmpp.packet.StreamFeaturesPacket;
+import com.echomine.xmpp.packet.StreamFeatures;
 
 /**
  * The custom mapper for the stream features element. This mapper supports all
@@ -56,14 +56,14 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
      */
     public void marshal(Object obj, IMarshallingContext ictx) throws JiBXException {
         // make sure the parameters are as expected
-        if (!(obj instanceof StreamFeaturesPacket)) {
+        if (!(obj instanceof StreamFeatures)) {
             throw new JiBXException("Invalid object type for marshaller");
         } else if (!(ictx instanceof MarshallingContext)) {
             throw new JiBXException("Invalid object type for marshaller");
         } else {
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
-            StreamFeaturesPacket packet = (StreamFeaturesPacket) obj;
+            StreamFeatures packet = (StreamFeatures) obj;
             IXMLWriter writer = ctx.getXmlWriter();
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
             marshallStartTLSFeature(ctx, packet);
@@ -98,7 +98,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
      * @param packet the packet containing the data to marshall
      * @throws JiBXException
      */
-    private void marshallSupportedFeatures(MarshallingContext ctx, StreamFeaturesPacket packet) throws JiBXException {
+    private void marshallSupportedFeatures(MarshallingContext ctx, StreamFeatures packet) throws JiBXException {
         int featIdx = ctx.getNamespaces().length;
         Map features = packet.getFeatures();
         Iterator iter = features.keySet().iterator();
@@ -137,7 +137,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
      * @param packet the packet containing the data to marshall
      * @throws JiBXException
      */
-    private void marshallStartTLSFeature(MarshallingContext ctx, StreamFeaturesPacket packet) throws JiBXException {
+    private void marshallStartTLSFeature(MarshallingContext ctx, StreamFeatures packet) throws JiBXException {
         if (!packet.isTLSSupported())
             return;
         String[] extns = new String[] { NS_STREAM_TLS };
@@ -168,9 +168,9 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
         UnmarshallingContext ctx = (UnmarshallingContext) ictx;
         if (!ctx.isAt(uri, name))
             ctx.throwStartTagNameError(uri, name);
-        StreamFeaturesPacket packet = (StreamFeaturesPacket) obj;
+        StreamFeatures packet = (StreamFeatures) obj;
         if (packet == null)
-            packet = new StreamFeaturesPacket();
+            packet = new StreamFeatures();
         // parse past the features element
         ctx.parsePastStartTag(uri, name);
         while (true) {
@@ -188,7 +188,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
                 ctx.parsePastEndTag(NS_STREAM_SASL, SASL_ELEMENT_NAME);
             } else {
                 // if no unmarshaller found, then do simple feature add
-                Class cls = FeridianConfiguration.getConfig().getClassForFeatureUri(ctx.getNamespace());
+                Class cls = FeridianConfiguration.getConfig().getUnmarshallerForFeature(ctx.getNamespace());
                 if (cls != null) {
                     Object value = JiBXUtil.unmarshallObject(ctx, cls);
                     packet.addFeature(ctx.getNamespace(), ctx.getName(), value);
@@ -208,7 +208,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
      * @param packet the stream features packet
      * @throws JiBXException
      */
-    private void unmarshallStartTLSFeature(UnmarshallingContext ctx, StreamFeaturesPacket packet) throws JiBXException {
+    private void unmarshallStartTLSFeature(UnmarshallingContext ctx, StreamFeatures packet) throws JiBXException {
         if (!ctx.isAt(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME))
             ctx.throwStartTagNameError(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
         ctx.parsePastStartTag(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME);
