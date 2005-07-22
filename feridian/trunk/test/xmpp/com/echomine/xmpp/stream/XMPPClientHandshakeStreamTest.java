@@ -25,7 +25,7 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
         endOutgoingStreamHeader();
         compare(outRes);
         assertEquals("c2s_123", sessCtx.getSessionId());
-        // assertEquals("example.com", sessCtx.getHost());
+        assertEquals("example.com", sessCtx.getHostName());
     }
 
     public void testHandshakeWithError() throws Exception {
@@ -48,7 +48,7 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
         run(inRes, stream);
         endOutgoingStreamHeader();
         compare(outRes);
-        // assertTrue(sessCtx.isTLSSupported());
-        // assertTrue(sessCtx.isTLSRequired());
+        assertTrue(streamCtx.getFeatures().isTLSSupported());
+        assertTrue(streamCtx.getFeatures().isTLSRequired());
     }
 }

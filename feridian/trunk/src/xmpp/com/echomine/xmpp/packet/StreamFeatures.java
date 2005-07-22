@@ -5,6 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.echomine.xmpp.IPacket;
 import com.echomine.xmpp.XMPPConstants;
 
@@ -13,6 +16,7 @@ import com.echomine.xmpp.XMPPConstants;
  * It contains a list of features supported by the server.
  */
 public class StreamFeatures implements IPacket {
+    private static Log log = LogFactory.getLog(StreamFeatures.class);
     private boolean tlsRequired;
     private LinkedHashMap features = new LinkedHashMap();
 
@@ -97,6 +101,8 @@ public class StreamFeatures implements IPacket {
         if (namespace == null)
             throw new IllegalArgumentException("namespace for feature cannot be null");
         features.put(namespace, new StreamFeature(elementName, value));
+        if (log.isDebugEnabled())
+            log.debug("Added feature namespace: " + namespace);
     }
 
     /**
@@ -150,9 +156,9 @@ public class StreamFeatures implements IPacket {
     }
 
     /**
-     * Returns a unmodifiable list of supported mechanisms.
+     * Returns a unmodifiable list of supported mechanisms strings.
      * 
-     * @return a non-null list of sasl mechanism, but possibly empty
+     * @return a non-null list of sasl mechanism strings, but possibly empty
      */
     public List getSaslMechanisms() {
         StreamFeature feature = (StreamFeature) getFeature(XMPPConstants.NS_STREAM_SASL);

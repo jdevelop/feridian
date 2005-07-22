@@ -70,8 +70,8 @@ public class TLSHandshakeStreamTest extends BaseStreamTestCase {
         String inRes = "com/echomine/xmpp/data/TLSHandshakeProceed_in.xml";
         String outRes = "com/echomine/xmpp/data/TLSHandshake_out.xml";
         runAndCompare(inRes, outRes, stream, true, true);
-        // assertTrue(sessCtx.getSocket() instanceof SSLSocket);
-        // assertEquals(null, sessCtx.getHost());
+        assertTrue(streamCtx.getSocket() instanceof SSLSocket);
+        assertEquals(null, sessCtx.getHostName());
         assertEquals(null, sessCtx.getSessionId());
     }
 

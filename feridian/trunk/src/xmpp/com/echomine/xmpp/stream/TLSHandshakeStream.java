@@ -69,8 +69,10 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             writer.flush();
             // check for error or proceed
             uctx.next();
-            if (uctx.isAt(NS_STREAM_TLS, "failure"))
+            if (uctx.isAt(NS_STREAM_TLS, "failure")) {
+                uctx.toEnd();
                 throw new XMPPException("TLS Failure");
+            }
             if (!uctx.isAt(NS_STREAM_TLS, "proceed"))
                 throw new XMPPException("Expecting <proceed> tag, but found: " + uctx.getName());
             uctx.toEnd();

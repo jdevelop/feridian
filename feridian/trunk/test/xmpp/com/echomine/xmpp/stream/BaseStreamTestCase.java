@@ -97,6 +97,31 @@ public class BaseStreamTestCase extends XMPPTestCase {
      * will only run through the stream handler. It will not do any comparison
      * afterwards, and is up to the subclasses to test any assertions.
      * 
+     * @param inReader reader that acontains incoming XML to read
+     * @param outReader the reader to compare the output with
+     * @param stream the stream handler to run the inReader through
+     * @param addHeaders whether to enclose this resource with stream header for
+     *            comparing
+     * @param stripHeaders whether to strip incoming resource's stream header
+     * @throws Exception
+     */
+    protected void run(String inRes, IXMPPStream stream, boolean addHeaders, boolean stripHeaders) throws Exception {
+        uctx.setDocument(getClass().getClassLoader().getResourceAsStream(inRes), "UTF-8");
+        if (addHeaders)
+            startOutgoingStreamHeader();
+        if (stripHeaders)
+            stripIncomingStreamHeader();
+        stream.process(sessCtx, streamCtx);
+        if (addHeaders)
+            endOutgoingStreamHeader();
+        writer.flush();
+    }
+    
+    /**
+     * This will take an incoming resource to give the stream to unmarshall but
+     * will only run through the stream handler. It will not do any comparison
+     * afterwards, and is up to the subclasses to test any assertions.
+     * 
      * @param inRes the resource to read incoming XML
      * @param stream the stream handler to run the resource through
      * @throws Exception

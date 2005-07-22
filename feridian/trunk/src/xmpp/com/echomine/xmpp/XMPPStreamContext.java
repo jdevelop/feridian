@@ -16,6 +16,7 @@ public class XMPPStreamContext {
     private XMPPStreamWriter writer;
     private Socket socket;
     private StreamFeatures features;
+    private XMPPAuthCallback authCallback;
 
     public XMPPStreamContext() {
         reset();
@@ -76,6 +77,10 @@ public class XMPPStreamContext {
         uctx = new UnmarshallingContext();
         writer = new XMPPStreamWriter();
         socket = null;
+        if (authCallback != null) {
+            authCallback.clear();
+            authCallback = null;
+        }
     }
 
     /**
@@ -97,5 +102,19 @@ public class XMPPStreamContext {
      */
     public void setFeatures(StreamFeatures features) {
         this.features = features;
+    }
+
+    /**
+     * @return Returns the authCallback.
+     */
+    public XMPPAuthCallback getAuthCallback() {
+        return authCallback;
+    }
+
+    /**
+     * @param authCallback The authCallback to set.
+     */
+    public void setAuthCallback(XMPPAuthCallback authCallback) {
+        this.authCallback = authCallback;
     }
 }

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+<stream:stream from='example.com' version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>cmVhbG09InNvbWVyZWFsbSIsbm9uY2U9Ik9BNk1HOXRFUUdtMmhoIixxb3A9ImF1dGgiLGNoYXJzZXQ9dXRmLTgsYWxnb3JpdGhtPW1kNS1zZXNzCg==</challenge>
+	<challenge xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>cnNwYXV0aD1lYTQwZjYwMzM1YzQyN2I1NTI3Yjg0ZGJhYmNkZmZmZAo=</challenge>
+	<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>
+</stream:stream>

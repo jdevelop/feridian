@@ -20,7 +20,8 @@
 		<value name="jid" field="jid"/>
 		<value name="name" field="name" usage="optional"/>
 		<value name="subscription" field="subscription" usage="optional"/>
-		<collection field="groups" type="java.util.ArrayList" usage="optional">
+		<collection field="groups" type="java.util.ArrayList" usage="optional"
+            item-type="java.lang.String">
 			<value name="group" style="element"/>
 		</collection>
 	</mapping>
