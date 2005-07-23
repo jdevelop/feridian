@@ -2,7 +2,7 @@
   <streams>
   	<stream ns="urn:echomine:feridian:xmpp-handshake" class="com.echomine.xmpp.stream.XMPPClientHandshakeStream"/>
   	<stream ns="urn:ietf:params:xml:ns:xmpp-tls" class="com.echomine.xmpp.stream.TLSHandshakeStream"/>
-  	<stream ns="urn:ietf:params:xml:ns:xmpp-sasl" class="com.echomine.xmpp.stream.XMPPResourceBindingStream"/>
+  	<stream ns="urn:ietf:params:xml:ns:xmpp-sasl" class="com.echomine.xmpp.stream.SASLHandshakeStream"/>
   	<stream ns="urn:ietf:params:xml:ns:xmpp-bind" class="com.echomine.xmpp.stream.XMPPResourceBindingStream"/>
   </streams>
   <packets>

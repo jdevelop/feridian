@@ -78,17 +78,20 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             uctx.toEnd();
             SSLSocket tlsSocket = startTLSHandshake(streamCtx.getSocket());
             streamCtx.setSocket(tlsSocket);
-            InputStreamReader bis = new InputStreamReader(tlsSocket.getInputStream(), "UTF-8");
-            BufferedOutputStream bos = new BufferedOutputStream(tlsSocket.getOutputStream(), SOCKETBUF);
             // Workaround for JiBX's reset() not resetting prefix
             // Thus, a new stream writer must be created
-            writer.close();
+            InputStreamReader bis = new InputStreamReader(tlsSocket.getInputStream(), "UTF-8");
+            BufferedOutputStream bos = new BufferedOutputStream(tlsSocket.getOutputStream(), SOCKETBUF);
+            writer.flush();
             writer = new XMPPStreamWriter();
             writer.setOutput(bos);
             uctx.setDocument(bis);
             streamCtx.setSocket(tlsSocket);
             streamCtx.setWriter(writer);
             streamCtx.setUnmarshallingContext(uctx);
+            
+            // as per XMPP specs, must reset all previous session data
+            sessCtx.reset();
         } catch (Exception ex) {
             if (ex instanceof XMPPException)
                 throw (XMPPException) ex;

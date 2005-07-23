@@ -193,6 +193,7 @@ public class SocketConnector extends TimeableConnection {
     public void connectWithSynchStart(final HandshakeableSocketHandler socketHandler, final ConnectionContext connectionCtx) throws ConnectionException, ConnectionVetoException, IOException {
         startingConnection(socketHandler, connectionCtx);
         Socket socket = null;
+        boolean fail = false;
         try {
             socket = establishingConnection(socketHandler, connectionCtx);
             SocketRunnable runner = new SocketRunnable() {
@@ -214,9 +215,11 @@ public class SocketConnector extends TimeableConnection {
         } catch (ConnectionException ex) {
             ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());
             fireConnectionClosed(event);
+            fail = true;
             throw ex;
         } finally {
-            IOUtil.closeSocket(socket);
+            if (fail)
+                IOUtil.closeSocket(socket);
         }
     }
 

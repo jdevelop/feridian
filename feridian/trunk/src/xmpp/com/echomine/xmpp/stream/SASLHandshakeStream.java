@@ -3,6 +3,7 @@ package com.echomine.xmpp.stream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,13 +11,16 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.util.Base64;
 import com.echomine.xmpp.IXMPPStream;
+import com.echomine.xmpp.JID;
+import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.StreamFeatures;
-import com.echomine.xmpp.stream.sasl.XMPPSaslClient;
+import com.echomine.xmpp.stream.sasl.DigestMD5SaslClient;
 
 /**
  * This is the main stream that process SASL authentication. This particular
@@ -41,67 +45,33 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
      */
     public void process(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException {
         if (!streamCtx.getFeatures().isSaslSupported())
-            return;
+            throw new XMPPException("SASL is not supported and this stream should not have been called");
         String mechanism = findPreferredMechanism(streamCtx.getFeatures());
         if (mechanism == null)
             throw new XMPPException("Unable to find a supported mechanism.  This stream only supports DIGEST-MD5 and PLAIN");
+        if (log.isInfoEnabled())
+            log.info("Request authentication with " + mechanism);
         XMPPStreamWriter writer = streamCtx.getWriter();
         UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
         String[] extns = new String[] { NS_STREAM_SASL };
         writer.pushExtensionNamespaces(extns);
-        int idx = writer.getNamespaces().length;
         try {
-            // send <auth>
-            if (log.isInfoEnabled())
-                log.info("Request authentication with " + mechanism);
-            writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
-            writer.addAttribute(0, "mechanism", mechanism);
-            writer.closeEmptyTag();
-            writer.flush();
-            // server sends us challenge
-            uctx.next();
-            parseAndThrowFailure(uctx);
-            if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
-                throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
-            String challengeStr = uctx.parseElementText(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME);
-            if (log.isInfoEnabled())
-                log.info("Received challenge string: " + challengeStr);
-            XMPPSaslClient client = new XMPPSaslClient();
-            client.unwrapChallenge(challengeStr);
-            String response = client.getAuthResponse(sessCtx, streamCtx);
-            // send response
-            if (log.isInfoEnabled())
-                log.info("Sending response: " + response);
-            writer.startTagNamespaces(idx, RESPONSE_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
-            writer.closeStartTag();
-            writer.writeTextContent(response);
-            writer.endTag(idx, RESPONSE_ELEMENT_NAME);
-            writer.flush();
-            // check remote response
-            uctx.next();
-            parseAndThrowFailure(uctx);
-            if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
-                throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
-            // the received string is rsauth, which can be ignored
-            uctx.parseElementText(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME);
-            // send final response
-            if (log.isInfoEnabled())
-                log.info("Authentication accepted, sending final acknowledgement");
-            writer.startTagNamespaces(idx, RESPONSE_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
-            writer.closeEmptyTag();
-            writer.flush();
-            // receive final success or failure
-            uctx.next();
-            parseAndThrowFailure(uctx);
-            if (!uctx.isAt(NS_STREAM_SASL, "success"))
-                throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
-            uctx.parseElementText(NS_STREAM_SASL, "success");
+            if (DIGEST_MD5.equals(mechanism))
+                authDigestMD5(uctx, writer, sessCtx, streamCtx);
+            else if (PLAIN.equals(mechanism))
+                authPlain(uctx, writer, sessCtx, streamCtx);
+            // save username and resource and reset auth callback
+            sessCtx.reset();
+            sessCtx.setUsername(streamCtx.getAuthCallback().getUsername());
+            sessCtx.setResource(streamCtx.getAuthCallback().getResource());
+            streamCtx.getAuthCallback().clear();
             if (log.isInfoEnabled())
                 log.info("SASL authentication complete, resetting input and output streams for new handshake");
-            InputStreamReader bis = new InputStreamReader(streamCtx.getSocket().getInputStream(), "UTF-8");
-            BufferedOutputStream bos = new BufferedOutputStream(streamCtx.getSocket().getOutputStream(), SOCKETBUF);
             // reset writer and unmarshalling context for handshake
             // renegotiation preparation
+            InputStreamReader bis = new InputStreamReader(streamCtx.getSocket().getInputStream(), "UTF-8");
+            BufferedOutputStream bos = new BufferedOutputStream(streamCtx.getSocket().getOutputStream(), SOCKETBUF);
+            writer.flush();
             writer = new XMPPStreamWriter();
             writer.setOutput(bos);
             uctx.setDocument(bis);
@@ -114,13 +84,103 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
     }
 
     /**
+     * Authenticates using the SASL PLAIN mechanism
+     * 
+     * @throws IOException
+     * @throws JiBXException 
+     * @throws XMPPException 
+     */
+    private void authPlain(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws IOException, JiBXException, XMPPException {
+        int idx = writer.getNamespaces().length;
+        // send <auth>
+        writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
+        writer.addAttribute(0, "mechanism", PLAIN);
+        writer.closeStartTag();
+        XMPPAuthCallback callback = streamCtx.getAuthCallback();
+        JID authid = new JID(callback.getUsername(), sessCtx.getHostName(), callback.getResource());
+        StringBuffer buf = new StringBuffer(128);
+        buf.append(authid.toString()).append('\0').append(callback.getUsername()).append('\0').append(callback.getPassword());
+        writer.writeTextContent(Base64.encodeString(buf.toString()));
+        writer.endTag(idx, "auth");
+        // send response immediately
+        writer.flush();
+        // receive final success or failure
+        uctx.next();
+        parseAndThrowFailure(uctx);
+        if (!uctx.isAt(NS_STREAM_SASL, "success"))
+            throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
+        parseElementText(uctx, "success");
+    }
+
+    /**
+     * authenticates the user using SASL Digest-MD5 mechanism
+     * 
+     * @throws XMPPException
+     * @throws IOException
+     * @throws JiBXException
+     */
+    private void authDigestMD5(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException, IOException, JiBXException {
+        int idx = writer.getNamespaces().length;
+        // send <auth>
+        writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
+        writer.addAttribute(0, "mechanism", DIGEST_MD5);
+        writer.closeEmptyTag();
+        writer.flush();
+        // server sends us challenge
+        uctx.next();
+        parseAndThrowFailure(uctx);
+        if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
+            throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
+        String challengeStr = parseElementText(uctx, CHALLENGE_ELEMENT_NAME);
+        if (log.isInfoEnabled())
+            log.info("Received challenge string: " + challengeStr);
+        DigestMD5SaslClient client = new DigestMD5SaslClient();
+        client.unwrapChallenge(challengeStr);
+        String response = client.getAuthResponse(sessCtx, streamCtx);
+        // send response
+        if (log.isInfoEnabled())
+            log.info("Sending response: " + response);
+        writer.startTagNamespaces(idx, RESPONSE_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
+        writer.closeStartTag();
+        writer.writeTextContent(response);
+        writer.endTag(idx, RESPONSE_ELEMENT_NAME);
+        writer.flush();
+        // check remote response
+        uctx.next();
+        parseAndThrowFailure(uctx);
+        if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
+            throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
+        // the received string is rspauth, which can be ignored
+        parseElementText(uctx, CHALLENGE_ELEMENT_NAME);
+        // send final response
+        if (log.isInfoEnabled())
+            log.info("Authentication accepted, sending final acknowledgement");
+        writer.startTagNamespaces(idx, RESPONSE_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
+        writer.closeEmptyTag();
+        writer.flush();
+        // receive final success or failure
+        uctx.next();
+        parseAndThrowFailure(uctx);
+        if (!uctx.isAt(NS_STREAM_SASL, "success"))
+            throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
+        parseElementText(uctx, "success");
+    }
+
+    private String parseElementText(UnmarshallingContext uctx, String elementName) throws JiBXException {
+        uctx.parsePastStartTag(NS_STREAM_SASL, elementName);
+        String text = uctx.parseContentText();
+        uctx.toEnd();
+        return text;
+    }
+
+    /**
      * will parse and throw exception if failure is caught
      * 
      * @param uctx
      * @throws JiBXException
      * @throws XMPPException
      */
-    private void parseAndThrowFailure(UnmarshallingContext uctx) throws JiBXException, XMPPException {
+    protected void parseAndThrowFailure(UnmarshallingContext uctx) throws JiBXException, XMPPException {
         if (uctx.isAt(NS_STREAM_SASL, "failure")) {
             uctx.parsePastStartTag(NS_STREAM_SASL, "failure");
             uctx.toTag();
@@ -141,6 +201,13 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
      * @return the preferred mechanism, or null if one is not found.
      */
     protected String findPreferredMechanism(StreamFeatures features) {
+        if (log.isDebugEnabled()) {
+            Iterator iter = features.getSaslMechanisms().iterator();
+            StringBuffer buf = new StringBuffer("Available Mechanism: ");
+            while (iter.hasNext())
+                buf.append(iter.next() + ",");
+            log.debug(buf.toString());
+        }
         if (features.isSaslMechanismSupported(DIGEST_MD5))
             return DIGEST_MD5;
         if (features.isSaslMechanismSupported(PLAIN))

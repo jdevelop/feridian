@@ -8,12 +8,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 
-import com.echomine.jibx.JiBXOutputStreamWrapper;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
-import com.echomine.xmpp.IConnectionHandler;
+import com.echomine.xmpp.ISessionHandler;
 import com.echomine.xmpp.IXMPPStream;
+import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
@@ -26,7 +26,7 @@ import com.echomine.xmpp.XMPPStreamFactory;
  * outgoing parsing. In addition, the handler will do automatic TLS negotation
  * if the remote entity supports it. It is on by default.
  */
-public class XMPPConnectionHandler implements IConnectionHandler {
+public class XMPPConnectionHandler implements ISessionHandler {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
 
     protected XMPPSessionContext sessCtx;
@@ -82,7 +82,7 @@ public class XMPPConnectionHandler implements IConnectionHandler {
         sessCtx.setHostName(connCtx.getHostName());
         try {
             socket.setKeepAlive(true);
-            streamCtx.getWriter().setOutput(new JiBXOutputStreamWrapper(socket.getOutputStream()));
+            streamCtx.getWriter().setOutput(socket.getOutputStream());
             streamCtx.getUnmarshallingContext().setDocument(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             streamCtx.setSocket(socket);
             if (log.isDebugEnabled())
@@ -115,16 +115,38 @@ public class XMPPConnectionHandler implements IConnectionHandler {
      *      com.echomine.net.ConnectionContext)
      */
     public void handle(Socket socket, ConnectionContext connCtx) throws IOException {
+        synchronized(this) {
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                // TODO Auto-generated catch block
+                ex.printStackTrace();
+            }
+        }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.echomine.xmpp.IConnectionHandler#authenticateSession(java.lang.String,
+     * @see com.echomine.xmpp.ISessionHandler#authenticateSession(java.lang.String,
      *      char[], java.lang.String)
      */
     public void authenticateSession(String username, char[] password, String resource) throws XMPPException {
-        throw new XMPPException("NOT IMPLEMENTED");
+        XMPPAuthCallback callback = new XMPPAuthCallback();
+        callback.setUsername(username);
+        callback.setPassword(password);
+        callback.setResource(resource);
+        streamCtx.setAuthCallback(callback);
+        //see if SASL feature is supported
+        IXMPPStream stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SASL);
+        if (streamCtx.getFeatures().isSaslSupported() && stream != null) {
+            stream.process(sessCtx, streamCtx);
+            //redo handshake
+            handshakeStream.process(sessCtx, streamCtx);
+            //perform resource and session binding
+            return;
+        }
+        throw new XMPPException("No proper authentication method found.");
     }
 
     /*
@@ -169,7 +191,7 @@ public class XMPPConnectionHandler implements IConnectionHandler {
     /*
      * (non-Javadoc)
      * 
-     * @see com.echomine.xmpp.IConnectionHandler#getSessionContext()
+     * @see com.echomine.xmpp.ISessionHandler#getSessionContext()
      */
     public XMPPSessionContext getSessionContext() {
         return sessCtx;
@@ -178,7 +200,7 @@ public class XMPPConnectionHandler implements IConnectionHandler {
     /*
      * (non-Javadoc)
      * 
-     * @see com.echomine.xmpp.IConnectionHandler#getStreamContext()
+     * @see com.echomine.xmpp.ISessionHandler#getStreamContext()
      */
     public XMPPStreamContext getStreamContext() {
         return streamCtx;

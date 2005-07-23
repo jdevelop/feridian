@@ -21,9 +21,9 @@ import com.echomine.xmpp.XMPPStreamContext;
  * will unwrap, wrap, and work with the different aspects of SASL authentication
  * that is pertinent to XMPP.
  */
-public class XMPPSaslClient {
-    private static final Log log = LogFactory.getLog(XMPPSaslClient.class);
-    private SaslContext challengeCtx = new SaslContext();
+public class DigestMD5SaslClient {
+    private static final Log log = LogFactory.getLog(DigestMD5SaslClient.class);
+    private DigestMD5SaslContext challengeCtx = new DigestMD5SaslContext();
     private String cnonce;
     private JID authzid;
     private String digesturi;
@@ -52,13 +52,14 @@ public class XMPPSaslClient {
         StringBuffer buf = new StringBuffer();
         cnonce = generateCNonce();
         digesturi = "xmpp/" + sessCtx.getHostName();
-        authzid = new JID(sessCtx.getUsername(), sessCtx.getHostName(), sessCtx.getResource());
+        authzid = new JID(auth.getUsername(), sessCtx.getHostName(), auth.getResource());
         buf.append("username=\"").append(auth.getUsername()).append("\"");
         if (challengeCtx.getRealm() != null)
             buf.append(",realm=\"").append(challengeCtx.getRealm()).append("\"");
         buf.append(",nonce=\"").append(challengeCtx.getNonce()).append("\"");
         buf.append(",cnonce=\"").append(cnonce).append("\"");
         buf.append(",nc=00000001");
+        buf.append(",qop=auth");
         buf.append(",digest-uri=\"").append(digesturi).append("\"");
         buf.append(",response=\"").append(generatePasswordDigest(sessCtx, streamCtx.getAuthCallback())).append("\"");
         buf.append(",charset=utf-8");
@@ -79,7 +80,8 @@ public class XMPPSaslClient {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             md = MessageDigest.getInstance("MD5");
-            String x = callback.getUsername() + ":" + challengeCtx.getRealm() + ":" + new String(callback.getPassword());
+            String realm = challengeCtx.getRealm() != null ? challengeCtx.getRealm() : "";
+            String x = callback.getUsername() + ":" + realm + ":" + new String(callback.getPassword());
             temp = md.digest(x.getBytes());
             bos.write(temp);
             String b = ":" + challengeCtx.getNonce() + ":" + cnonce + ":" + authzid.toString();

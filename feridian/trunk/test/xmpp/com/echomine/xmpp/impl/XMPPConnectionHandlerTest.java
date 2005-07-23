@@ -52,8 +52,4 @@ public class XMPPConnectionHandlerTest extends TestCase {
         assertNotNull(streamCtx.getUnmarshallingContext());
         assertTrue(streamCtx.getFeatures().isBindingSupported());
     }
-    
-    public void testAuthenticateWithSASL() throws Exception {
-        
-    }
 }

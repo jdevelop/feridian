@@ -40,8 +40,9 @@ public class SimpleXMPPClient {
      * having to recompile the test class
      */
     public void runConsole() throws Exception {
+        conn.addConnectionListener(new DefaultConnectionListener());
         conn.connect(serverName, port, true);
-        Thread.sleep(4000);
+        conn.login(username, password.toCharArray(), "Home");
     }
 
     class DefaultConnectionListener implements ConnectionListener {

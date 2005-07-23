@@ -7,7 +7,7 @@ import com.echomine.net.ConnectionException;
 import com.echomine.net.ConnectionListener;
 import com.echomine.net.ConnectionVetoException;
 import com.echomine.net.HandshakeableSocketConnector;
-import com.echomine.xmpp.IConnectionHandler;
+import com.echomine.xmpp.ISessionHandler;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPConnection;
 import com.echomine.xmpp.SendPacketFailedException;
@@ -22,7 +22,7 @@ import com.echomine.xmpp.XMPPSessionContext;
  */
 public class XMPPConnectionImpl implements IXMPPConnection {
     HandshakeableSocketConnector conn;
-    IConnectionHandler handler;
+    ISessionHandler handler;
 
     /**
      * The default constructor that most classes should use. It will use a
@@ -30,7 +30,7 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * 
      * @param conn
      */
-    public XMPPConnectionImpl(IConnectionHandler handler) {
+    public XMPPConnectionImpl(ISessionHandler handler) {
         this(new HandshakeableSocketConnector(), handler);
     }
 
@@ -41,7 +41,7 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * @param conn the connector to use
      * @param handler the handler to use.
      */
-    public XMPPConnectionImpl(HandshakeableSocketConnector conn, IConnectionHandler handler) {
+    public XMPPConnectionImpl(HandshakeableSocketConnector conn, ISessionHandler handler) {
         this.conn = conn;
         this.handler = handler;
     }

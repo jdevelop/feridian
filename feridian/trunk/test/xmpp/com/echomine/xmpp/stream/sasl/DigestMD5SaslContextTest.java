@@ -2,11 +2,11 @@ package com.echomine.xmpp.stream.sasl;
 
 import junit.framework.TestCase;
 
-public class SaslContextTest extends TestCase {
-    SaslContext ctx;
+public class DigestMD5SaslContextTest extends TestCase {
+    DigestMD5SaslContext ctx;
     
     protected void setUp() throws Exception {
-        ctx = new SaslContext();
+        ctx = new DigestMD5SaslContext();
     }
 
     public void testUnwrap() throws Exception {

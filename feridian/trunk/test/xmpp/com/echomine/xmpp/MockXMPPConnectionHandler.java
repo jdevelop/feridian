@@ -12,7 +12,7 @@ import com.echomine.net.HandshakeFailedException;
  * and assertion testing afterwards. This class is useful for testing connection
  * logic.
  */
-public class MockXMPPConnectionHandler implements IConnectionHandler {
+public class MockXMPPConnectionHandler implements ISessionHandler {
     boolean connected;
     boolean failHandshake;
     boolean failAuthentication;

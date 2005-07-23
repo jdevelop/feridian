@@ -8,7 +8,7 @@ import com.echomine.net.HandshakeableSocketHandler;
  * The handler also transforms these data from packets to recognizable stanzas
  * by the XMPP system, and vice versa.
  */
-public interface IConnectionHandler extends HandshakeableSocketHandler {
+public interface ISessionHandler extends HandshakeableSocketHandler {
 
     /**
      * This method will authenticate the session stream with the provided
