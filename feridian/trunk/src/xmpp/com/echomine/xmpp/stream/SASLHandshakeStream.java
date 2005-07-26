@@ -61,10 +61,13 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
             else if (PLAIN.equals(mechanism))
                 authPlain(uctx, writer, sessCtx, streamCtx);
             // save username and resource and reset auth callback
+            String hostname = sessCtx.getHostName();
             sessCtx.reset();
+            sessCtx.setHostName(hostname);
             sessCtx.setUsername(streamCtx.getAuthCallback().getUsername());
             sessCtx.setResource(streamCtx.getAuthCallback().getResource());
             streamCtx.getAuthCallback().clear();
+            streamCtx.clearFeatures();
             if (log.isInfoEnabled())
                 log.info("SASL authentication complete, resetting input and output streams for new handshake");
             // reset writer and unmarshalling context for handshake
@@ -87,8 +90,8 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
      * Authenticates using the SASL PLAIN mechanism
      * 
      * @throws IOException
-     * @throws JiBXException 
-     * @throws XMPPException 
+     * @throws JiBXException
+     * @throws XMPPException
      */
     private void authPlain(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws IOException, JiBXException, XMPPException {
         int idx = writer.getNamespaces().length;
@@ -166,6 +169,20 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         parseElementText(uctx, "success");
     }
 
+    /**
+     * Convenience method to parse past an element and obtaining the text
+     * contained within. It expects to be at the start tag, and will parse the
+     * context, then end tag. This method is here to bypass a bug in jibx where
+     * jibx's parseElementText() will hang while reading an xml stream. This is
+     * because the jibx method attempts to read past the end tag, but in a
+     * streaming xml, there is no more data, and thus the parser will hang,
+     * waiting for more incoming data.
+     * 
+     * @param uctx the unmarshalling context
+     * @param elementName the element name to parse text
+     * @return the text, or null if none cannot be found.
+     * @throws JiBXException if any exception occurs
+     */
     private String parseElementText(UnmarshallingContext uctx, String elementName) throws JiBXException {
         uctx.parsePastStartTag(NS_STREAM_SASL, elementName);
         String text = uctx.parseContentText();
@@ -174,7 +191,7 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
     }
 
     /**
-     * will parse and throw exception if failure is caught
+     * will parse and throw exception if failure during negotiation is caught
      * 
      * @param uctx
      * @throws JiBXException

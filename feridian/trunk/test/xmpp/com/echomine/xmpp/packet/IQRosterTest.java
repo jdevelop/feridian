@@ -2,8 +2,8 @@ package com.echomine.xmpp.packet;
 
 import java.io.Reader;
 
-import com.echomine.XMPPTestCase;
 import com.echomine.xmpp.JID;
+import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * Tests the roster iq packet and roster item

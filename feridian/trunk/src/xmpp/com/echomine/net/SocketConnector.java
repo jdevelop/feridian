@@ -107,9 +107,11 @@ public class SocketConnector extends TimeableConnection {
      * makes a connection asynchronously using internal socket handler. This
      * means that the method will be run in a separate thread and return control
      * to the caller of the method immediately.
+     * 
+     * @param threadName optional thread name
      */
-    public void aconnect(ConnectionContext connectionCtx) {
-        aconnect(socketHandler, connectionCtx);
+    public void aconnect(ConnectionContext connectionCtx, String threadName) {
+        aconnect(socketHandler, connectionCtx, threadName);
     }
 
     /**
@@ -144,8 +146,10 @@ public class SocketConnector extends TimeableConnection {
      * makes a connection asynchronously. This means that the method will be run
      * in a separate thread and return control to the caller of the method
      * immediately.
+     * 
+     * @param threadName optional name of the thread
      */
-    public void aconnect(final SocketHandler socketHandler, final ConnectionContext connectionCtx) {
+    public void aconnect(final SocketHandler socketHandler, final ConnectionContext connectionCtx, String threadName) {
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
@@ -170,6 +174,8 @@ public class SocketConnector extends TimeableConnection {
                 }
             }
         });
+        if (threadName != null)
+            thread.setName(threadName);
         thread.start();
     }
 
@@ -186,11 +192,12 @@ public class SocketConnector extends TimeableConnection {
      * 
      * @param socketHandler the socket handler
      * @param connectionCtx the connection context
+     * @param threadName optional name of thread
      * @throws ConnectionVetoException if connection is vetoed
      * @throws IOException if connection failed or connection errored
      * @throws HandshakeFailedException Handshaking failed
      */
-    public void connectWithSynchStart(final HandshakeableSocketHandler socketHandler, final ConnectionContext connectionCtx) throws ConnectionException, ConnectionVetoException, IOException {
+    public void connectWithSynchStart(final HandshakeableSocketHandler socketHandler, final ConnectionContext connectionCtx, String threadName) throws ConnectionException, ConnectionVetoException, IOException {
         startingConnection(socketHandler, connectionCtx);
         Socket socket = null;
         boolean fail = false;
@@ -211,6 +218,8 @@ public class SocketConnector extends TimeableConnection {
             };
             runner.socket = socket;
             Thread thread = new Thread(runner);
+            if (threadName != null)
+                thread.setName(threadName);
             thread.start();
         } catch (ConnectionException ex) {
             ConnectionEvent event = new ConnectionEvent(connectionCtx, ConnectionEvent.CONNECTION_ERRORED, "Error..." + ex.getMessage());

@@ -3,7 +3,7 @@ package com.echomine.xmpp.packet;
 import java.io.Reader;
 import java.io.StringReader;
 
-import com.echomine.XMPPTestCase;
+import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * Tests the iq privacy packet and its associated functions

@@ -1,6 +1,5 @@
 package com.echomine.xmpp;
 
-import com.echomine.XMPPTestCase;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 public class StanzaPacketBaseTest extends XMPPTestCase {

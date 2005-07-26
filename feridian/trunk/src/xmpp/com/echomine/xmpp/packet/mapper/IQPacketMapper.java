@@ -113,9 +113,9 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
                 } else if (iqClass != null) {
                     packet = (IQPacket) JiBXUtil.unmarshallObject(ctx, iqClass);
                 } else {
-                    String unknownText = ctx.parseElementText(ctx.getNamespace(), ctx.getElementName());
-                    if (log.isWarnEnabled())
-                        log.warn("Found and Ignoring Unknown Element Data: " + unknownText);
+                    if (log.isInfoEnabled())
+                        log.info("Ignored Unknown Stanza -- element: " + ctx.getName() + ", ns: " + ctx.getNamespace());
+                    ctx.skipElement();
                 }
             }
         } while (true);

@@ -1,4 +1,4 @@
-package com.echomine;
+package com.echomine.xmpp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -7,7 +7,7 @@ import com.echomine.net.ConnectionException;
 import com.echomine.net.ConnectionListener;
 import com.echomine.net.ConnectionVetoException;
 import com.echomine.net.HandshakeableSocketConnector;
-import com.echomine.xmpp.ISessionHandler;
+import com.echomine.xmpp.IPacketListener;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPConnection;
 import com.echomine.xmpp.SendPacketFailedException;
@@ -22,28 +22,41 @@ import com.echomine.xmpp.XMPPSessionContext;
  */
 public class XMPPConnectionImpl implements IXMPPConnection {
     HandshakeableSocketConnector conn;
-    ISessionHandler handler;
+    XMPPConnectionHandler handler;
+    PacketListenerManager listenerManager;
 
     /**
-     * The default constructor that most classes should use. It will use a
-     * default connector.
-     * 
-     * @param conn
+     * The default constructor that most classes should use. It will use all
+     * default objects.
      */
-    public XMPPConnectionImpl(ISessionHandler handler) {
+    public XMPPConnectionImpl() {
+        this(new XMPPConnectionHandler());
+    }
+
+    /**
+     * uses the specified alternate objects. This is usually used when an
+     * alternate handler class is preferred (ie. user overrides the default
+     * implementation and then specified a factory that instantiates the
+     * alternative handler).
+     * 
+     * @param handler the handler to use.
+     */
+    public XMPPConnectionImpl(XMPPConnectionHandler handler) {
         this(new HandshakeableSocketConnector(), handler);
     }
 
     /**
-     * uses the connector and handler. This is really a method used to perform
-     * unit testing.
+     * uses the specified alternate objects. This is really a method used to
+     * perform unit testing.
      * 
      * @param conn the connector to use
      * @param handler the handler to use.
      */
-    public XMPPConnectionImpl(HandshakeableSocketConnector conn, ISessionHandler handler) {
+    public XMPPConnectionImpl(HandshakeableSocketConnector conn, XMPPConnectionHandler handler) {
         this.conn = conn;
         this.handler = handler;
+        this.listenerManager = new PacketListenerManager(this);
+        handler.setPacketListenerManager(listenerManager);
     }
 
     /**
@@ -64,10 +77,10 @@ public class XMPPConnectionImpl implements IXMPPConnection {
         try {
             ConnectionContext context = new ConnectionContext(host, port);
             if (wait) {
-                conn.connectWithSynchStart(handler, context);
+                conn.connectWithSynchStart(handler, context, "Feridian - " + host);
                 return handler.getSessionContext();
             } else {
-                conn.aconnect(handler, context);
+                conn.aconnect(handler, context, "Feridian - " + host);
                 return null;
             }
         } catch (IOException ex) {
@@ -78,9 +91,9 @@ public class XMPPConnectionImpl implements IXMPPConnection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.echomine.xmpp.IXMPPConnection#disconnect(boolean)
+     * @see com.echomine.xmpp.IXMPPConnection#disconnect()
      */
-    public void disconnect(boolean wait) {
+    public void disconnect() {
         handler.shutdown();
     }
 
@@ -100,6 +113,7 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * @see com.echomine.xmpp.IXMPPConnection#sendPacket(com.echomine.xmpp.IStanzaPacket)
      */
     public void sendPacket(IStanzaPacket packet) throws SendPacketFailedException {
+        handler.queuePacket(packet, false);
     }
 
     /*
@@ -108,7 +122,7 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * @see com.echomine.xmpp.IXMPPConnection#sendSyncPacket(com.echomine.xmpp.IStanzaPacket)
      */
     public IStanzaPacket sendSyncPacket(IStanzaPacket packet) throws SendPacketFailedException {
-        return null;
+        return handler.queuePacket(packet, true);
     }
 
     /*
@@ -129,4 +143,21 @@ public class XMPPConnectionImpl implements IXMPPConnection {
         conn.removeConnectionListener(listener);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.echomine.xmpp.IXMPPConnection#addPacketListener(com.echomine.xmpp.IPacketListener)
+     */
+    public void addPacketListener(IPacketListener listener) {
+        listenerManager.addPacketListener(listener);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.echomine.xmpp.IXMPPConnection#removePacketListener(com.echomine.xmpp.IPacketListener)
+     */
+    public void removePacketListener(IPacketListener listener) {
+        listenerManager.removePacketListener(listener);
+    }
 }

@@ -18,6 +18,7 @@ public class StanzaPacketBase implements IStanzaPacket {
     private JID from;
     private String id;
     private String type;
+    private long timeout = 5000;
     private StanzaErrorPacket error;
 
     public StanzaPacketBase() {
@@ -78,6 +79,20 @@ public class StanzaPacketBase implements IStanzaPacket {
      */
     public void setType(String type) {
         this.type = type;
+    }
+
+    /**
+     * @return Returns the timeout.
+     */
+    public long getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * @param timeout The timeout to set.
+     */
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
 
     /**

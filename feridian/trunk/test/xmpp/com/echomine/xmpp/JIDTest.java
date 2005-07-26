@@ -1,6 +1,5 @@
 package com.echomine.xmpp;
 
-import com.echomine.XMPPTestCase;
 
 /**
  * Tests the JID class and checks to see if the parsing of the JID is correct

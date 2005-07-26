@@ -104,20 +104,16 @@ public interface IXMPPConnection {
     XMPPSessionContext connect(String host, int port, boolean wait) throws ConnectionException, ConnectionVetoException;
 
     /**
-     * Disconnect from the remote entity. This method has an option to wait
-     * until the connection is fully shutdown before disconnecting. Otherwise,
-     * users should listen for shutdown events through listeners. Before
-     * disconnecting, it is recommended that all pending packets be processed
-     * (outgoing packets are sent out and incoming packets are fired as events).
-     * 
-     * @param wait true to wait for shutdown to finish before returning.
+     * Disconnect from the remote entity. Before disconnecting, it is
+     * recommended that all pending packets be processed (outgoing packets are
+     * sent out and incoming packets are fired as events).
      */
-    void disconnect(boolean wait);
+    void disconnect();
 
     /**
      * adds a listener to listen for connection starting/establishing/closing
      * events. When connection closes, the listener will NOT be removed. Thus,
-     * the listener can abe used for subsequent connections. However, if you do
+     * the listener can be used for subsequent connections. However, if you do
      * not need it anymore, you must manually remove the listener or memory
      * leaks might occur.
      * 
@@ -131,4 +127,21 @@ public interface IXMPPConnection {
      * @param listener the listener to remove
      */
     void removeConnectionListener(ConnectionListener listener);
+
+    /**
+     * adds a listener to listen for incoming packets. When connection closes,
+     * the listener will NOT be removed. Thus, the listener can be used for
+     * subsequent connections. However, if you do not need it anymore, you must
+     * manually remove the listener or memory leaks may occur.
+     * 
+     * @param listener the lsitener to add
+     */
+    void addPacketListener(IPacketListener listener);
+
+    /**
+     * removes the packet listener
+     * 
+     * @param listener the listener to remove
+     */
+    void removePacketListener(IPacketListener listener);
 }

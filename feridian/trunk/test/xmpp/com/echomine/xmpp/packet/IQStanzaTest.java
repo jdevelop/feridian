@@ -2,8 +2,8 @@ package com.echomine.xmpp.packet;
 
 import java.io.StringReader;
 
-import com.echomine.XMPPTestCase;
 import com.echomine.jibx.JiBXUtil;
+import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;
 
 /**

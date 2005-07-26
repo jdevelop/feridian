@@ -12,7 +12,6 @@ import com.echomine.xmpp.XMPPConnectionFactory;
  */
 public class XMPPConnectionFactoryImpl extends XMPPConnectionFactory {
     public IXMPPConnection createXMPPConnection() {
-        XMPPConnectionHandler handler = new XMPPConnectionHandler();
-        return new XMPPConnectionImpl(handler);
+        return new XMPPConnectionImpl();
     }
 }

@@ -3,7 +3,6 @@ package com.echomine.xmpp.stream;
 import java.util.ArrayList;
 
 import com.echomine.net.MockSocket;
-import com.echomine.util.Base64;
 import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 

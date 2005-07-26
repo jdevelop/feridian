@@ -57,8 +57,10 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
      * The method will return immediately and run the daemon in a background
      * thread.
      * </p>
+     * 
+     * @param optional name of thread
      */
-    public void accept(final SocketHandler socketHandler) {
+    public void accept(final SocketHandler socketHandler, String threadName) {
         shutdown = false;
         Thread thread = new Thread(new Runnable() {
             public void run() {
@@ -89,6 +91,8 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
                 }
             }
         });
+        if (threadName != null)
+            thread.setName(threadName);
         thread.start();
     }
 
@@ -107,8 +111,10 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
      * The method returns immediately and runs the daemon in a background
      * thread.
      * </p>
+     * 
+     * @param threadName optional name of thread
      */
-    public void aaccept(final SocketHandler socketHandler) {
+    public void aaccept(final SocketHandler socketHandler, String threadName) {
         shutdown = false;
         Thread thread = new Thread(new Runnable() {
             public void run() {
@@ -124,6 +130,8 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
                 }
             }
         });
+        if (threadName != null)
+            thread.setName(threadName);
         thread.start();
     }
 

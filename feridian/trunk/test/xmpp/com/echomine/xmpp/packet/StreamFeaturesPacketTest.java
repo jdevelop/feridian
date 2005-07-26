@@ -4,8 +4,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 
-import com.echomine.XMPPTestCase;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * Tests the stream features packet

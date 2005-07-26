@@ -1,12 +1,13 @@
 package com.echomine.feridian;
 
-import com.echomine.XMPPTestCase;
+import junit.framework.TestCase;
+
 import com.echomine.xmpp.packet.IQResourceBindPacket;
 
 /**
  * Tests the feridian configuration.
  */
-public class FeridianConfigurationTest extends XMPPTestCase {
+public class FeridianConfigurationTest extends TestCase {
     public void testFeridianConfig() throws Exception {
         FeridianConfiguration config = FeridianConfiguration.getConfig();
         assertEquals(IQResourceBindPacket.class, config.getClassForIQUri("urn:ietf:params:xml:ns:xmpp-bind"));

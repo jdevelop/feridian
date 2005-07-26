@@ -36,4 +36,15 @@ public interface IStanzaPacket extends IPacket {
      * @return the type associated with this packet
      */
     String getType();
+
+    /**
+     * Retrieves the timeout set for the packet. This is used to indicate how
+     * long the user should wait for a reply when sending a packet
+     * synchronously. The implementation should set a default reasonable timeout
+     * period (ie. 5 seconds). Normally, if the server does not reply within a
+     * short period of time, there's probably something wrong.
+     * 
+     * @return the timeout in millis
+     */
+    long getTimeout();
 }

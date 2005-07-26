@@ -23,6 +23,8 @@ public class XMPPSessionContext {
         host = null;
         sessionId = null;
         version = null;
+        username = null;
+        resource = null;
     }
 
     /**

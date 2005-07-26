@@ -89,9 +89,12 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             streamCtx.setSocket(tlsSocket);
             streamCtx.setWriter(writer);
             streamCtx.setUnmarshallingContext(uctx);
-            
+
             // as per XMPP specs, must reset all previous session data
+            String hostname = sessCtx.getHostName();
             sessCtx.reset();
+            sessCtx.setHostName(hostname);
+            streamCtx.clearFeatures();
         } catch (Exception ex) {
             if (ex instanceof XMPPException)
                 throw (XMPPException) ex;

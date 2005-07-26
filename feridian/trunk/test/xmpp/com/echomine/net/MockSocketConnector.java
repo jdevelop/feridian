@@ -29,29 +29,29 @@ public class MockSocketConnector extends HandshakeableSocketConnector {
         this.failConnection = fail;
     }
 
-    public void aconnect(HandshakeableSocketHandler socketHandler, ConnectionContext connectionModel) {
+    public void aconnect(HandshakeableSocketHandler socketHandler, ConnectionContext connCtx, String threadName) {
         if (!failConnection) {
-            super.aconnect(socketHandler, connectionModel);
+            super.aconnect(socketHandler, connCtx, threadName);
             return;
         }
-        simulateFailedConnection(connectionModel);
+        simulateFailedConnection(connCtx);
     }
 
-    public void connect(HandshakeableSocketHandler socketHandler, ConnectionContext connectionModel) throws ConnectionFailedException {
+    public void connect(HandshakeableSocketHandler socketHandler, ConnectionContext connCtx) throws ConnectionFailedException {
         if (!failConnection) {
-            super.connect(socketHandler, connectionModel);
+            super.connect(socketHandler, connCtx);
             return;
         }
-        simulateFailedConnection(connectionModel);
+        simulateFailedConnection(connCtx);
         throw new ConnectionFailedException("Simulated Connection Failure");
     }
 
-    public void connectWithSynchStart(HandshakeableSocketHandler socketHandler, ConnectionContext connectionModel) throws ConnectionException, ConnectionVetoException, IOException {
+    public void connectWithSynchStart(HandshakeableSocketHandler socketHandler, ConnectionContext connCtx, String threadName) throws ConnectionException, ConnectionVetoException, IOException {
         if (!failConnection) {
-            super.connectWithSynchStart(socketHandler, connectionModel);
+            super.connectWithSynchStart(socketHandler, connCtx, threadName);
             return;
         }
-        simulateFailedConnection(connectionModel);
+        simulateFailedConnection(connCtx);
         throw new ConnectionFailedException("Simulated Connection Failure");
     }
 
@@ -72,15 +72,15 @@ public class MockSocketConnector extends HandshakeableSocketConnector {
      * Simulates a failed connection by simply firing events
      * 
      */
-    private void simulateFailedConnection(ConnectionContext connectionModel) {
-        ConnectionEvent event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_STARTING);
-        ConnectionEvent vetoEvent = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_VETOED);
+    private void simulateFailedConnection(ConnectionContext connCtx) {
+        ConnectionEvent event = new ConnectionEvent(connCtx, ConnectionEvent.CONNECTION_STARTING);
+        ConnectionEvent vetoEvent = new ConnectionEvent(connCtx, ConnectionEvent.CONNECTION_VETOED);
         try {
             fireConnectionStarting(event, vetoEvent);
         } catch (ConnectionVetoException ex) {
         } finally {
             // error connecting
-            event = new ConnectionEvent(connectionModel, ConnectionEvent.CONNECTION_ERRORED, "Simulated Failed Connection");
+            event = new ConnectionEvent(connCtx, ConnectionEvent.CONNECTION_ERRORED, "Simulated Failed Connection");
             fireConnectionClosed(event);
         }
     }

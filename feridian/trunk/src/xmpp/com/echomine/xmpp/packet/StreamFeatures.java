@@ -21,6 +21,14 @@ public class StreamFeatures implements IPacket {
     private LinkedHashMap features = new LinkedHashMap();
 
     /**
+     * Clears all the data for reuse of this object
+     */
+    public void clear() {
+        tlsRequired = false;
+        features.clear();
+    }
+
+    /**
      * checks if TLS is required.
      * 
      * @return true if TLS is required, false otherwise
@@ -39,9 +47,9 @@ public class StreamFeatures implements IPacket {
      * @param tlsRequired true if TLS is required.
      */
     public void setTLSRequired(boolean tlsRequired) {
-        //setting element name and value to null is intentional
-        //since we know that TLS is (un)marshalled separately.
-        //yes, it's a cheating technique that should NOT be copied
+        // setting element name and value to null is intentional
+        // since we know that TLS is (un)marshalled separately.
+        // yes, it's a cheating technique that should NOT be copied
         if (tlsRequired)
             addFeature(XMPPConstants.NS_STREAM_TLS, null, null);
         this.tlsRequired = tlsRequired;

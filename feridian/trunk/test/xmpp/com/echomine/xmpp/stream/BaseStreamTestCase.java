@@ -3,11 +3,11 @@ package com.echomine.xmpp.stream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import com.echomine.XMPPTestCase;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPStreamContext;
+import com.echomine.xmpp.XMPPTestCase;
 
 /**
  * Base class for stream test cases to extend from that provides many common

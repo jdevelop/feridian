@@ -1,5 +1,6 @@
 package com.echomine.util;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -35,6 +36,17 @@ public class ClassUtil {
      */
     public static Reader getResourceAsReader(String res, String enc) throws UnsupportedEncodingException {
         return new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(res), "UTF-8");
+    }
+
+    /**
+     * retrieves the specified resource from the classpath, and return it as a
+     * input stream.
+     * 
+     * @param res the path location of the resource
+     * @return the resource as an input stream
+     */
+    public static InputStream getResourceAsStream(String res) {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(res);
     }
 
     /**

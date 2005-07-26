@@ -5,6 +5,7 @@ import java.net.Socket;
 
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
+import com.echomine.xmpp.impl.XMPPConnectionHandler;
 
 /**
  * This mock socket handler will emulate the server by simply streaming out
@@ -12,14 +13,11 @@ import com.echomine.net.HandshakeFailedException;
  * and assertion testing afterwards. This class is useful for testing connection
  * logic.
  */
-public class MockXMPPConnectionHandler implements ISessionHandler {
-    boolean connected;
+public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
     boolean failHandshake;
     boolean failAuthentication;
     String sessionId;
     String version;
-    XMPPSessionContext sessCtx = new XMPPSessionContext();
-    XMPPStreamContext streamCtx = new XMPPStreamContext();
 
     public void handshake(Socket socket, ConnectionContext connCtx) throws HandshakeFailedException {
         if (failHandshake)
@@ -31,6 +29,8 @@ public class MockXMPPConnectionHandler implements ISessionHandler {
     }
 
     public void handle(Socket socket, ConnectionContext connCtx) throws IOException {
+        while (!shutdown)
+            Thread.yield();
     }
 
     /**
@@ -39,29 +39,14 @@ public class MockXMPPConnectionHandler implements ISessionHandler {
     public void authenticateSession(String username, char[] password, String resource) throws XMPPException {
         if (failAuthentication)
             throw new XMPPException("Unable to login -- Simulated authentication failure");
-        //after authentication, session context data must be set
+        // after authentication, session context data must be set
         sessCtx.setUsername(username);
         sessCtx.setResource(resource);
     }
 
-    public boolean isConnected() {
-        return connected;
-    }
-
     public void shutdown() {
+        super.shutdown();
         connected = false;
-    }
-
-    public void start() {
-        connected = false;
-    }
-
-    public XMPPSessionContext getSessionContext() {
-        return sessCtx;
-    }
-
-    public XMPPStreamContext getStreamContext() {
-        return streamCtx;
     }
 
     public void setFailHandshake(boolean fail) {
@@ -75,7 +60,7 @@ public class MockXMPPConnectionHandler implements ISessionHandler {
     public void setVersion(String version) {
         this.version = version;
     }
-    
+
     public void setFailAuthentication(boolean fail) {
         this.failAuthentication = fail;
     }

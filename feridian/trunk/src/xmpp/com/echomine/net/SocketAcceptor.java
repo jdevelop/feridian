@@ -96,8 +96,10 @@ public class SocketAcceptor extends TimeableConnection {
      * Failure to do so will result in a port that's binded until the end of the
      * application.
      * </p>
+     * 
+     * @param threadName optional name of thread
      */
-    public void aaccept(final SocketHandler socketHandler) {
+    public void aaccept(final SocketHandler socketHandler, String threadName) {
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 Socket s = null;
@@ -126,6 +128,8 @@ public class SocketAcceptor extends TimeableConnection {
                 }
             }
         });
+        if (threadName != null)
+            thread.setName(threadName);
         thread.start();
     }
 

@@ -77,6 +77,8 @@ public class XMPPStreamContext {
         uctx = new UnmarshallingContext();
         writer = new XMPPStreamWriter();
         socket = null;
+        if (features != null)
+            features.clear();
         if (authCallback != null) {
             authCallback.clear();
             authCallback = null;
@@ -93,6 +95,13 @@ public class XMPPStreamContext {
         if (features == null)
             features = new StreamFeatures();
         return features;
+    }
+
+    /**
+     * Clears the features and set it for future renegotiation purposes
+     */
+    public void clearFeatures() {
+        features.clear();
     }
 
     /**
