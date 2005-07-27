@@ -41,6 +41,8 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
             writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", sessCtx.getHostName());
             writer.closeStartTag();
             writer.flush();
+            // start logging
+            streamCtx.getReader().startLogging();
             // now read in the xml stream
             if (!uctx.isAt(XMPPConstants.NS_JABBER_STREAM, STREAM_ELEMENT_NAME))
                 uctx.throwStartTagNameError(XMPPConstants.NS_JABBER_STREAM, STREAM_ELEMENT_NAME);
@@ -62,6 +64,7 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
                 StreamFeatures features = (StreamFeatures) JiBXUtil.unmarshallObject(uctx, StreamFeatures.class);
                 streamCtx.setFeatures(features);
             }
+            streamCtx.getReader().stopLogging();
         } catch (IOException ex) {
             throw new XMPPException(ex);
         } catch (JiBXException ex) {

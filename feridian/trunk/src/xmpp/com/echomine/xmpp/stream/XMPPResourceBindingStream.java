@@ -41,8 +41,11 @@ public class XMPPResourceBindingStream implements IXMPPStream {
             request.setType(IQPacket.TYPE_SET);
             request.setResourceName(sessCtx.getResource());
             JiBXUtil.marshallIQPacket(writer, request);
+            // start logging
+            streamCtx.getReader().startLogging();
             // process result
             IQResourceBindPacket result = (IQResourceBindPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+            streamCtx.getReader().stopLogging();
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");
             if (result.isError())

@@ -2,7 +2,6 @@ package com.echomine.xmpp.stream;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -18,6 +17,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPLoggableReader;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.SimpleTrustManager;
 import com.echomine.xmpp.IXMPPStream;
@@ -67,6 +67,8 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             writer.startTagNamespaces(idx, STARTTLS_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
             writer.closeEmptyTag();
             writer.flush();
+            // start logging
+            streamCtx.getReader().startLogging();
             // check for error or proceed
             uctx.next();
             if (uctx.isAt(NS_STREAM_TLS, "failure")) {
@@ -76,11 +78,12 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             if (!uctx.isAt(NS_STREAM_TLS, "proceed"))
                 throw new XMPPException("Expecting <proceed> tag, but found: " + uctx.getName());
             uctx.toEnd();
+            streamCtx.getReader().stopLogging();
             SSLSocket tlsSocket = startTLSHandshake(streamCtx.getSocket());
             streamCtx.setSocket(tlsSocket);
             // Workaround for JiBX's reset() not resetting prefix
             // Thus, a new stream writer must be created
-            InputStreamReader bis = new InputStreamReader(tlsSocket.getInputStream(), "UTF-8");
+            XMPPLoggableReader bis = new XMPPLoggableReader(tlsSocket.getInputStream(), "UTF-8");
             BufferedOutputStream bos = new BufferedOutputStream(tlsSocket.getOutputStream(), SOCKETBUF);
             writer.flush();
             writer = new XMPPStreamWriter();
@@ -89,7 +92,7 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             streamCtx.setSocket(tlsSocket);
             streamCtx.setWriter(writer);
             streamCtx.setUnmarshallingContext(uctx);
-
+            streamCtx.setReader(bis);
             // as per XMPP specs, must reset all previous session data
             String hostname = sessCtx.getHostName();
             sessCtx.reset();

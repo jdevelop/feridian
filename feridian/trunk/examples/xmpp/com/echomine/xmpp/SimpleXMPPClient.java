@@ -1,8 +1,12 @@
 package com.echomine.xmpp;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import com.echomine.net.ConnectionEvent;
 import com.echomine.net.ConnectionListener;
 import com.echomine.net.ConnectionVetoException;
+import com.echomine.xmpp.packet.XMLTextPacket;
 
 public class SimpleXMPPClient {
     private String username;
@@ -10,6 +14,7 @@ public class SimpleXMPPClient {
     private String serverName;
     private int port = IXMPPConnection.DEFAULT_XMPP_PORT;
     private IXMPPConnection conn;
+    private boolean shutdown;
 
     public SimpleXMPPClient(String username, String password, String server) {
         this.username = username;
@@ -23,7 +28,7 @@ public class SimpleXMPPClient {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.out.println("Usage: SimpleXMPPClient <username> <password> [<xmpp server>]");
+            System.out.println("Usage: SimpleXMPPClient <username|'nologin'> <password> [<xmpp server>]");
             System.exit(1);
         }
         String server = "jabber.org";
@@ -40,9 +45,26 @@ public class SimpleXMPPClient {
      * having to recompile the test class
      */
     public void runConsole() throws Exception {
-        conn.addConnectionListener(new DefaultConnectionListener());
-        conn.connect(serverName, port, true);
-        conn.login(username, password.toCharArray(), "Home");
+        try {
+            conn.addConnectionListener(new DefaultConnectionListener());
+            conn.connect(serverName, port, true);
+            if (!"nologin".equals(username))
+                conn.login(username, password.toCharArray(), "Home");
+            String cmd;
+            BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
+            XMLTextPacket packet = new XMLTextPacket();
+            do {
+                System.out.print("Prompt? ");
+                cmd = rdr.readLine();
+                if ("quit".equals(cmd))
+                    break;
+                packet.setText(cmd);
+                conn.sendPacket(packet, false);
+            } while (!shutdown);
+        } finally {
+            System.out.println("Exiting...");
+            conn.disconnect();
+        }
     }
 
     class DefaultConnectionListener implements ConnectionListener {
@@ -56,6 +78,7 @@ public class SimpleXMPPClient {
 
         public void connectionClosed(ConnectionEvent event) {
             System.out.println("Connection closed: " + event.getConnectionContext());
+            shutdown = true;
         }
     }
 }

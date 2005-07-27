@@ -1,5 +1,9 @@
 package com.echomine.xmpp;
 
+import org.jibx.runtime.JiBXException;
+
+import com.echomine.jibx.JiBXUtil;
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
@@ -125,5 +129,18 @@ public class StanzaPacketBase implements IStanzaPacket {
             this.type = TYPE_ERROR;
         else
             this.type = null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.echomine.xmpp.IStanzaPacket#toString(com.echomine.jibx.XMPPStreamWriter)
+     */
+    public void toString(XMPPStreamWriter writer) {
+        try {
+            JiBXUtil.marshallObject(writer, this);
+        } catch (JiBXException ex) {
+            // intentionally left empty
+        }
     }
 }

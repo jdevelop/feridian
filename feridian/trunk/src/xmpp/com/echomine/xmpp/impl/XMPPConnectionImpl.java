@@ -112,17 +112,8 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * 
      * @see com.echomine.xmpp.IXMPPConnection#sendPacket(com.echomine.xmpp.IStanzaPacket)
      */
-    public void sendPacket(IStanzaPacket packet) throws SendPacketFailedException {
-        handler.queuePacket(packet, false);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.echomine.xmpp.IXMPPConnection#sendSyncPacket(com.echomine.xmpp.IStanzaPacket)
-     */
-    public IStanzaPacket sendSyncPacket(IStanzaPacket packet) throws SendPacketFailedException {
-        return handler.queuePacket(packet, true);
+    public IStanzaPacket sendPacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException {
+        return handler.queuePacket(packet, wait);
     }
 
     /*
@@ -160,4 +151,5 @@ public class XMPPConnectionImpl implements IXMPPConnection {
     public void removePacketListener(IPacketListener listener) {
         listenerManager.removePacketListener(listener);
     }
+
 }

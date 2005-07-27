@@ -1,5 +1,9 @@
 package com.echomine.xmpp.packet;
 
+import org.jibx.runtime.JiBXException;
+
+import com.echomine.jibx.JiBXUtil;
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.StanzaPacketBase;
 
 /**
@@ -42,5 +46,18 @@ public class IQPacket extends StanzaPacketBase {
         packet.setFrom(getFrom());
         if (getError() != null)
             packet.setError(getError());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.echomine.xmpp.StanzaPacketBase#toString(com.echomine.jibx.XMPPStreamWriter)
+     */
+    public void toString(XMPPStreamWriter writer) {
+        try {
+            JiBXUtil.marshallIQPacket(writer, this);
+        } catch (JiBXException ex) {
+            // intentionally left empty
+        }
     }
 }

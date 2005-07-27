@@ -4,6 +4,7 @@ import java.net.Socket;
 
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPLoggableReader;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.packet.StreamFeatures;
 
@@ -14,6 +15,7 @@ import com.echomine.xmpp.packet.StreamFeatures;
 public class XMPPStreamContext {
     private UnmarshallingContext uctx;
     private XMPPStreamWriter writer;
+    private XMPPLoggableReader reader;
     private Socket socket;
     private StreamFeatures features;
     private XMPPAuthCallback authCallback;
@@ -77,6 +79,7 @@ public class XMPPStreamContext {
         uctx = new UnmarshallingContext();
         writer = new XMPPStreamWriter();
         socket = null;
+        reader = null;
         if (features != null)
             features.clear();
         if (authCallback != null) {
@@ -126,4 +129,20 @@ public class XMPPStreamContext {
     public void setAuthCallback(XMPPAuthCallback authCallback) {
         this.authCallback = authCallback;
     }
+
+    /**
+     * @return The reader for the input stream
+     */
+    public XMPPLoggableReader getReader() {
+        return reader;
+    }
+
+    /**
+     * sets the input reader
+     */
+    public void setReader(XMPPLoggableReader reader) {
+        this.reader = reader;
+    }
+    
+    
 }

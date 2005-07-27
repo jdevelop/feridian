@@ -2,7 +2,6 @@ package com.echomine.xmpp.stream;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -10,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPLoggableReader;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.Base64;
 import com.echomine.xmpp.IXMPPStream;
@@ -56,6 +56,7 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         String[] extns = new String[] { NS_STREAM_SASL };
         writer.pushExtensionNamespaces(extns);
         try {
+            streamCtx.getReader().startLogging();
             if (DIGEST_MD5.equals(mechanism))
                 authDigestMD5(uctx, writer, sessCtx, streamCtx);
             else if (PLAIN.equals(mechanism))
@@ -72,13 +73,15 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
                 log.info("SASL authentication complete, resetting input and output streams for new handshake");
             // reset writer and unmarshalling context for handshake
             // renegotiation preparation
-            InputStreamReader bis = new InputStreamReader(streamCtx.getSocket().getInputStream(), "UTF-8");
+            streamCtx.getReader().stopLogging();
+            XMPPLoggableReader bis = new XMPPLoggableReader(streamCtx.getSocket().getInputStream(), "UTF-8");
             BufferedOutputStream bos = new BufferedOutputStream(streamCtx.getSocket().getOutputStream(), SOCKETBUF);
             writer.flush();
             writer = new XMPPStreamWriter();
             writer.setOutput(bos);
             uctx.setDocument(bis);
             streamCtx.setWriter(writer);
+            streamCtx.setReader(bis);
         } catch (IOException ex) {
             throw new XMPPException(ex);
         } catch (JiBXException ex) {
@@ -109,10 +112,11 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.flush();
         // receive final success or failure
         uctx.next();
-        parseAndThrowFailure(uctx);
+        parseAndThrowFailure(uctx, streamCtx);
         if (!uctx.isAt(NS_STREAM_SASL, "success"))
             throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
-        parseElementText(uctx, "success");
+        parseElementText(uctx, "success", streamCtx);
+        streamCtx.getReader().flushLog();
     }
 
     /**
@@ -131,10 +135,10 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.flush();
         // server sends us challenge
         uctx.next();
-        parseAndThrowFailure(uctx);
+        parseAndThrowFailure(uctx, streamCtx);
         if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
             throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
-        String challengeStr = parseElementText(uctx, CHALLENGE_ELEMENT_NAME);
+        String challengeStr = parseElementText(uctx, CHALLENGE_ELEMENT_NAME, streamCtx);
         if (log.isInfoEnabled())
             log.info("Received challenge string: " + challengeStr);
         DigestMD5SaslClient client = new DigestMD5SaslClient();
@@ -150,11 +154,11 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.flush();
         // check remote response
         uctx.next();
-        parseAndThrowFailure(uctx);
+        parseAndThrowFailure(uctx, streamCtx);
         if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
             throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
         // the received string is rspauth, which can be ignored
-        parseElementText(uctx, CHALLENGE_ELEMENT_NAME);
+        parseElementText(uctx, CHALLENGE_ELEMENT_NAME, streamCtx);
         // send final response
         if (log.isInfoEnabled())
             log.info("Authentication accepted, sending final acknowledgement");
@@ -163,10 +167,10 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.flush();
         // receive final success or failure
         uctx.next();
-        parseAndThrowFailure(uctx);
+        parseAndThrowFailure(uctx, streamCtx);
         if (!uctx.isAt(NS_STREAM_SASL, "success"))
             throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
-        parseElementText(uctx, "success");
+        parseElementText(uctx, "success", streamCtx);
     }
 
     /**
@@ -183,10 +187,11 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
      * @return the text, or null if none cannot be found.
      * @throws JiBXException if any exception occurs
      */
-    private String parseElementText(UnmarshallingContext uctx, String elementName) throws JiBXException {
+    private String parseElementText(UnmarshallingContext uctx, String elementName, XMPPStreamContext streamCtx) throws JiBXException {
         uctx.parsePastStartTag(NS_STREAM_SASL, elementName);
         String text = uctx.parseContentText();
         uctx.toEnd();
+        streamCtx.getReader().flushLog();
         return text;
     }
 
@@ -197,13 +202,14 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
      * @throws JiBXException
      * @throws XMPPException
      */
-    protected void parseAndThrowFailure(UnmarshallingContext uctx) throws JiBXException, XMPPException {
+    protected void parseAndThrowFailure(UnmarshallingContext uctx, XMPPStreamContext streamCtx) throws JiBXException, XMPPException {
         if (uctx.isAt(NS_STREAM_SASL, "failure")) {
             uctx.parsePastStartTag(NS_STREAM_SASL, "failure");
             uctx.toTag();
             String errorType = uctx.getName();
             uctx.parsePastElement(NS_STREAM_SASL, errorType);
             uctx.toEnd();
+            streamCtx.getReader().stopLogging();
             if (log.isWarnEnabled())
                 log.warn("SASL auth negotiation failed with error " + errorType);
             throw new XMPPException("SASL Failed with error: " + errorType);

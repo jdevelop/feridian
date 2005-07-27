@@ -2,11 +2,10 @@ package com.echomine.jibx;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.impl.UTF8StreamWriter;
 
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.XMPPLogger;
 
 /**
  * This customized stream writer will automatically register the prefixes for
@@ -18,7 +17,6 @@ import com.echomine.xmpp.XMPPConstants;
 public class XMPPStreamWriter extends UTF8StreamWriter {
     public static final int IDX_JABBER_STREAM = 2;
     public static final int IDX_XMPP_CLIENT = 3;
-    private static final Log log = LogFactory.getLog(XMPPStreamWriter.class);
     private static final String STREAM_PREFIX = "stream";
     private static final String CLIENT_PREFIX = "";
     private static final String[] STREAM_URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", XMPPConstants.NS_JABBER_STREAM, XMPPConstants.NS_XMPP_CLIENT };
@@ -51,10 +49,9 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      * @see org.jibx.runtime.IXMLWriter#flush()
      */
     public void flush() throws IOException {
-        if (log.isDebugEnabled()) {
+        if (XMPPLogger.canLogOutgoing())
             if (m_fillOffset != 0)
-                log.debug(new String(m_buffer, 0, m_fillOffset));
-        }
+                XMPPLogger.logOutgoing(new String(m_buffer, 0, m_fillOffset));
         super.flush();
     }
 

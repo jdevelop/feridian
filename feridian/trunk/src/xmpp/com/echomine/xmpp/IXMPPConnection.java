@@ -40,14 +40,10 @@ public interface IXMPPConnection {
      * Sends a packet to the remote entity asynchronously. Implementators must
      * queue packets until connection is established, then send those packets
      * out. If that is not possible, then exception must be thrown to indicate
-     * that the packet cannot be sent.
-     */
-    void sendPacket(IStanzaPacket packet) throws SendPacketFailedException;
-
-    /**
-     * sends a packet and wait for a reply. This allows the user to perform
-     * synchronous actions. The method waits for a reply for the packet sent. If
-     * no reply is receivied within timeout period, an exception is thrown. The
+     * that the packet cannot be sent. <br/>This method also can send a packet
+     * and wait for a reply. This allows the user to perform synchronous
+     * actions. The method waits for a reply for the packet sent. If no reply is
+     * receivied within a specified timeout period, an exception is thrown. The
      * timeout is specified in the packet, per packet. NOTE: If the reply packet
      * is an error packet, then exception will be thrown instead of returning
      * the reply packet. This should allow a better flow control for users who
@@ -55,11 +51,13 @@ public interface IXMPPConnection {
      * interaction. The exception will contain the error packet data.
      * 
      * @param packet the packet to send
+     * @param wait true if to wait for a reply packet, false to return
+     *            immediately
      * @return the reply packet
      * @throws SendPacketFailedException if message cannot be sent, timeout
      *             occurred, or reply is an error packet.
      */
-    IStanzaPacket sendSyncPacket(IStanzaPacket packet) throws SendPacketFailedException;
+    IStanzaPacket sendPacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException;
 
     /**
      * Checks whether the we are connected.

@@ -1,7 +1,6 @@
 package com.echomine.xmpp.impl;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.commons.logging.Log;
@@ -10,14 +9,17 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
+import com.echomine.jibx.XMPPLoggableReader;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
 import com.echomine.net.HandshakeableSocketHandler;
 import com.echomine.util.IOUtil;
+import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.SendPacketFailedException;
+import com.echomine.xmpp.StanzaPacketBase;
 import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
@@ -25,8 +27,10 @@ import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPStreamFactory;
 import com.echomine.xmpp.packet.IQPacket;
+import com.echomine.xmpp.packet.IQResourceBindPacket;
 import com.echomine.xmpp.packet.MessagePacket;
 import com.echomine.xmpp.packet.PresencePacket;
+import com.echomine.xmpp.packet.XMLTextPacket;
 
 /**
  * The handler for working with the xmpp client connection. The handler will
@@ -49,6 +53,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
     private PacketQueue queue;
     private PacketListenerManager listenerManager;
     private boolean paused;
+    private Socket mainSocket;
 
     /**
      * The constructor for the handler. It accepts a connection context to use
@@ -97,10 +102,13 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      */
     public void handshake(Socket socket, ConnectionContext connCtx) throws HandshakeFailedException {
         try {
+            this.mainSocket = socket;
             socket.setKeepAlive(true);
             streamCtx.getWriter().setOutput(socket.getOutputStream());
-            streamCtx.getUnmarshallingContext().setDocument(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+            XMPPLoggableReader reader = new XMPPLoggableReader(socket.getInputStream(), "UTF-8");
+            streamCtx.getUnmarshallingContext().setDocument(reader);
             streamCtx.setSocket(socket);
+            streamCtx.setReader(reader);
             if (log.isDebugEnabled())
                 log.debug("Starting Handshake with " + connCtx.getHostName());
             sessCtx.setHostName(connCtx.getHostName());
@@ -147,7 +155,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         // start reading incoming data packet through stream
         try {
             while (!shutdown) {
-                if (paused) {
+                if (paused)
                     synchronized (this) {
                         try {
                             wait();
@@ -155,7 +163,9 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                             // intentionally left empty
                         }
                     }
-                }
+                if (shutdown)
+                    break;
+                streamCtx.getReader().startLogging();
                 // go into wait state if no data is incoming.
                 uctx.next();
                 IStanzaPacket packet = null;
@@ -166,15 +176,12 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     } else if (uctx.isAt(NS_XMPP_CLIENT, MESSAGE_ELEMENT_NAME)) {
                         packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, MessagePacket.class);
                     } else if (uctx.isAt(NS_XMPP_CLIENT, IQ_ELEMENT_NAME)) {
-                        System.out.println("FOUND IQ Packet... unmarshalling...");
                         packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
                     } else {
                         if (uctx.isEnd())
                             continue;
-                        // parse past the unknown packet
-                        if (log.isInfoEnabled())
-                            log.info("Ignored Unknown Stanza -- element: " + uctx.getName() + ", ns: " + uctx.getNamespace());
                         uctx.skipElement();
+                        streamCtx.getReader().flushIgnoredDataToLog();
                     }
                     // match packets with those in queue in case any packets are
                     // waiting for replies
@@ -182,10 +189,15 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                         queue.packetReceived(packet);
                         if (listenerManager != null)
                             listenerManager.firePacketReceived(packet);
+                        streamCtx.getReader().flushLog();
                     }
                 }
             }
         } catch (JiBXException ex) {
+            // intentionally left empty
+            if (log.isWarnEnabled())
+                log.warn("Error during handling..", ex);
+        } finally {
             // error reading incoming data (maybe connection closed)
             shutdown();
             endStream();
@@ -196,6 +208,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
     /**
      * This will queue a packet for later delivery. This should be the method of
      * choice when sending ALL packets. The sendPacket() is used by the queue.
+     * If the packet extends from StanzaPacketBase, it will also set the ID of
+     * the packet if one doesn't already exist.
      * 
      * @param packet the packet to send
      * @param wait whether to wait for a reply
@@ -205,6 +219,9 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      *             shutdown
      */
     public IStanzaPacket queuePacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException {
+        // set default ID if one isn't set
+        if (packet.getId() == null && packet instanceof StanzaPacketBase)
+            ((StanzaPacketBase) packet).setId(IDGenerator.nextID());
         return queue.queuePacket(packet, wait);
     }
 
@@ -213,9 +230,11 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * internally by the queue and should not be used by outside users. However,
      * it IS safe to use this method to immediately send a packet without going
      * through the queue. The method is synchronized to prevent overlapping
-     * writes.
+     * writes. This method also supports XMLTextPacket, and will output direct
+     * xml text to the stream without going through any marshalling.
      * 
      * @param packet the packet to send
+     * @see com.echomine.xmpp.packet.XMLTextPacket
      * @throws SendPacketFailedException if packet cannot be sent (connection
      *             closed, IO error, etc)
      */
@@ -224,6 +243,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
             // IQ Packets are marshalled differently
             if (packet instanceof IQPacket)
                 JiBXUtil.marshallIQPacket(streamCtx.getWriter(), (IQPacket) packet);
+            else if (packet instanceof XMLTextPacket)
+                streamCtx.getWriter().writeMarkup(((XMLTextPacket) packet).getText());
             else
                 JiBXUtil.marshallObject(streamCtx.getWriter(), packet);
             streamCtx.getWriter().flush();
@@ -262,8 +283,17 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         if (streamCtx.getFeatures().isSaslSupported() && stream != null) {
             stream.process(sessCtx, streamCtx);
             handshakeStream.process(sessCtx, streamCtx);
-            // TODO: perform resource and session binding
             resume();
+            if (streamCtx.getFeatures().isBindingSupported()) {
+                IQResourceBindPacket packet = new IQResourceBindPacket();
+                packet.setType(IQPacket.TYPE_SET);
+                if (resource != null)
+                    packet.setResourceName(resource);
+                packet = (IQResourceBindPacket) queuePacket(packet, true);
+                if (packet != null && packet.isError())
+                    throw new XMPPException("Error occurred while trying to do resource binding", packet.getError());
+                sessCtx.setResource(packet.getJid().getResource());
+            }
             return;
         }
         resume();
@@ -291,6 +321,13 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      */
     public void shutdown() {
         shutdown = true;
+        // must physically shutdown input stream in order to release
+        // the unmarshalling context's parser wait status
+        try {
+            IOUtil.closeStream(mainSocket.getInputStream());
+        } catch (IOException ex) {
+            // intentionally left empty
+        }
         // to release
         resume();
         queue.stop();
@@ -357,7 +394,9 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         if (!paused)
             return;
         paused = false;
-        notifyAll();
+        synchronized (this) {
+            notify();
+        }
     }
 
     /**
@@ -365,8 +404,12 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * any error encountered here. The method will not flush or close the
      * underlying stream.
      */
-    protected void endStream() throws IOException {
-        streamCtx.getWriter().endTag(XMPPStreamWriter.IDX_JABBER_STREAM, "stream");
-        streamCtx.getWriter().flush();
+    protected void endStream() {
+        try {
+            streamCtx.getWriter().endTag(XMPPStreamWriter.IDX_JABBER_STREAM, "stream");
+            streamCtx.getWriter().flush();
+        } catch (IOException ex) {
+            // intentionally left empty
+        }
     }
 }
