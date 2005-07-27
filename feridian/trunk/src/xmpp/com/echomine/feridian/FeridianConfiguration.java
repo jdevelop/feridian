@@ -37,6 +37,7 @@ public class FeridianConfiguration {
     private HashMap streamMappings = new HashMap();
     private Class connectionFactoryClass;
     private Class streamFactoryClass;
+    private Class idGeneratorClass;
 
     /**
      * Obtains the config file.
@@ -180,11 +181,18 @@ public class FeridianConfiguration {
     }
 
     /**
-     * Retrieves the facotry for creating xmpp stream objects.
+     * Retrieves the factory for creating xmpp stream objects.
      * 
      * @return the stream factory
      */
     public Class getXMPPStreamFactory() {
         return streamFactoryClass;
+    }
+
+    /**
+     * the id generator class for creating unique IDs
+     */
+    public Class getIdGeneratorClass() {
+        return idGeneratorClass;
     }
 }

@@ -1,4 +1,4 @@
-<iq xmlns="jabber:client" type='result' id='bind_1'>
+<iq xmlns="jabber:client" type='result' id='test_001'>
   <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
     <jid>romeo@example.com/someresource</jid>
   </bind>

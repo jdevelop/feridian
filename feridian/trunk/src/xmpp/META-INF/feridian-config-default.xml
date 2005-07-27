@@ -1,4 +1,5 @@
 <feridian>
   <connection-factory class="com.echomine.xmpp.impl.XMPPConnectionFactoryImpl"/>
   <stream-factory class="com.echomine.xmpp.impl.XMPPStreamFactoryImpl"/>
+  <id-generator class="com.echomine.xmpp.impl.IDGeneratorImpl"/>
 </feridian>

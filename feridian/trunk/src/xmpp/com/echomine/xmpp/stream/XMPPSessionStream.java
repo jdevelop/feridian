@@ -7,24 +7,22 @@ import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IXMPPStream;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQResourceBindPacket;
+import com.echomine.xmpp.packet.IQSessionPacket;
 
 /**
- * This stream checks to see if resource binding is required. Under XMPP specs,
- * resource binding occurs AFTER SASL authentication. If the stream feature
- * indicates that resource binding is required, then this stream will do it.
- * Normally, it is preferable that the client sets the resource and the server
- * accepts it, although the server can autogenerate a resource for the client.
- * If resource conflict occurs, either the server will reject the current
- * client's request with a forbidden error or the server will disconnect the
- * previous active resource and allow the current client to bind to the resource
- * (recommended for servers).
+ * This stream will issue a session start request. Under XMPP specs, client must
+ * establish session after resource binding and SASL authentication. If the
+ * stream feature indicates that session establishment is required, then this
+ * stream will do it. If this stream process data before SASL OR resource
+ * binding, nothing will happen. Server will not reply with any data and this
+ * may cause the API to wait forever for incoming data.
  */
-public class XMPPResourceBindingStream implements IXMPPStream {
+public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
     /*
      * (non-Javadoc)
      * 
@@ -33,28 +31,24 @@ public class XMPPResourceBindingStream implements IXMPPStream {
      */
     public void process(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException {
         try {
-            if (!streamCtx.getFeatures().isBindingSupported())
+            if (!streamCtx.getFeatures().isSessionSupported())
                 return;
             XMPPStreamWriter writer = streamCtx.getWriter();
             UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
-            // send bind request
-            IQResourceBindPacket request = new IQResourceBindPacket();
+            // send request
+            IQSessionPacket request = new IQSessionPacket();
             request.setId(IDGenerator.nextID());
             request.setType(IQPacket.TYPE_SET);
-            request.setResourceName(sessCtx.getResource());
             JiBXUtil.marshallIQPacket(writer, request);
             // start logging
             streamCtx.getReader().startLogging();
             // process result
-            IQResourceBindPacket result = (IQResourceBindPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+            IQSessionPacket result = (IQSessionPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             streamCtx.getReader().stopLogging();
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");
             if (result.isError())
                 throw new XMPPException(result.getError());
-            if (result.getJid() == null)
-                throw new XMPPException("Resource Binding result does not include a JID.  Possibly bad server implementation");
-            sessCtx.setResource(result.getJid().getResource());
         } catch (JiBXException ex) {
             throw new XMPPException(ex);
         }

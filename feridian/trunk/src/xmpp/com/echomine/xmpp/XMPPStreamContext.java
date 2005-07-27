@@ -104,7 +104,8 @@ public class XMPPStreamContext {
      * Clears the features and set it for future renegotiation purposes
      */
     public void clearFeatures() {
-        features.clear();
+        if (features != null)
+            features.clear();
     }
 
     /**

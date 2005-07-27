@@ -3,6 +3,7 @@ package com.echomine.xmpp.stream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import com.echomine.jibx.MockXMPPLoggableReader;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPException;
@@ -22,6 +23,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
         streamCtx = new XMPPStreamContext();
         streamCtx.setWriter(writer);
         streamCtx.setUnmarshallingContext(uctx);
+        streamCtx.setReader(new MockXMPPLoggableReader());
     }
 
     /**
@@ -116,7 +118,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
             endOutgoingStreamHeader();
         writer.flush();
     }
-    
+
     /**
      * This will take an incoming resource to give the stream to unmarshall but
      * will only run through the stream handler. It will not do any comparison

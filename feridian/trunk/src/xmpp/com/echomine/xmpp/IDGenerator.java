@@ -1,42 +1,54 @@
 package com.echomine.xmpp;
 
+import com.echomine.feridian.FeridianConfiguration;
+import com.echomine.util.ClassUtil;
+
 /**
- * Holds a singleton instance of the id generator.  It will give you unique id sequences.
- * The unique ID sequence has a header prepended before the sequence number.  This is to make
- * the ID attribute conform to the XML Specification.  The XML standard states that the unique
- * ID attribute in an XML document must begin with an alphabet(a-z), underscore(_), or colon(:).
+ * Holds a singleton instance of the id generator. It will give you unique id
+ * sequences. The unique ID sequence has a header prepended before the sequence
+ * number. This is to make the ID attribute conform to the XML Specification.
+ * The XML standard states that the unique ID attribute in an XML document must
+ * begin with an alphabet(a-z), underscore(_), or colon(:). The ID generator is
+ * an abstract factory class. It will obtain the real implementation from the
+ * configuration and instantiate.
  */
-public class IDGenerator {
-    private static final String ID_HEADER = "frdn_";
+public abstract class IDGenerator {
     private static IDGenerator generator;
-    private int id;
 
-    private IDGenerator(int initial) {
-        this.id = initial;
-    }
-
-    public int increment() {
-        //this is an atomic operation, no need for synchronization
-        return id++;
+    /**
+     * obatins the real generator implementation
+     */
+    private static IDGenerator getGenerator() throws XMPPException {
+        try {
+            return (IDGenerator) ClassUtil.newInstance(FeridianConfiguration.getConfig().getIdGeneratorClass(), IDGenerator.class);
+        } catch (Exception ex) {
+            throw new XMPPException(ex);
+        }
     }
 
     /**
-     * retrieves the next ID.  If this is the first time this method is called,
-     * the initial value will be set to 10001.  If you want to start off at a
-     * specific number, use the nextID(int) static method instead.
+     * This is the implementation to retrieve the next ID; This ID must be
+     * guaranteed to be unique in a given session.
      */
-    public static String nextID() {
-        return nextID(10001);
-    }
+    protected abstract String generateID();
 
     /**
-     * if this is the first time the method is called, it will initialize the generator
-     * to the initial value provided.  Subsequent calls to this method will ignore the initial request.
+     * if this is the first time the method is called, it will initialize the
+     * generator.
      */
-    public static String nextID(int initial) {
+    public static String nextID() throws XMPPException {
         if (generator == null)
-            generator = new IDGenerator(initial);
-        return String.valueOf(ID_HEADER + generator.increment());
+            generator = getGenerator();
+        return generator.generateID();
     }
 
+    /**
+     * This method allows the user to set a custom ID generator. It can only be
+     * set once and must be called before any nextID() calls are made.
+     * 
+     * @param gen the generator implementation
+     */
+    public static void setIDGenerator(IDGenerator gen) {
+        generator = gen;
+    }
 }

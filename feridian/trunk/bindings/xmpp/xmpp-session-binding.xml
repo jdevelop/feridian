@@ -1,0 +1,10 @@
+<!-- 
+	binding file for working with the XMPP session
+-->
+<binding>
+	<namespace uri="urn:ietf:params:xml:ns:xmpp-session" default="elements"/>
+
+	<!-- iq session packet support -->
+	<mapping name="session" ns="urn:ietf:params:xml:ns:xmpp-session"
+		class="com.echomine.xmpp.packet.IQSessionPacket"/>
+</binding>

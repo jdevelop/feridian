@@ -27,7 +27,6 @@ import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPStreamFactory;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQResourceBindPacket;
 import com.echomine.xmpp.packet.MessagePacket;
 import com.echomine.xmpp.packet.PresencePacket;
 import com.echomine.xmpp.packet.XMLTextPacket;
@@ -171,15 +170,17 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                 IStanzaPacket packet = null;
                 if (!paused) {
                     // parse incoming data
-                    if (uctx.isAt(NS_XMPP_CLIENT, PRESENCE_ELEMENT_NAME)) {
+                    if (uctx.currentEvent() == UnmarshallingContext.END_DOCUMENT) {
+                        break;
+                    } else if (uctx.isEnd()) {
+                        continue;
+                    } else if (uctx.isAt(NS_XMPP_CLIENT, PRESENCE_ELEMENT_NAME)) {
                         packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, PresencePacket.class);
                     } else if (uctx.isAt(NS_XMPP_CLIENT, MESSAGE_ELEMENT_NAME)) {
                         packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, MessagePacket.class);
                     } else if (uctx.isAt(NS_XMPP_CLIENT, IQ_ELEMENT_NAME)) {
                         packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
                     } else {
-                        if (uctx.isEnd())
-                            continue;
                         uctx.skipElement();
                         streamCtx.getReader().flushIgnoredDataToLog();
                     }
@@ -221,7 +222,12 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
     public IStanzaPacket queuePacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException {
         // set default ID if one isn't set
         if (packet.getId() == null && packet instanceof StanzaPacketBase)
-            ((StanzaPacketBase) packet).setId(IDGenerator.nextID());
+            try {
+                ((StanzaPacketBase) packet).setId(IDGenerator.nextID());
+            } catch (XMPPException ex) {
+                if (log.isWarnEnabled())
+                    log.warn("Unable to generate packet ID.  Will not auto-set ID. You should check into cause", ex);
+            }
         return queue.queuePacket(packet, wait);
     }
 
@@ -283,17 +289,17 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         if (streamCtx.getFeatures().isSaslSupported() && stream != null) {
             stream.process(sessCtx, streamCtx);
             handshakeStream.process(sessCtx, streamCtx);
-            resume();
+            // must do resource binding if supported
             if (streamCtx.getFeatures().isBindingSupported()) {
-                IQResourceBindPacket packet = new IQResourceBindPacket();
-                packet.setType(IQPacket.TYPE_SET);
-                if (resource != null)
-                    packet.setResourceName(resource);
-                packet = (IQResourceBindPacket) queuePacket(packet, true);
-                if (packet != null && packet.isError())
-                    throw new XMPPException("Error occurred while trying to do resource binding", packet.getError());
-                sessCtx.setResource(packet.getJid().getResource());
+                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_BINDING);
+                stream.process(sessCtx, streamCtx);
             }
+            // must do session if supported
+            if (streamCtx.getFeatures().isSessionSupported()) {
+                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SESSION);
+                stream.process(sessCtx, streamCtx);
+            }
+            resume();
             return;
         }
         resume();
@@ -324,7 +330,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         // must physically shutdown input stream in order to release
         // the unmarshalling context's parser wait status
         try {
-            IOUtil.closeStream(mainSocket.getInputStream());
+            if (mainSocket != null)
+                IOUtil.closeStream(mainSocket.getInputStream());
         } catch (IOException ex) {
             // intentionally left empty
         }

@@ -9,5 +9,9 @@
 			<value name="class" style="attribute" field="streamFactoryClass" 
 				deserializer="com.echomine.util.ClassUtil.loadClass"/>
 		</structure>
+		<structure name='id-generator'>
+			<value name="class" style="attribute" field="idGeneratorClass" 
+				deserializer="com.echomine.util.ClassUtil.loadClass"/>
+		</structure>
 	</mapping>
 </binding>

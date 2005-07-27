@@ -17,7 +17,6 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.ClassUtil;
-import com.echomine.xmpp.XMPPSessionContext;
 
 /**
  * A basic test case that simply provides a set of convenient methods.
@@ -27,6 +26,11 @@ public class XMPPTestCase extends TestCase {
     protected UnmarshallingContext uctx;
     protected XMPPSessionContext sessCtx;
     protected XMPPStreamWriter writer;
+    protected MockIDGenerator generator = new MockIDGenerator();
+
+    static {
+        IDGenerator.setIDGenerator(new MockIDGenerator());
+    }
 
     /*
      * (non-Javadoc)
