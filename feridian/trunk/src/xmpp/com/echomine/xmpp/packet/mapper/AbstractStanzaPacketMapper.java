@@ -13,7 +13,7 @@ import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IPacket;
 import com.echomine.xmpp.JID;
-import com.echomine.xmpp.ParseException;
+import com.echomine.xmpp.JIDFormatException;
 import com.echomine.xmpp.StanzaPacketBase;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
@@ -82,7 +82,7 @@ public abstract class AbstractStanzaPacketMapper extends AbstractPacketMapper {
                 packet.setFrom(JID.parseJID(ctx.attributeText(null, FROM_ATTRIBUTE_NAME)));
             if (ctx.hasAttribute(null, ID_ATTRIBUTE_NAME))
                 packet.setId(ctx.attributeText(null, ID_ATTRIBUTE_NAME));
-        } catch (ParseException ex) {
+        } catch (JIDFormatException ex) {
             throw new JiBXException("Error Parsing JID", ex);
         }
     }

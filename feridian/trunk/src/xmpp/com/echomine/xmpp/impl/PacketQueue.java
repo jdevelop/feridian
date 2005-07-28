@@ -103,10 +103,12 @@ public class PacketQueue implements Runnable {
      * request packet. If so, it will notify and release the wait on that
      * packet.
      * 
+     * @param packet the packet received for matching with original packet
+     * @return the original packet if found, null if not
      */
-    public void packetReceived(IStanzaPacket packet) {
+    public IStanzaPacket packetReceived(IStanzaPacket packet) {
         if (packet == null || packet.getId() == null)
-            return;
+            return null;
         IStanzaPacket oldPacket = (IStanzaPacket) packetReplyTable.remove(packet.getId());
         if (oldPacket != null) {
             replyPackets.put(packet.getId(), packet);
@@ -114,6 +116,7 @@ public class PacketQueue implements Runnable {
                 oldPacket.notifyAll();
             }
         }
+        return oldPacket;
     }
 
     /**

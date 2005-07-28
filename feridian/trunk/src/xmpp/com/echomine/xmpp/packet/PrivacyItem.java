@@ -1,7 +1,7 @@
 package com.echomine.xmpp.packet;
 
 import com.echomine.xmpp.JID;
-import com.echomine.xmpp.ParseException;
+import com.echomine.xmpp.JIDFormatException;
 
 /**
  * <p>
@@ -120,9 +120,9 @@ public class PrivacyItem {
      * before calling this method.
      * 
      * @return the jid, or null if value is not set or type is not JID
-     * @throws ParseException if parsing causes error.
+     * @throws JIDFormatException if parsing causes error.
      */
-    public JID getJid() throws ParseException {
+    public JID getJid() {
         if (value == null || !TYPE_JID.equals(type))
             return null;
         return JID.parseJID(value);

@@ -20,18 +20,18 @@ public class JID {
     /**
      * takes in a JID string and parses it into a JID component.
      * 
-     * @throws ParseException if the jid does not conform to the format
+     * @throws JIDFormatException if the jid does not conform to the format
      */
-    public static JID parseJID(String jidStr) throws ParseException {
+    public static JID parseJID(String jidStr) throws JIDFormatException {
         if (jidStr == null)
-            throw new ParseException("JID cannot be null");
+            throw new JIDFormatException("JID cannot be null");
         // URI Syntax is [node@]domain[/resource]
         Matcher matcher = jidPat.matcher(jidStr);
         if (matcher.matches()) {
             JID jid = new JID(matcher.group(1), matcher.group(2), matcher.group(3));
             return jid;
         } else {
-            throw new ParseException("Unable to parse JID: " + jidStr);
+            throw new JIDFormatException("Unable to parse JID: " + jidStr);
         }
     }
 

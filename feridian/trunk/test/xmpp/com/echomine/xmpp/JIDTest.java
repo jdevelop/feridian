@@ -35,7 +35,7 @@ public class JIDTest extends XMPPTestCase {
         try {
             JID.parseJID("test@blah/");
             fail("JID 'test@blah/' should not have passed");
-        } catch (ParseException ex) {
+        } catch (JIDFormatException ex) {
         }
     }
 }
