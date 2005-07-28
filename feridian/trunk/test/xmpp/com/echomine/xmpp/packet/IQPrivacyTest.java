@@ -3,6 +3,7 @@ package com.echomine.xmpp.packet;
 import java.io.Reader;
 import java.io.StringReader;
 
+import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.XMPPTestCase;
 
 /**
@@ -10,10 +11,10 @@ import com.echomine.xmpp.XMPPTestCase;
  */
 public class IQPrivacyTest extends XMPPTestCase {
     public void testMarshallPrivacyListRequest() throws Exception {
-        String xml = "<query xmlns='jabber:iq:privacy'/>";
+        String xml = "<iq xmlns='jabber:client'><query xmlns='jabber:iq:privacy'/></iq>";
         StringReader rdr = new StringReader(xml);
         IQPrivacyPacket packet = new IQPrivacyPacket();
-        marshallObject(packet, IQPrivacyPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
@@ -22,14 +23,14 @@ public class IQPrivacyTest extends XMPPTestCase {
      * else, the marshalled xml must not include an empty "default" element.
      */
     public void testMarshallPrivacyListAfterSecondTimeSettingToNull() throws Exception {
-        String xml = "<query xmlns='jabber:iq:privacy'/>";
+        String xml = "<iq xmlns='jabber:client'><query xmlns='jabber:iq:privacy'/></iq>";
         StringReader rdr = new StringReader(xml);
         IQPrivacyPacket packet = new IQPrivacyPacket();
         packet.setDefaultName("test");
         packet.setDefaultName(null);
         packet.setActiveName("test");
         packet.setActiveName(null);
-        marshallObject(packet, IQPrivacyPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
@@ -37,12 +38,12 @@ public class IQPrivacyTest extends XMPPTestCase {
      * Tests the setting for removing a default name
      */
     public void testMarshallDefaultNameRemove() throws Exception {
-        String xml = "<query xmlns='jabber:iq:privacy'><default/></query>";
+        String xml = "<iq xmlns='jabber:client'><query xmlns='jabber:iq:privacy'><default/></query></iq>";
         StringReader rdr = new StringReader(xml);
         IQPrivacyPacket packet = new IQPrivacyPacket();
         packet.setDefaultName("");
         assertNull(packet.getDefaultName());
-        marshallObject(packet, IQPrivacyPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
@@ -50,22 +51,22 @@ public class IQPrivacyTest extends XMPPTestCase {
      * Tests the setting for removing an active name
      */
     public void testMarshallActiveNameRemove() throws Exception {
-        String xml = "<query xmlns='jabber:iq:privacy'><active/></query>";
+        String xml = "<iq xmlns='jabber:client'><query xmlns='jabber:iq:privacy'><active/></query></iq>";
         StringReader rdr = new StringReader(xml);
         IQPrivacyPacket packet = new IQPrivacyPacket();
         packet.setActiveName("");
         assertNull(packet.getDefaultName());
-        marshallObject(packet, IQPrivacyPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
     public void testMarshallListRequest() throws Exception {
-        String xml = "<query xmlns='jabber:iq:privacy'><list name='public'/></query>";
+        String xml = "<iq xmlns='jabber:client'><query xmlns='jabber:iq:privacy'><list name='public'/></query></iq>";
         StringReader rdr = new StringReader(xml);
         IQPrivacyPacket packet = new IQPrivacyPacket();
         packet.addPrivacyList(new PrivacyList("public"));
         assertNull(packet.getDefaultName());
-        marshallObject(packet, IQPrivacyPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
@@ -79,14 +80,14 @@ public class IQPrivacyTest extends XMPPTestCase {
         PrivacyList list = new PrivacyList("iq-global-example");
         list.addItem(item);
         packet.addPrivacyList(list);
-        marshallObject(packet, IQPrivacyPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
     public void testUnmarshallPrivacyListWithItemResult() throws Exception {
         String inRes = "com/echomine/xmpp/data/PrivacyListWithItemResult.xml";
         Reader rdr = getResourceAsReader(inRes);
-        IQPrivacyPacket packet = (IQPrivacyPacket) unmarshallObject(rdr, IQPrivacyPacket.class);
+        IQPrivacyPacket packet = (IQPrivacyPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);
         assertNull(packet.getActiveName());
         assertNull(packet.getDefaultName());
         assertEquals(1, packet.getPrivacyLists().size());
@@ -107,7 +108,7 @@ public class IQPrivacyTest extends XMPPTestCase {
     public void testUnmarshallPrivacyListResult() throws Exception {
         String inRes = "com/echomine/xmpp/data/PrivacyListResult.xml";
         Reader rdr = getResourceAsReader(inRes);
-        IQPrivacyPacket packet = (IQPrivacyPacket) unmarshallObject(rdr, IQPrivacyPacket.class);
+        IQPrivacyPacket packet = (IQPrivacyPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);
         assertEquals("private", packet.getActiveName());
         assertEquals("public", packet.getDefaultName());
         assertEquals(3, packet.getPrivacyLists().size());

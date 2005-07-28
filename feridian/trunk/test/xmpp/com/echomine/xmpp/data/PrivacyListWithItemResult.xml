@@ -1,3 +1,4 @@
+<iq xmlns="jabber:client">
 <query xmlns='jabber:iq:privacy'>
   <list name='public'>
     <item type='jid'
@@ -7,3 +8,4 @@
     <item action='allow' order='2'/>
   </list>
 </query>
+</iq>

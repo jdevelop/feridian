@@ -1,10 +1,17 @@
 package com.echomine.xmpp.packet.mapper;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Iterator;
+
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.feridian.FeridianConfiguration;
+import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.xmpp.IPacket;
 import com.echomine.xmpp.JID;
 import com.echomine.xmpp.ParseException;
 import com.echomine.xmpp.StanzaPacketBase;
@@ -105,5 +112,55 @@ public abstract class AbstractStanzaPacketMapper extends AbstractPacketMapper {
      */
     protected StanzaErrorPacket unmarshallStanzaError(UnmarshallingContext ctx) throws JiBXException {
         return (StanzaErrorPacket) errorMapper.unmarshal(null, ctx);
+    }
+
+    /**
+     * This will marshall all extensions contained within the packet. It will
+     * try to find the marshaller for each packet and marshall the extension.
+     * Failing that, it will simply skip the extension. The extensions are
+     * marshalled in no particular order.
+     * 
+     * @param ctx the marshalling context
+     * @param packet packet containing the extensions
+     * @throws JiBXException
+     */
+    protected void marshallExtensions(MarshallingContext ctx, StanzaPacketBase packet) throws JiBXException {
+        Iterator iter = packet.getExtensions().iterator();
+        IPacket ext;
+        StringWriter strWriter = new StringWriter(256);
+        XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
+        try {
+            while (iter.hasNext()) {
+                ext = (IPacket) iter.next();
+                JiBXUtil.marshallObject(strWriter, ext);
+                writer.writeMarkup(strWriter.toString());
+            }
+        } catch (IOException ex) {
+            throw new JiBXException("Error Occurred while writing markup to writer", ex);
+        }
+    }
+
+    /**
+     * This will unmarshall unknown extension data. It will try to find an
+     * unmarshaller that recognizes the extension data. Failing that, it will
+     * simply skip the extension data and move on to the next extension segment.
+     * 
+     * @param ctx the unmarshalling context
+     * @param packet the stanza packet to add the extension to
+     * @throws JiBXException
+     */
+    protected void unmarshallExtension(UnmarshallingContext ctx, StanzaPacketBase packet) throws JiBXException {
+        // extension/unknown stanzas
+        String ns = ctx.getNamespace();
+        Class extClass = FeridianConfiguration.getConfig().getClassForIQUri(ns);
+        IPacket extPacket;
+        if (extClass != null) {
+            extPacket = (IPacket) JiBXUtil.unmarshallObject(ctx, extClass);
+            // add packet to main packet
+            packet.addExtension(ns, extPacket);
+        } else {
+            // ignore unknown stanza
+            ctx.skipElement();
+        }
     }
 }

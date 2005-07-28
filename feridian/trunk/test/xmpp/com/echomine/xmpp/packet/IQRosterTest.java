@@ -2,6 +2,7 @@ package com.echomine.xmpp.packet;
 
 import java.io.Reader;
 
+import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.JID;
 import com.echomine.xmpp.XMPPTestCase;
 
@@ -9,15 +10,15 @@ import com.echomine.xmpp.XMPPTestCase;
  * Tests the roster iq packet and roster item
  */
 public class IQRosterTest extends XMPPTestCase {
-    public void testRosterRequest() throws Exception {
+    public void testMarshallRosterRequest() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterRequest.xml";
         Reader rdr = getResourceAsReader(inRes);
         IQRosterPacket packet = new IQRosterPacket();
-        marshallObject(packet, IQRosterPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
-    public void testRosterRemove() throws Exception {
+    public void testMarshallRosterRemove() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterRemove.xml";
         Reader rdr = getResourceAsReader(inRes);
         IQRosterPacket packet = new IQRosterPacket();
@@ -26,14 +27,14 @@ public class IQRosterTest extends XMPPTestCase {
         item.setJid(JID.parseJID("nurse@example.com"));
         item.setSubscription(RosterItem.SUBSCRIBE_REMOVE);
         packet.addItem(item);
-        marshallObject(packet, IQRosterPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
-    public void testRosterNoneWithPending() throws Exception {
+    public void testUnmarshallRosterNoneWithPending() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterNoneWithPending.xml";
         Reader rdr = getResourceAsReader(inRes);
-        IQRosterPacket packet = (IQRosterPacket) unmarshallObject(rdr, IQRosterPacket.class);
+        IQRosterPacket packet = (IQRosterPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);
         assertNotNull(packet.getRosterItems());
         assertEquals(1, packet.getRosterItems().size());
         RosterItem item = (RosterItem) packet.getRosterItems().get(0);
@@ -46,7 +47,7 @@ public class IQRosterTest extends XMPPTestCase {
         assertEquals("MyBuddies", (String) item.getGroups().get(0));
     }
 
-    public void testRosterResultNoChild() throws Exception {
+    public void testMarshallRosterResultNoChild() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterAdd.xml";
         Reader rdr = getResourceAsReader(inRes);
         IQRosterPacket packet = new IQRosterPacket();
@@ -55,14 +56,14 @@ public class IQRosterTest extends XMPPTestCase {
         item.setName("MyContact");
         item.addGroup("MyBuddies");
         packet.addItem(item);
-        marshallObject(packet, IQRosterPacket.class);
+        JiBXUtil.marshallIQPacket(writer, packet);
         compare(rdr);
     }
 
-    public void testRosterListResult() throws Exception {
+    public void testUnmarshallRosterListResult() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterListResult.xml";
         Reader rdr = getResourceAsReader(inRes);
-        IQRosterPacket packet = (IQRosterPacket) unmarshallObject(rdr, IQRosterPacket.class);
+        IQRosterPacket packet = (IQRosterPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);
         assertNotNull(packet.getRosterItems());
         assertEquals(2, packet.getRosterItems().size());
         RosterItem item = (RosterItem) packet.getRosterItems().get(0);

@@ -97,29 +97,26 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
         IQPacket tpkt = (IQPacket) obj;
         IQPacket packet = null;
         unmarshallStanzaAttributes(tpkt, ctx);
-        // unmarshall real packet's contents
-        ctx.parsePastStartTag(XMPPConstants.NS_XMPP_CLIENT, "iq");
-        do {
+        ctx.next();
+        while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
             if (ctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "error")) {
                 tpkt.setError((StanzaErrorPacket) JiBXUtil.unmarshallObject(ctx, StanzaErrorPacket.class));
-            } else if (ctx.isEnd()) {
-                break;
             } else {
                 Class iqClass = FeridianConfiguration.getConfig().getClassForIQUri(ctx.getNamespace());
                 if (packet != null) {
-                    ctx.parseElementText(ctx.getNamespace(), ctx.getElementName());
                     if (log.isWarnEnabled())
                         log.warn("Invalid IQ Packet.  Already unmarshalled one child element, but found more than one.  This does not conform to XMPP specs.  Ignoring this child element");
+                    ctx.skipElement();
                 } else if (iqClass != null) {
                     packet = (IQPacket) JiBXUtil.unmarshallObject(ctx, iqClass);
                 } else {
-                    if (log.isInfoEnabled())
-                        log.info("Ignored Unknown Stanza -- element: " + ctx.getName() + ", ns: " + ctx.getNamespace());
+                    // ignore unknown stanza
                     ctx.skipElement();
                 }
+                if (ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName()))
+                    ctx.next();
             }
-        } while (true);
-        ctx.toEnd();
+        }
         if (packet != null) {
             tpkt.copyTo(packet);
             return packet;

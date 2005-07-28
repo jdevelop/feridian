@@ -59,6 +59,8 @@ public class MessagePacketMapper extends AbstractStanzaPacketMapper {
                 ctx.element(index, THREAD_ELEMENT_NAME, packet.getThreadID());
             if (packet.getError() != null)
                 marshallStanzaError(packet.getError(), ctx);
+            //marshall extensions
+            marshallExtensions(ctx, packet);
             ctx.endTag(index, name);
             try {
                 writer.flush();
@@ -85,8 +87,8 @@ public class MessagePacketMapper extends AbstractStanzaPacketMapper {
             packet = new MessagePacket();
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
-        ctx.parsePastStartTag(uri, name);
-        do {
+        ctx.next();
+        while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
             if (ctx.isAt(uri, SUBJECT_ELEMENT_NAME)) {
                 packet.setSubject(ctx.parseElementText(uri, SUBJECT_ELEMENT_NAME));
             } else if (ctx.isAt(uri, BODY_ELEMENT_NAME)) {
@@ -96,11 +98,10 @@ public class MessagePacketMapper extends AbstractStanzaPacketMapper {
             } else if (ctx.isAt(uri, ERROR_ELEMENT_NAME)) {
                 packet.setError(unmarshallStanzaError(ctx));
             } else {
-                break;
+                unmarshallExtension(ctx, packet);
+                ctx.next();
             }
-        } while (true);
-        // parse to end
-        ctx.toEnd();
+        }
         return packet;
     }
 }

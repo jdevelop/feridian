@@ -31,6 +31,8 @@ public class JiBXUtil {
         if (rdr == null)
             throw new IllegalArgumentException("Reader cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(cls);
+        if (factory == null)
+            return null;
         UnmarshallingContext fctx = (UnmarshallingContext) factory.createUnmarshallingContext();
         return fctx.unmarshalDocument(rdr);
     }
@@ -49,6 +51,8 @@ public class JiBXUtil {
         if (parentCtx == null || cls == null)
             throw new IllegalArgumentException("Context or class reference cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(cls);
+        if (factory == null)
+            return null;
         UnmarshallingContext fctx = (UnmarshallingContext) factory.createUnmarshallingContext();
         fctx.setFromContext(parentCtx);
         return fctx.unmarshalElement();
@@ -58,7 +62,8 @@ public class JiBXUtil {
      * Marshalls an objects by first looking up the marshaller from the jibx
      * binding directory. This method requires a current parent unmarshalling
      * context. Furthermore, it requires that the stream writer is placed at the
-     * position where the marshalled xml will go.
+     * position where the marshalled xml will go. If a marshaller cannot be
+     * found for the object, then nothing is done (no exception thrown either).
      * 
      * @param parentCtx the parent marshalling context
      * @param obj the object to marshall
@@ -69,6 +74,8 @@ public class JiBXUtil {
         if (parentCtx == null || obj == null)
             throw new IllegalArgumentException("Context or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
+        if (factory == null)
+            return;
         MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
         fctx.setFromContext(parentCtx);
         fctx.marshalDocument(obj);
@@ -78,7 +85,8 @@ public class JiBXUtil {
      * Marshalls an objects by first looking up the marshaller from the jibx
      * binding directory. This method requires a current stream writer context.
      * Furthermore, it requires that the stream writer is placed at the position
-     * where the marshalled xml will go.
+     * where the marshalled xml will go. If a marshaller cannot be found for the
+     * object, then nothing is done (no exception thrown either).
      * 
      * @param writer the parent marshalling context
      * @param obj the object to marshall
@@ -89,6 +97,8 @@ public class JiBXUtil {
         if (writer == null || obj == null)
             throw new IllegalArgumentException("Writer or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
+        if (factory == null)
+            return;
         MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
         fctx.setXmlWriter(writer);
         fctx.marshalDocument(obj);
@@ -96,7 +106,8 @@ public class JiBXUtil {
 
     /**
      * This method will marshall the object to the writer. It does not do any
-     * additional processing.
+     * additional processing. If a marshaller cannot be found for the object,
+     * then nothing is done (no exception thrown either).
      * 
      * @param writer the extisting output writer
      * @param obj the object to marshall
@@ -106,6 +117,8 @@ public class JiBXUtil {
         if (writer == null || obj == null)
             throw new IllegalArgumentException("Writer or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
+        if (factory == null)
+            return;
         MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
         fctx.setOutput(writer);
         fctx.marshalDocument(obj);
@@ -113,7 +126,8 @@ public class JiBXUtil {
 
     /**
      * IQ Packets requires special marshalling. This method is specifically
-     * created to marshall IQ packets properly.
+     * created to marshall IQ packets properly. If a marshaller cannot be found
+     * for the object, then nothing is done (no exception thrown either).
      * 
      * @param writer the existing output stream
      * @param packet the object to marshall
@@ -123,6 +137,8 @@ public class JiBXUtil {
         if (writer == null || packet == null)
             throw new IllegalArgumentException("Writer or packet to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(IQPacket.class);
+        if (factory == null)
+            return;
         MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
         fctx.setXmlWriter(writer);
         iqPacketMapper.marshal(packet, fctx);

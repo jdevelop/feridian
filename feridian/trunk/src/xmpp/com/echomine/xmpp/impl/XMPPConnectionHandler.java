@@ -196,8 +196,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
             }
         } catch (JiBXException ex) {
             // intentionally left empty
-            if (log.isWarnEnabled())
-                log.warn("Error during handling..", ex);
+            if (log.isInfoEnabled())
+                log.info("Error while reading incoming data. Likely stream is closed due to shutdown or error", ex);
         } finally {
             // error reading incoming data (maybe connection closed)
             shutdown();
@@ -392,6 +392,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      */
     protected synchronized void pause() {
         paused = true;
+        queue.pause();
     }
 
     /**
@@ -401,6 +402,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         if (!paused)
             return;
         paused = false;
+        queue.resume();
         synchronized (this) {
             notify();
         }

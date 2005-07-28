@@ -8,13 +8,8 @@ import java.io.Reader;
 import junit.framework.TestCase;
 
 import org.jibx.extras.DocumentComparator;
-import org.jibx.runtime.BindingDirectory;
-import org.jibx.runtime.IBindingFactory;
-import org.jibx.runtime.IMarshallingContext;
-import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.ClassUtil;
 
@@ -95,31 +90,5 @@ public class XMPPTestCase extends TestCase {
         InputStreamReader brdr = new InputStreamReader(new ByteArrayInputStream(os.toByteArray()), "UTF-8");
         DocumentComparator comp = new DocumentComparator(System.err);
         assertTrue("Invalid XML: " + str, comp.compare(outReader, brdr));
-    }
-
-    /**
-     * marshalls the object to the contained output stream. By default, the
-     * output encoding is set to UTF8.
-     * 
-     * @param packet
-     * @throws JiBXException
-     */
-    protected void marshallObject(Object obj, Class cls) throws JiBXException {
-        IBindingFactory bfact = BindingDirectory.getFactory(cls);
-        IMarshallingContext ctx = bfact.createMarshallingContext();
-        ctx.setOutput(os, "UTF-8");
-        ctx.marshalDocument(obj);
-    }
-
-    /**
-     * Unmarshalls the object.
-     * 
-     * @param rdr the reader containing incoming data
-     * @param cls the class to contain the unmarshalled data
-     * @return the object or null if none can be found.
-     * @throws JiBXException
-     */
-    protected Object unmarshallObject(Reader rdr, Class cls) throws JiBXException {
-        return JiBXUtil.unmarshallObject(rdr, cls);
     }
 }

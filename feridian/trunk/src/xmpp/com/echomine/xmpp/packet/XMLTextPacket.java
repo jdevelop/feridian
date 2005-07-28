@@ -1,7 +1,5 @@
 package com.echomine.xmpp.packet;
 
-import com.echomine.xmpp.IStanzaPacket;
-import com.echomine.xmpp.JID;
 import com.echomine.xmpp.StanzaPacketBase;
 
 /**

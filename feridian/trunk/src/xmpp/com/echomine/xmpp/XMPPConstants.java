@@ -7,7 +7,7 @@ public interface XMPPConstants {
     // custom API namespaces
     static final String NS_STREAM_HANDSHAKE = "urn:echomine:feridian:xmpp-handshake";
 
-    // namespace constants
+    // namespace constants for stream-level elements
     static final String NS_XML = "http://www.w3.org/XML/1998/namespace";
     static final String NS_JABBER_STREAM = "http://etherx.jabber.org/streams";
     static final String NS_XMPP_CLIENT = "jabber:client";
@@ -19,4 +19,8 @@ public interface XMPPConstants {
     static final String NS_STREAM_SASL = "urn:ietf:params:xml:ns:xmpp-sasl";
     static final String NS_STREAM_IQ_AUTH = "http://jabber.org/features/iq-auth";
     static final String NS_STREAM_IQ_REGISTER = "http://jabber.org/features/iq-register";
+    
+    // namespace constants for stanzas and extensions
+    static final String NS_IQ_ROSTER = "jabber:iq:roster";
+    static final String NS_IQ_PRIVACY = "jabber:iq:privacy";
 }

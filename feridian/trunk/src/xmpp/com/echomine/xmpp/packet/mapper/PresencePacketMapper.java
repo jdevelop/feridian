@@ -14,7 +14,7 @@ import com.echomine.xmpp.packet.PresencePacket;
 /**
  * This is the mapper for the presence packet.
  * <p>
- * FIXME: Support xml:lang and arbitrary extension children.
+ * FIXME: Support xml:lang.
  * </p>
  */
 public class PresencePacketMapper extends AbstractStanzaPacketMapper {
@@ -61,6 +61,8 @@ public class PresencePacketMapper extends AbstractStanzaPacketMapper {
                 ctx.element(index, PRIORITY_ELEMENT_NAME, packet.getPriority());
             if (packet.getError() != null)
                 marshallStanzaError(packet.getError(), ctx);
+            //marshall extensions
+            marshallExtensions(ctx, packet);
             ctx.endTag(index, name);
             try {
                 writer.flush();
@@ -87,10 +89,8 @@ public class PresencePacketMapper extends AbstractStanzaPacketMapper {
             packet = new PresencePacket();
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
-        int eventType = ctx.next();
-        if (eventType == UnmarshallingContext.END_TAG)
-            return packet;
-        do {
+        ctx.next();
+        while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
             if (ctx.isAt(uri, SHOW_ELEMENT_NAME)) {
                 packet.setShow(ctx.parseElementText(uri, SHOW_ELEMENT_NAME));
             } else if (ctx.isAt(uri, STATUS_ELEMENT_NAME)) {
@@ -100,11 +100,10 @@ public class PresencePacketMapper extends AbstractStanzaPacketMapper {
             } else if (ctx.isAt(uri, ERROR_ELEMENT_NAME)) {
                 packet.setError(unmarshallStanzaError(ctx));
             } else {
-                break;
+                unmarshallExtension(ctx, packet);
+                ctx.next();
             }
-        } while (true);
-        // parse to end
-        ctx.toEnd();
+        }
         return packet;
     }
 }

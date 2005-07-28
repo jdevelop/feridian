@@ -1,9 +1,9 @@
 package com.echomine.xmpp;
 
-import org.jibx.runtime.JiBXException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 
-import com.echomine.jibx.JiBXUtil;
-import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
@@ -22,6 +22,7 @@ public class StanzaPacketBase implements IStanzaPacket {
     private JID from;
     private String id;
     private String type;
+    private HashMap extensions;
     private long timeout = 5000;
     private StanzaErrorPacket error;
 
@@ -131,16 +132,66 @@ public class StanzaPacketBase implements IStanzaPacket {
             this.type = null;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Adds an extension to the current stanza. An extension is simply an
+     * additional stanza tagged to the main stanza. For instance, delay time,
+     * vcard, etc can be sent as extensions to a message or presence packet. It
+     * allows arbitrary information to be added to the existing main stanzas.
+     * Each extension is associated with its own namespace. Thus, when adding a
+     * new extension, a namespace is required. As long as the extension can be
+     * marshalled, it will be appended to the main packet. If a packet is added
+     * that conflicts with a packet already registered with the specified
+     * namespace, then the new packet will replace the old one. <br/>When
+     * marshalling, the namespace is not taken into account. The namespace is
+     * governed by the binding file. Thus, when sending packets with extensions,
+     * null or any arbitrarily unique namespace can be used. On the other hand,
+     * if this packet contains unmarshalled data, then the namespace will
+     * indicate what type of packet it is.
      * 
-     * @see com.echomine.xmpp.IStanzaPacket#toString(com.echomine.jibx.XMPPStreamWriter)
+     * @param ns the namespace
+     * @param packet the extension packet
      */
-    public void toString(XMPPStreamWriter writer) {
-        try {
-            JiBXUtil.marshallObject(writer, this);
-        } catch (JiBXException ex) {
-            // intentionally left empty
-        }
+    public void addExtension(String ns, IPacket packet) {
+        if (extensions == null)
+            extensions = new HashMap();
+        extensions.put(ns, packet);
+    }
+
+    /**
+     * Removes an extension from the main packet. If this extension exists, then
+     * it will be removed and the packet will be returned. Otherwise, null is
+     * returned.
+     * 
+     * @param ns the packet with the specified namespace to remove
+     * @return the packet associated with the namespace, or null if namespace is
+     *         not found.
+     */
+    public IPacket removeExtension(String ns) {
+        if (extensions == null)
+            return null;
+        return (IPacket) extensions.remove(ns);
+    }
+
+    /**
+     * Retrieves the packet associated with the namespace.
+     * 
+     * @param ns the namespace that the packet is associated with
+     * @return the packet if found, or null if no packet found
+     */
+    public IPacket getExtension(String ns) {
+        if (extensions == null)
+            return null;
+        return (IPacket) extensions.get(ns);
+    }
+
+    /**
+     * Get a list of extensions. This list is not modifiable.
+     * 
+     * @return
+     */
+    public Collection getExtensions() {
+        if (extensions == null)
+            return Collections.EMPTY_SET;
+        return Collections.unmodifiableCollection(extensions.values());
     }
 }

@@ -1,12 +1,14 @@
-<query xmlns='jabber:iq:roster'>
-  <item jid='romeo@example.org'
-        name='Romeo'
-        subscription='both'>
-    <group>Friends</group>
-  </item>
-  <item jid='mercutio@example.org'
-        name='Mercutio'
-        subscription='from'>
-    <group>Friends</group>
-  </item>
-</query>
+<iq xmlns="jabber:client">
+	<query xmlns='jabber:iq:roster'>
+	  <item jid='romeo@example.org'
+	        name='Romeo'
+	        subscription='both'>
+	    <group>Friends</group>
+	  </item>
+	  <item jid='mercutio@example.org'
+	        name='Mercutio'
+	        subscription='from'>
+	    <group>Friends</group>
+	  </item>
+	</query>
+</iq>

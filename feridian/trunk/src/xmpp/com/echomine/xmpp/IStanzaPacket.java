@@ -1,6 +1,5 @@
 package com.echomine.xmpp;
 
-import com.echomine.jibx.XMPPStreamWriter;
 
 /**
  * Represents the XML stanza packet. These packets are the message, IQ, and
@@ -49,13 +48,4 @@ public interface IStanzaPacket extends IPacket {
      * @return the timeout in millis
      */
     long getTimeout();
-
-    /**
-     * This will write out the string version of the packet. Note that this
-     * implementation likely will include additional namespace declarations.
-     * This should only be used for debugging purpose.
-     * 
-     * @param writer the writer to output the text to
-     */
-    void toString(XMPPStreamWriter writer);
 }

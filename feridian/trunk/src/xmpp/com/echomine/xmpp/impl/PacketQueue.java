@@ -16,11 +16,14 @@ import com.echomine.xmpp.SendPacketFailedException;
  * synchronicity in the API.
  */
 public class PacketQueue implements Runnable {
+    private final static String QUEUE_RUNNING = "Feridian Packet Queue";
+    private final static String QUEUE_PAUSED = "Feridian Packet Queue -- PAUSED";
     protected LinkedList queue;
     protected HashMap packetReplyTable;
     protected HashMap replyPackets;
     protected boolean shutdown;
     private XMPPConnectionHandler handler;
+    private boolean paused;
 
     public PacketQueue(XMPPConnectionHandler handler) {
         this.handler = handler;
@@ -44,12 +47,16 @@ public class PacketQueue implements Runnable {
      */
     public void start() {
         shutdown = false;
+        paused = false;
         clear();
         Thread thread = new Thread(this);
-        thread.setName("Feridian Packet Queue");
+        thread.setName(QUEUE_RUNNING);
         thread.start();
     }
 
+    /**
+     * Stops the queue. It will not clear all packets here (start will do that).
+     */
     public void stop() {
         shutdown = true;
         synchronized (queue) {
@@ -61,10 +68,32 @@ public class PacketQueue implements Runnable {
             IStanzaPacket packet;
             while (iter.hasNext()) {
                 packet = (IStanzaPacket) iter.next();
-                synchronized(packet) {
+                synchronized (packet) {
                     packet.notifyAll();
                 }
             }
+        }
+    }
+
+    /**
+     * Pauses current processing of sending packets. It will continue to accept
+     * and queue packets, but will not send them out. This is normally used when
+     * the entire xml processing is taken over by a stream processor.
+     */
+    public synchronized void pause() {
+        paused = true;
+    }
+
+    /**
+     * resumes operation in sending out packets.
+     * 
+     */
+    public synchronized void resume() {
+        if (!paused)
+            return;
+        paused = false;
+        synchronized (queue) {
+            queue.notify();
         }
     }
 
@@ -106,13 +135,13 @@ public class PacketQueue implements Runnable {
         synchronized (queue) {
             queue.addLast(packet);
             // notify threads that's waiting for messages
-            queue.notifyAll();
+            queue.notify();
         }
         if (wait) {
             synchronized (packet) {
                 try {
                     packet.wait(packet.getTimeout());
-                    //retrieve reply packet
+                    // retrieve reply packet
                     return (IStanzaPacket) replyPackets.remove(packet.getId());
                 } catch (InterruptedException ex) {
                     throw new SendPacketFailedException("Wait timed out or interrupted");
@@ -133,11 +162,16 @@ public class PacketQueue implements Runnable {
         try {
             while (!shutdown) {
                 synchronized (queue) {
+                    if (paused) {
+                        Thread.currentThread().setName(QUEUE_PAUSED);
+                        queue.wait();
+                        Thread.currentThread().setName(QUEUE_RUNNING);
+                    }
                     // wait until there is a new request
                     // or until we get interrupted
                     if (queue.isEmpty() && !shutdown)
                         queue.wait();
-                    if (!queue.isEmpty() && !shutdown) {
+                    if (!queue.isEmpty() && !shutdown && !paused) {
                         packet = (IStanzaPacket) queue.removeFirst();
                         handler.sendPacket(packet);
                     }

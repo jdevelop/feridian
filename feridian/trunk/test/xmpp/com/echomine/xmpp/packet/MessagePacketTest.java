@@ -2,8 +2,10 @@ package com.echomine.xmpp.packet;
 
 import java.io.Reader;
 
+import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.JID;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPTestCase;
 
 /**
@@ -11,18 +13,10 @@ import com.echomine.xmpp.XMPPTestCase;
  */
 public class MessagePacketTest extends XMPPTestCase {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testUnmarshallNormalPacket() throws Exception {
         String inRes = "com/echomine/xmpp/data/MessageNormal_in.xml";
         Reader rdr = getResourceAsReader(inRes);
-        MessagePacket packet = (MessagePacket) unmarshallObject(rdr, MessagePacket.class);
+        MessagePacket packet = (MessagePacket) JiBXUtil.unmarshallObject(rdr, MessagePacket.class);
         assertEquals("test subject", packet.getSubject());
         assertEquals("test body", packet.getBody());
         assertEquals("test-thread", packet.getThreadID());
@@ -34,7 +28,7 @@ public class MessagePacketTest extends XMPPTestCase {
     public void testUnmarshallPacketWithNoSubject() throws Exception {
         String inRes = "com/echomine/xmpp/data/MessageBodyOnly_in.xml";
         Reader rdr = getResourceAsReader(inRes);
-        MessagePacket packet = (MessagePacket) unmarshallObject(rdr, MessagePacket.class);
+        MessagePacket packet = (MessagePacket) JiBXUtil.unmarshallObject(rdr, MessagePacket.class);
         assertNull(packet.getSubject());
         assertEquals("test body", packet.getBody());
         assertNull(packet.getThreadID());
@@ -46,10 +40,17 @@ public class MessagePacketTest extends XMPPTestCase {
     public void testUnmarshallPacketWithError() throws Exception {
         String inRes = "com/echomine/xmpp/data/MessageWithError_in.xml";
         Reader rdr = getResourceAsReader(inRes);
-        MessagePacket packet = (MessagePacket) unmarshallObject(rdr, MessagePacket.class);
+        MessagePacket packet = (MessagePacket) JiBXUtil.unmarshallObject(rdr, MessagePacket.class);
         assertNotNull(packet.getError());
         assertEquals(ErrorCode.C_NOT_ALLOWED, packet.getError().getCondition());
         assertEquals(StanzaErrorPacket.AUTH, packet.getError().getErrorType());
+    }
+
+    public void testUnmarshallWithUnknownStanzas() throws Exception {
+        String inRes = "com/echomine/xmpp/data/MessageWithUnknown_in.xml";
+        Reader rdr = getResourceAsReader(inRes);
+        MessagePacket packet = (MessagePacket) JiBXUtil.unmarshallObject(rdr, PresencePacket.class);
+        assertEquals("chat", packet.getType());
     }
 
     public void testMarshallNormalPacket() throws Exception {
@@ -63,7 +64,29 @@ public class MessagePacketTest extends XMPPTestCase {
         packet.setFrom(JID.parseJID("juliet@shakespeare.com"));
         packet.setType(MessagePacket.TYPE_CHAT);
         packet.setId("id_0001");
-        marshallObject(packet, MessagePacket.class);
+        JiBXUtil.marshallObject(writer, packet);
+        compare(rdr);
+    }
+
+    public void testMarshallWithExtensions() throws Exception {
+        String inRes = "com/echomine/xmpp/data/MessageWithExtensions.xml";
+        Reader rdr = getResourceAsReader(inRes);
+        MessagePacket packet = new MessagePacket();
+        packet.setSubject("test subject");
+        packet.setBody("test body");
+        packet.setThreadID("test-thread");
+        packet.setTo(JID.parseJID("romeo@shakespeare.com"));
+        packet.setFrom(JID.parseJID("juliet@shakespeare.com"));
+        packet.setType(MessagePacket.TYPE_CHAT);
+        packet.setId("id_0001");
+        IQRosterPacket ext = new IQRosterPacket();
+        RosterItem item = new RosterItem();
+        item.setJid(JID.parseJID("contact@example.org"));
+        item.setName("MyContact");
+        item.addGroup("MyBuddies");
+        ext.addItem(item);
+        packet.addExtension(XMPPConstants.NS_IQ_ROSTER, ext);
+        JiBXUtil.marshallObject(writer, packet);
         compare(rdr);
     }
 
@@ -80,7 +103,7 @@ public class MessagePacketTest extends XMPPTestCase {
         error.setCondition(ErrorCode.C_NOT_ALLOWED);
         error.setErrorType(StanzaErrorPacket.AUTH);
         packet.setError(error);
-        marshallObject(packet, MessagePacket.class);
+        JiBXUtil.marshallObject(writer, packet);
         compare(rdr);
     }
 }
