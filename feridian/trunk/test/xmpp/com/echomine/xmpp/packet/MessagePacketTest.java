@@ -1,6 +1,7 @@
 package com.echomine.xmpp.packet;
 
 import java.io.Reader;
+import java.util.Locale;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.ErrorCode;
@@ -105,5 +106,37 @@ public class MessagePacketTest extends XMPPTestCase {
         packet.setError(error);
         JiBXUtil.marshallObject(writer, packet);
         compare(rdr);
+    }
+
+    public void testMarshallInternationalPacket() throws Exception {
+        String inRes = "com/echomine/xmpp/data/MessageInternational.xml";
+        Reader rdr = getResourceAsReader(inRes);
+        MessagePacket packet = new MessagePacket();
+        packet.setLocale(Locale.CANADA);
+        packet.setSubject("hello!");
+        packet.setSubject("ciao!", Locale.ITALIAN);
+        packet.setBody("good day!");
+        packet.setBody("buon giorno!", Locale.ITALIAN);
+        packet.setThreadID("test-thread");
+        packet.setTo(JID.parseJID("romeo@shakespeare.com"));
+        packet.setFrom(JID.parseJID("juliet@shakespeare.com"));
+        packet.setType(MessagePacket.TYPE_CHAT);
+        packet.setId("id_0001");
+        JiBXUtil.marshallObject(writer, packet);
+        compare(rdr);
+    }
+
+    public void testUnmarshallInternationalPacket() throws Exception {
+        String inRes = "com/echomine/xmpp/data/MessageInternational.xml";
+        Reader rdr = getResourceAsReader(inRes);
+        MessagePacket packet = (MessagePacket) JiBXUtil.unmarshallObject(rdr, MessagePacket.class);
+        assertEquals(Locale.CANADA, packet.getLocale());
+        assertEquals("hello!", packet.getSubject());
+        assertEquals("ciao!", packet.getSubject(Locale.ITALIAN));
+        assertEquals("good day!", packet.getBody());
+        assertEquals("buon giorno!", packet.getBody(Locale.ITALIAN));
+        assertEquals("test-thread", packet.getThreadID());
+        assertEquals(MessagePacket.TYPE_CHAT, packet.getType());
+        assertEquals("id_0001", packet.getId());
     }
 }

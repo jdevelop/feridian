@@ -19,7 +19,6 @@ import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.SendPacketFailedException;
-import com.echomine.xmpp.StanzaPacketBase;
 import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
@@ -29,6 +28,7 @@ import com.echomine.xmpp.XMPPStreamFactory;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.MessagePacket;
 import com.echomine.xmpp.packet.PresencePacket;
+import com.echomine.xmpp.packet.StanzaPacketBase;
 import com.echomine.xmpp.packet.XMLTextPacket;
 
 /**

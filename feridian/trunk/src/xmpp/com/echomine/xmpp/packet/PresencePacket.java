@@ -1,6 +1,9 @@
 package com.echomine.xmpp.packet;
 
-import com.echomine.xmpp.StanzaPacketBase;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * <p>
@@ -36,13 +39,21 @@ import com.echomine.xmpp.StanzaPacketBase;
  * <p>
  * The priority is used when you have multiple logins. The "default" is 0.
  * Negative priority is a preference that the sender should not be used for
- * direct or immediate contact. This should only be set when type is NOT set.
+ * direct or immediate contact. This vlaue should only be set when type is NOT
+ * set.
+ * </p>
+ * <p>
+ * International, Locale, and xml:lang considerations -- This presence packet
+ * supports xml:lang. Stanza-level locale (setLocale()) overrides stream-level
+ * locale and will set the overall default locale for all children. The children
+ * can further override higher-level locales by setting its own individual
+ * locale.
  * </p>
  * <p>
  * <b>Current Implementation: XMPP IM and Presence RFC </b> <br>
  * </p>
  */
-public class PresencePacket extends StanzaPacketBase {
+public class PresencePacket extends IMPacket {
     public static final String TYPE_UNAVAILABLE = "unavailable";
     public static final String TYPE_SUBSCRIBE = "subscribe";
     public static final String TYPE_SUBSCRIBED = "subscribed";
@@ -55,7 +66,7 @@ public class PresencePacket extends StanzaPacketBase {
     public static final String SHOW_XA = "xa";
 
     private String show;
-    private String status;
+    private LinkedHashMap statuses = new LinkedHashMap();
     private int priority;
 
     public PresencePacket() {
@@ -96,16 +107,58 @@ public class PresencePacket extends StanzaPacketBase {
     }
 
     /**
+     * This will return the status for the default (ie. no xml:lang) locale. If
+     * no such status exists, then it will check for the packet's default
+     * locale. Failing that, a null is returned.
+     * 
      * @return Returns the status.
      */
     public String getStatus() {
+        String status = getStatus(null);
+        if (status == null && getLocale() != null)
+            status = getStatus(getLocale());
         return status;
     }
 
     /**
+     * This will return the status for the specified locale. If no such status
+     * exists, then null is returned.
+     * 
+     * @param locale the locale, null to specify default (ie. no xml:lang)
+     * @return Returns the status or null if none exists
+     */
+    public String getStatus(Locale locale) {
+        return (String) statuses.get(locale);
+    }
+
+    /**
+     * sets the status for the "null" locale (no xml:lang)
+     * 
      * @param status The status to set.
      */
     public void setStatus(String status) {
-        this.status = status;
+        setStatus(status, null);
+    }
+
+    /**
+     * Sets the sattus for the specified locale. If locale is "null", then this
+     * is the empty/default body.
+     * 
+     * @param status the status text
+     * @param locale optional locale. null to specify default (ie. no xml:lang)
+     */
+    public void setStatus(String status, Locale locale) {
+        statuses.put(locale, status);
+    }
+
+    /**
+     * obtain an unmodifiable hash map of statuses. The key is an Locale object,
+     * the value a String. The null locale stores the default (no xml:lang)
+     * subject.
+     * 
+     * @return an unmodifiable hash map of statuses
+     */
+    public Map getStatuses() {
+        return Collections.unmodifiableMap(statuses);
     }
 }

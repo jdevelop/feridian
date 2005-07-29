@@ -1,6 +1,5 @@
 package com.echomine.xmpp.packet;
 
-import com.echomine.xmpp.StanzaPacketBase;
 
 /**
  * This packet is a generic text packet that will send out whatever text data is

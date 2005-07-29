@@ -1,6 +1,7 @@
 package com.echomine.xmpp.stream;
 
 import java.io.StringReader;
+import java.util.Locale;
 
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPException;
@@ -26,6 +27,17 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
         compare(outRes);
         assertEquals("c2s_123", sessCtx.getSessionId());
         assertEquals("example.com", sessCtx.getHostName());
+    }
+
+    public void testInternationalHandshake() throws Exception {
+        StringReader rdr = new StringReader("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='c2s_123' from='example.com' xml:lang='en-us' version='1.0'></stream:stream>");
+        String outRes = "com/echomine/xmpp/data/XMPPEmptyStream.xml";
+        run(rdr, stream);
+        endOutgoingStreamHeader();
+        compare(outRes);
+        assertEquals("c2s_123", sessCtx.getSessionId());
+        assertEquals("example.com", sessCtx.getHostName());
+        assertEquals(Locale.US, sessCtx.getLocale());
     }
 
     public void testHandshakeWithError() throws Exception {

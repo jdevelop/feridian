@@ -2,6 +2,7 @@ package com.echomine.xmpp.packet;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Locale;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.ErrorCode;
@@ -65,5 +66,27 @@ public class PresencePacketTest extends XMPPTestCase {
         packet.setError(error);
         JiBXUtil.marshallObject(writer, packet);
         compare(rdr);
+    }
+
+    public void testMarshallInternationalPacket() throws Exception {
+        String inRes = "com/echomine/xmpp/data/PresenceInternational.xml";
+        Reader rdr = getResourceAsReader(inRes);
+        PresencePacket packet = new PresencePacket();
+        packet.setLocale(Locale.CANADA);
+        packet.setShow(PresencePacket.SHOW_AWAY);
+        packet.setStatus("dinner");
+        packet.setStatus("cenare", Locale.ITALY);
+        JiBXUtil.marshallObject(writer, packet);
+        compare(rdr);
+    }
+    
+    public void testUnmarshallInternationalPacket() throws Exception {
+        String inRes = "com/echomine/xmpp/data/PresenceInternational.xml";
+        Reader rdr = getResourceAsReader(inRes);
+        PresencePacket packet = (PresencePacket) JiBXUtil.unmarshallObject(rdr, PresencePacket.class);
+        assertEquals(Locale.CANADA, packet.getLocale());
+        assertEquals("away", packet.getShow());
+        assertEquals("dinner", packet.getStatus());
+        assertEquals("cenare", packet.getStatus(Locale.ITALY));
     }
 }

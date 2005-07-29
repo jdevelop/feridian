@@ -7,6 +7,7 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.util.LocaleUtil;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
@@ -39,6 +40,8 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
             writer.startTagNamespaces(XMPPStreamWriter.IDX_JABBER_STREAM, STREAM_ELEMENT_NAME, new int[] { 2, 3 }, new String[] { "stream", "" });
             writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "version", "1.0");
             writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", sessCtx.getHostName());
+            if (sessCtx.getLocale() != null)
+                writer.addAttribute(XMPPConstants.IDX_XML, "lang", LocaleUtil.format(sessCtx.getLocale()));
             writer.closeStartTag();
             writer.flush();
             // start logging
@@ -53,6 +56,8 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
                 sessCtx.setSessionId(uctx.attributeText(null, "id"));
             if (uctx.hasAttribute(null, "version"))
                 sessCtx.setVersion(uctx.attributeText(null, "version"));
+            if (uctx.hasAttribute(XMPPConstants.NS_XML, "lang"))
+                sessCtx.setLocale(LocaleUtil.parseLocale(uctx.attributeText(XMPPConstants.NS_XML, "lang")));
             // parse past start tag
             uctx.next();
             // read in any possible error element

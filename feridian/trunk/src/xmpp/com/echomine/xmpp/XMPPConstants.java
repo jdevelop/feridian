@@ -4,6 +4,8 @@ package com.echomine.xmpp;
  * Contains useful constants used by XMPP classes.
  */
 public interface XMPPConstants {
+    static final int IDX_XML = 1;
+
     // custom API namespaces
     static final String NS_STREAM_HANDSHAKE = "urn:echomine:feridian:xmpp-handshake";
 
@@ -19,7 +21,7 @@ public interface XMPPConstants {
     static final String NS_STREAM_SASL = "urn:ietf:params:xml:ns:xmpp-sasl";
     static final String NS_STREAM_IQ_AUTH = "http://jabber.org/features/iq-auth";
     static final String NS_STREAM_IQ_REGISTER = "http://jabber.org/features/iq-register";
-    
+
     // namespace constants for stanzas and extensions
     static final String NS_IQ_ROSTER = "jabber:iq:roster";
     static final String NS_IQ_PRIVACY = "jabber:iq:privacy";

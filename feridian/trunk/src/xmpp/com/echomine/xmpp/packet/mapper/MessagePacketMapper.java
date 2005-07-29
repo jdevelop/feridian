@@ -1,6 +1,7 @@
 package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
@@ -9,15 +10,15 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.util.LocaleUtil;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.MessagePacket;
 
 /**
- * Mapper for the stanza error packet.
- * <p>
- * FIXME: Support xml:lang and arbitrary extension children.
- * </p>
+ * Mapper for the message stanza. This mapper supports xml:lang and arbitrary
+ * extension children.
  */
-public class MessagePacketMapper extends AbstractStanzaPacketMapper {
+public class MessagePacketMapper extends AbstractIMPacketMapper implements XMPPConstants {
     protected static final String TYPE_ATTRIBUTE_NAME = "type";
     protected static final String SUBJECT_ELEMENT_NAME = "subject";
     protected static final String BODY_ELEMENT_NAME = "body";
@@ -51,15 +52,13 @@ public class MessagePacketMapper extends AbstractStanzaPacketMapper {
             marshallStanzaAttributes(packet, ctx);
             ctx.closeStartContent();
             // marshall out the message
-            if (packet.getSubject() != null)
-                ctx.element(index, SUBJECT_ELEMENT_NAME, packet.getSubject());
-            if (packet.getBody() != null)
-                ctx.element(index, BODY_ELEMENT_NAME, packet.getBody());
+            marshallMapWithLocale(index, SUBJECT_ELEMENT_NAME, packet.getSubjects(), ctx);
+            marshallMapWithLocale(index, BODY_ELEMENT_NAME, packet.getBodies(), ctx);
             if (packet.getThreadID() != null)
                 ctx.element(index, THREAD_ELEMENT_NAME, packet.getThreadID());
             if (packet.getError() != null)
                 marshallStanzaError(packet.getError(), ctx);
-            //marshall extensions
+            // marshall extensions
             marshallExtensions(ctx, packet);
             ctx.endTag(index, name);
             try {
@@ -88,11 +87,21 @@ public class MessagePacketMapper extends AbstractStanzaPacketMapper {
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
         ctx.next();
+        String value;
+        Locale locale;
         while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
             if (ctx.isAt(uri, SUBJECT_ELEMENT_NAME)) {
-                packet.setSubject(ctx.parseElementText(uri, SUBJECT_ELEMENT_NAME));
+                locale = null;
+                if (ctx.hasAttribute(NS_XML, LANG_ATTRIBUTE_NAME))
+                    locale = LocaleUtil.parseLocale(ctx.attributeText(NS_XML, LANG_ATTRIBUTE_NAME));
+                value = ctx.parseElementText(uri, SUBJECT_ELEMENT_NAME);
+                packet.setSubject(value, locale);
             } else if (ctx.isAt(uri, BODY_ELEMENT_NAME)) {
-                packet.setBody(ctx.parseElementText(uri, BODY_ELEMENT_NAME));
+                locale = null;
+                if (ctx.hasAttribute(NS_XML, LANG_ATTRIBUTE_NAME))
+                    locale = LocaleUtil.parseLocale(ctx.attributeText(NS_XML, LANG_ATTRIBUTE_NAME));
+                value = ctx.parseElementText(uri, BODY_ELEMENT_NAME);
+                packet.setBody(value, locale);
             } else if (ctx.isAt(uri, THREAD_ELEMENT_NAME)) {
                 packet.setThreadID(ctx.parseElementText(uri, THREAD_ELEMENT_NAME));
             } else if (ctx.isAt(uri, ERROR_ELEMENT_NAME)) {

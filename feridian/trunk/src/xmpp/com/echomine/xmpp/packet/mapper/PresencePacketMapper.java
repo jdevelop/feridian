@@ -1,6 +1,7 @@
 package com.echomine.xmpp.packet.mapper;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
@@ -9,15 +10,16 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.util.LocaleUtil;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.PresencePacket;
 
 /**
- * This is the mapper for the presence packet.
- * <p>
- * FIXME: Support xml:lang.
- * </p>
+ * This is the mapper for the presence packet. This mapper support
+ * (un)marshalling of extensions and xml:lang attributes. The only elements that
+ * can contain xml:lang attributes is the status.
  */
-public class PresencePacketMapper extends AbstractStanzaPacketMapper {
+public class PresencePacketMapper extends AbstractIMPacketMapper implements XMPPConstants {
     protected static final String SHOW_ELEMENT_NAME = "show";
     protected static final String STATUS_ELEMENT_NAME = "status";
     protected static final String PRIORITY_ELEMENT_NAME = "priority";
@@ -55,13 +57,12 @@ public class PresencePacketMapper extends AbstractStanzaPacketMapper {
             ctx.closeStartContent();
             if (packet.getShow() != null)
                 ctx.element(index, SHOW_ELEMENT_NAME, packet.getShow());
-            if (packet.getStatus() != null)
-                ctx.element(index, STATUS_ELEMENT_NAME, packet.getStatus());
+            marshallMapWithLocale(index, STATUS_ELEMENT_NAME, packet.getStatuses(), ctx);
             if (packet.getPriority() != 0)
                 ctx.element(index, PRIORITY_ELEMENT_NAME, packet.getPriority());
             if (packet.getError() != null)
                 marshallStanzaError(packet.getError(), ctx);
-            //marshall extensions
+            // marshall extensions
             marshallExtensions(ctx, packet);
             ctx.endTag(index, name);
             try {
@@ -90,11 +91,17 @@ public class PresencePacketMapper extends AbstractStanzaPacketMapper {
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
         ctx.next();
+        String value;
+        Locale locale;
         while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
             if (ctx.isAt(uri, SHOW_ELEMENT_NAME)) {
                 packet.setShow(ctx.parseElementText(uri, SHOW_ELEMENT_NAME));
             } else if (ctx.isAt(uri, STATUS_ELEMENT_NAME)) {
-                packet.setStatus(ctx.parseElementText(uri, STATUS_ELEMENT_NAME));
+                locale = null;
+                if (ctx.hasAttribute(NS_XML, LANG_ATTRIBUTE_NAME))
+                    locale = LocaleUtil.parseLocale(ctx.attributeText(NS_XML, LANG_ATTRIBUTE_NAME));
+                value = ctx.parseElementText(uri, STATUS_ELEMENT_NAME);
+                packet.setStatus(value, locale);
             } else if (ctx.isAt(uri, PRIORITY_ELEMENT_NAME)) {
                 packet.setPriority(ctx.parseElementInt(uri, PRIORITY_ELEMENT_NAME));
             } else if (ctx.isAt(uri, ERROR_ELEMENT_NAME)) {
