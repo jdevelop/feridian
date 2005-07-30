@@ -11,7 +11,7 @@ compile.deprecation=off
 # these can include a custom or separate classpath or directory
 # where you put log4j configuration or perhaps other configuration
 # files used during testing.
-classpath.extra=../custom
+test.classpath.extra=
 
 # test settings
 # These allow you to specify the specific test to run.

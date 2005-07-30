@@ -42,10 +42,10 @@ public class PacketQueueTest extends TestCase {
         packet.setId("id_001");
         packet.setType(PresencePacket.TYPE_SUBSCRIBED);
         queue.packetReceived(packet);
-        assertNotNull(runner.replyPacket);
-        assertEquals(PresencePacket.TYPE_SUBSCRIBED, runner.replyPacket.getType());
         assertEquals(0, queue.getQueue().size());
         assertEquals(0, queue.getReplyTable().size());
+        assertNotNull(runner.replyPacket);
+        assertEquals(PresencePacket.TYPE_SUBSCRIBED, runner.replyPacket.getType());
     }
 
     /**

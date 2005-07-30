@@ -1,7 +1,15 @@
 package com.echomine.xmpp.packet;
 
 /**
- * Extends the error packet to add in stanza-specific error packet data
+ * Extends the error packet to add in stanza-specific error packet data.
+ * <p>The following error types are defined by XMPP:<br/>
+ * <ul>
+ * <li>cancel -- do not retry (the error is unrecoverable)</li>
+ * <li>continue -- proceed (the condition was only a warning)</li>
+ * <li>modify -- retry after changing the data sent</li>
+ * <li>auth -- retry after providing credentials</li>
+ * <li>wait -- retry after waiting (the error is temporary)</li>
+ * </ul>
  */
 public class StanzaErrorPacket extends ErrorPacket {
     public static final String CANCEL = "cancel";

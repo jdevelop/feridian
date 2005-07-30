@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+<stream:stream to='example.com' version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<iq type='error' id='iq_0001' to='juliet@example.com'>
+		<error type='cancel'>
+			<service-unavailable xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+		</error>
+	</iq>
+</stream:stream>

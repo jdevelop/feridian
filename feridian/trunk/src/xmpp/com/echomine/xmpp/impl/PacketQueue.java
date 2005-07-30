@@ -21,7 +21,7 @@ public class PacketQueue implements Runnable {
     protected LinkedList queue;
     protected HashMap packetReplyTable;
     protected HashMap replyPackets;
-    protected boolean shutdown;
+    protected boolean shutdown = true;
     private XMPPConnectionHandler handler;
     private boolean paused;
 
@@ -55,12 +55,20 @@ public class PacketQueue implements Runnable {
     }
 
     /**
-     * Stops the queue. It will not clear all packets here (start will do that).
+     * Stops the queue. This method will actually wait for all packets to be
+     * sent before shutting down and giving control back to the caller.
      */
-    public void stop() {
+    public synchronized void stop() {
+        if (shutdown) return;
         shutdown = true;
         synchronized (queue) {
             queue.notifyAll();
+            if (!queue.isEmpty())
+                try {
+                    wait();
+                } catch (InterruptedException ex) {
+                    // intentionally left empty
+                }
         }
         // iterate through all the msgs waiting for a reply and interrupt them
         synchronized (packetReplyTable) {
@@ -163,9 +171,9 @@ public class PacketQueue implements Runnable {
     public void run() {
         IStanzaPacket packet;
         try {
-            while (!shutdown) {
+            while (!shutdown || !queue.isEmpty()) {
                 synchronized (queue) {
-                    if (paused) {
+                    if (paused && !shutdown) {
                         Thread.currentThread().setName(QUEUE_PAUSED);
                         queue.wait();
                         Thread.currentThread().setName(QUEUE_RUNNING);
@@ -174,7 +182,7 @@ public class PacketQueue implements Runnable {
                     // or until we get interrupted
                     if (queue.isEmpty() && !shutdown)
                         queue.wait();
-                    if (!queue.isEmpty() && !shutdown && !paused) {
+                    if (!queue.isEmpty() && !paused) {
                         packet = (IStanzaPacket) queue.removeFirst();
                         handler.sendPacket(packet);
                     }
@@ -185,6 +193,9 @@ public class PacketQueue implements Runnable {
         } catch (SendPacketFailedException ex) {
             // either packet cannot be marshalled or IO exception occurred.
         } finally {
+            synchronized (this) {
+                notifyAll();
+            }
             stop();
         }
     }

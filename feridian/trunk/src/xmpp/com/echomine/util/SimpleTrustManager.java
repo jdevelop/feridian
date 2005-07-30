@@ -14,6 +14,9 @@ import java.util.Enumeration;
 
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This sub_class implements the X509TrustManager interface. MyTrustManager
  * trusts known certificate chains, and queries the user to approve unknown
@@ -24,6 +27,8 @@ import javax.net.ssl.X509TrustManager;
  * (default is "false") if you want the class to prompt for acceptance.
  */
 public class SimpleTrustManager implements X509TrustManager {
+    private static final Log log = LogFactory.getLog(SimpleTrustManager.class);
+
     /**
      * property for setting promting true/on/false/off
      */
@@ -73,7 +78,7 @@ public class SimpleTrustManager implements X509TrustManager {
             prompt = false;
         try {
             checkChainTrusted(chain); // Is the chain is in the keyStore
-                                        // object?
+            // object?
         } catch (CertificateException ex) {
             if (prompt)
                 System.out.println("Untrusted Certificate chain:");
@@ -102,9 +107,9 @@ public class SimpleTrustManager implements X509TrustManager {
                 // Trust the chain.
                 try {
                     for (int i = 0; i < chain.length; i++) { // Add Chain to
-                                                                // the keyStore.
+                        // the keyStore.
                         keyStore.setCertificateEntry(chain[i].getIssuerDN().toString(), chain[i]); // throws
-                                                                                                    // KeyStoreException
+                        // KeyStoreException
                     }
                 } catch (KeyStoreException kse) {
                     System.err.println("Unable to add a certificate to the keystore");
@@ -117,23 +122,30 @@ public class SimpleTrustManager implements X509TrustManager {
                     try {
                         keyStore.store(keyStoreOStream, keyStorePassword);
                     } catch (CertificateException ce) {
-                        System.err.println("Certificate exception when trying to store the key in the keystore");
+                        if (log.isWarnEnabled())
+                            log.warn("Certificate exception when trying to store the key in the keystore");
                     } catch (KeyStoreException kse) {
-                        System.err.println("Key store exception when trying to store the key in the keystore");
+                        if (log.isWarnEnabled())
+                            log.warn("Key store exception when trying to store the key in the keystore");
                     } catch (IOException ioe) {
-                        System.err.println("Io exception when trying to store the key in the keystore");
+                        if (log.isWarnEnabled())
+                            log.warn("Io exception when trying to store the key in the keystore");
                     } catch (NoSuchAlgorithmException nsae) {
-                        System.err.println("No such algorithm exception when trying to store the key in the keystore");
+                        if (log.isWarnEnabled())
+                            log.warn("No such algorithm exception when trying to store the key in the keystore");
                     }
                 } catch (FileNotFoundException fnfe) {
-                    System.err.println("Keystore file: " + keyStorePath + " not found - key not saved");
+                    if (log.isWarnEnabled())
+                        log.warn("Keystore file: " + keyStorePath + " not found - key not saved");
                 } finally {
                     if (keyStoreOStream != null) {
                         try {
                             keyStoreOStream.close();
-                            System.out.println("Keystore saved in " + keyStorePath);
+                            if (log.isInfoEnabled())
+                                log.info("Keystore saved in " + keyStorePath);
                         } catch (IOException ioe) {
-                            System.err.println("Unable to close the key store file");
+                            if (log.isInfoEnabled())
+                                log.info("Unable to close the key store file");
                         }
                         keyStoreOStream = null;
                     }
@@ -169,7 +181,8 @@ public class SimpleTrustManager implements X509TrustManager {
 
             }
         } catch (Exception e) {
-            System.out.println("getAcceptedIssuers Exception: " + e.toString());
+            if (log.isWarnEnabled())
+                log.warn("getAcceptedIssuers Exception: " + e.toString());
             X509Certs = null;
         }
         return X509Certs;
@@ -189,7 +202,8 @@ public class SimpleTrustManager implements X509TrustManager {
                 if (keyStore.getCertificateAlias(chain[i]) != null)
                     break;
         } catch (Exception ex) {
-            System.out.println("checkChainTrusted Exception: " + ex.toString());
+            if (log.isWarnEnabled())
+                log.warn("checkChainTrusted Exception: " + ex.toString());
             throw new CertificateException("Chain is not trusted: " + ex.getMessage());
         }
     }

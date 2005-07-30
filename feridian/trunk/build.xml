@@ -190,7 +190,7 @@
     <target name="test-module" depends="compile-test-module" if="module.name">
         <junit printsummary="yes" haltonfailure="no" haltonerror="no" fork="yes">
             <!-- JUnit Configuration Options -->
-            <classpath location="${classpath.extra}"/>
+            <classpath location="${test.classpath.extra}"/>
             <classpath location="${build.dir}/${module.name}/classes"/>
             <classpath location="${build.dir}/${module.name}/tests/classes"/>
             <classpath refid="module.classpath"/>

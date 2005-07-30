@@ -10,6 +10,10 @@ import java.nio.charset.CharsetDecoder;
 
 import com.echomine.xmpp.XMPPLogger;
 
+/**
+ * This reader is the main reader wrapper for socket input streams.  It enables logging
+ * for incoming data.
+ */
 public class XMPPLoggableReader extends InputStreamReader {
     private static final int STOP = 0;
     private static final int START = 1;
@@ -80,6 +84,9 @@ public class XMPPLoggableReader extends InputStreamReader {
         }
     }
 
+    /**
+     * Overridden to enable logging
+     */
     public int read() throws IOException {
         int ch = super.read();
         if (XMPPLogger.canLogIncoming() && status == START && ch != -1)
@@ -87,6 +94,9 @@ public class XMPPLoggableReader extends InputStreamReader {
         return ch;
     }
 
+    /**
+     * Overridden to enable logging
+     */
     public int read(char[] cbuf, int offset, int length) throws IOException {
         int read = super.read(cbuf, offset, length);
         if (XMPPLogger.canLogIncoming() && status == START && read > 0)
@@ -94,9 +104,21 @@ public class XMPPLoggableReader extends InputStreamReader {
         return read;
     }
 
+    /**
+     * Overridden to enable logging
+     */
     public void close() throws IOException {
         stopLogging();
         super.close();
+    }
+
+    /**
+     * This gets the current text data that is in the log buffer.
+     * 
+     * @return the log text, can possibly be empty
+     */
+    public String getLogText() {
+        return writer.toString();
     }
 
 }

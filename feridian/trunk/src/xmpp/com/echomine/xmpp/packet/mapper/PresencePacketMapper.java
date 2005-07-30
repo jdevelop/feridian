@@ -108,7 +108,6 @@ public class PresencePacketMapper extends AbstractIMPacketMapper implements XMPP
                 packet.setError(unmarshallStanzaError(ctx));
             } else {
                 unmarshallExtension(ctx, packet);
-                ctx.next();
             }
         }
         return packet;

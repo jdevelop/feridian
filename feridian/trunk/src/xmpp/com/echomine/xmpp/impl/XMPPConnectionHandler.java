@@ -15,6 +15,7 @@ import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
 import com.echomine.net.HandshakeableSocketHandler;
 import com.echomine.util.IOUtil;
+import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPStream;
@@ -25,9 +26,11 @@ import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPStreamFactory;
+import com.echomine.xmpp.packet.ErrorPacket;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.MessagePacket;
 import com.echomine.xmpp.packet.PresencePacket;
+import com.echomine.xmpp.packet.StanzaErrorPacket;
 import com.echomine.xmpp.packet.StanzaPacketBase;
 import com.echomine.xmpp.packet.XMLTextPacket;
 
@@ -36,12 +39,36 @@ import com.echomine.xmpp.packet.XMLTextPacket;
  * actually delegate the work to Streams that handle all the incoming and
  * outgoing parsing. In addition, the handler will do automatic TLS negotation
  * if the remote entity supports it. It is on by default.
+ * <p>
+ * This connection also follows the XMPP specs on ignoring unknown stanzas. XMPP
+ * specs states the following for ignoring unknown stanzas:
+ * <ul>
+ * <li>If an entity receives a message or presence stanza that contains XML
+ * data qualified by a namespace it does not understand, the portion of the
+ * stanza that is in the unknown namespace SHOULD be ignored.</li>
+ * <li>If an entity receives a message stanza whose only child element is
+ * qualified by a namespace it does not understand, it MUST ignore the entire
+ * stanza.</li>
+ * <li>If an entity receives an IQ stanza of type "get" or "set" containing a
+ * child element qualified by a namespace it does not understand, the entity
+ * SHOULD return an IQ stanza of type "error" with an error condition of
+ * &lt;service-unavailable/>.</li>
+ * </ul>
+ * This connection handler follows the first and second rule. For the third
+ * rule, this handler will send back an error iq packet. However, it does not
+ * attach the original request. This should be fixed in future releases.
+ * </p>
+ * <p>
+ * TODO: Error reply for IQ request will include the original request data if
+ * the request is unknown.
+ * </p>
  */
 public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPConstants {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
     private static final String PRESENCE_ELEMENT_NAME = "presence";
     private static final String IQ_ELEMENT_NAME = "iq";
     private static final String MESSAGE_ELEMENT_NAME = "message";
+    private static final String ERROR_ELEMENT_NAME = "error";
 
     protected XMPPSessionContext sessCtx;
     protected boolean shutdown;
@@ -100,6 +127,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      *      com.echomine.net.ConnectionContext)
      */
     public void handshake(Socket socket, ConnectionContext connCtx) throws HandshakeFailedException {
+        shutdown = false;
         try {
             this.mainSocket = socket;
             socket.setKeepAlive(true);
@@ -177,9 +205,55 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     } else if (uctx.isAt(NS_XMPP_CLIENT, PRESENCE_ELEMENT_NAME)) {
                         packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, PresencePacket.class);
                     } else if (uctx.isAt(NS_XMPP_CLIENT, MESSAGE_ELEMENT_NAME)) {
-                        packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, MessagePacket.class);
+                        MessagePacket msgPkt = (MessagePacket) JiBXUtil.unmarshallObject(uctx, MessagePacket.class);
+                        // according to XMPP, message stanza with no child
+                        // element
+                        // or unknown namespace extensions should be ignored
+                        // This translates to this API ignoring message stanzas
+                        // with no child elements
+                        // and no extensions in this API.
+                        if (msgPkt.getBodies().isEmpty() && msgPkt.getExtensions().isEmpty() && msgPkt.getSubjects().isEmpty() && msgPkt.getThreadID() == null)
+                            streamCtx.getReader().flushIgnoredDataToLog();
+                        else
+                            packet = msgPkt;
                     } else if (uctx.isAt(NS_XMPP_CLIENT, IQ_ELEMENT_NAME)) {
-                        packet = (IStanzaPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+                        IQPacket iqpkt = (IQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+                        // according to XMPP, if an entity receives an IQ stanza
+                        // of type "get" or "set" containing a child element
+                        // qualified by a namespace it does not understand, the
+                        // entity SHOULD return an IQ stanza of type "error"
+                        // with an error condition of <service-unavailable/>.
+                        // Here, it is ignored as well. In addition, an
+                        // error packet is also sent back to the user, as
+                        // specified by the specs.
+                        if (IQPacket.class.getName().equals(iqpkt.getClass().getName()) && (IQPacket.TYPE_SET.equals(iqpkt.getType()) || IQPacket.TYPE_GET.equals(iqpkt.getType()))) {
+                            streamCtx.getReader().flushIgnoredDataToLog();
+                            IQPacket errpkt = new IQPacket();
+                            errpkt.setTo(iqpkt.getFrom());
+                            errpkt.setId(iqpkt.getId());
+                            // TODO: For now, the return result does not include
+                            // the original packet request data. XMPP specs
+                            // RECOMMENDS includes the original packet request
+                            // data.
+                            StanzaErrorPacket error = new StanzaErrorPacket();
+                            error.setCondition(ErrorCode.C_SERVICE_UNAVAILABLE);
+                            error.setErrorType(StanzaErrorPacket.CANCEL);
+                            errpkt.setError(error);
+                            try {
+                                queuePacket(errpkt, false);
+                            } catch (SendPacketFailedException ex) {
+                                // intentionally empty (will never get thrown)
+                            }
+                        } else {
+                            packet = iqpkt;
+                        }
+                    } else if (uctx.isAt(NS_JABBER_STREAM, ERROR_ELEMENT_NAME)) {
+                        // stream level error received = close stream
+                        ErrorPacket errorPkt = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
+                        XMPPException ex = new XMPPException("Stream error", errorPkt);
+                        IOException ioex = new IOException();
+                        ioex.initCause(ex);
+                        throw ioex;
                     } else {
                         uctx.skipElement();
                         streamCtx.getReader().flushIgnoredDataToLog();
@@ -321,12 +395,19 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
     }
 
     /*
-     * shutdown the connection
+     * shutdown the connection. This method will actually block until all
+     * packets are sent out. Note that even if sent packets errored, sending of
+     * subsequently packets are stopped because likely there was the output
+     * stream is already closed.
      * 
      * @see com.echomine.net.SocketHandler#shutdown()
      */
     public void shutdown() {
-        shutdown = true;
+        synchronized (this) {
+            if (shutdown)
+                return;
+            shutdown = true;
+        }
         // must physically shutdown input stream in order to release
         // the unmarshalling context's parser wait status
         try {

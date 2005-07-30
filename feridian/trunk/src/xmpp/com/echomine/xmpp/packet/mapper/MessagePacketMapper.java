@@ -108,7 +108,6 @@ public class MessagePacketMapper extends AbstractIMPacketMapper implements XMPPC
                 packet.setError(unmarshallStanzaError(ctx));
             } else {
                 unmarshallExtension(ctx, packet);
-                ctx.next();
             }
         }
         return packet;
