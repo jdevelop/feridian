@@ -195,8 +195,10 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     break;
                 queue.resume();
                 streamCtx.getReader().startLogging();
-                // go into wait state if no data is incoming.
-                uctx.next();
+                // purposely synchronize because of possible thread racing issue
+                synchronized (uctx) {
+                    uctx.next();
+                }
                 IStanzaPacket packet = null;
                 if (!paused) {
                     // parse incoming data
@@ -396,7 +398,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         streamCtx.reset();
         sessCtx.reset();
         queue.start();
-        //start queue paused
+        // start queue paused
         queue.pause();
     }
 

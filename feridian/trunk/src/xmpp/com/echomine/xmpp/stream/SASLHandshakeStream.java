@@ -111,7 +111,6 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         // send response immediately
         writer.flush();
         // receive final success or failure
-        uctx.next();
         parseAndThrowFailure(uctx, streamCtx);
         if (!uctx.isAt(NS_STREAM_SASL, "success"))
             throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
@@ -133,11 +132,12 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.addAttribute(0, "mechanism", DIGEST_MD5);
         writer.closeEmptyTag();
         writer.flush();
-        // server sends us challenge
-        uctx.next();
+        // synchronize the first access in case connection handler read extra data
+        synchronized (uctx) {
+            if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
+                uctx.next();
+        }
         parseAndThrowFailure(uctx, streamCtx);
-        if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
-            throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
         String challengeStr = parseElementText(uctx, CHALLENGE_ELEMENT_NAME, streamCtx);
         if (log.isInfoEnabled())
             log.info("Received challenge string: " + challengeStr);
@@ -152,11 +152,8 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         writer.writeTextContent(response);
         writer.endTag(idx, RESPONSE_ELEMENT_NAME);
         writer.flush();
-        // check remote response
         uctx.next();
         parseAndThrowFailure(uctx, streamCtx);
-        if (!uctx.isAt(NS_STREAM_SASL, CHALLENGE_ELEMENT_NAME))
-            throw new XMPPException("Expecting <challenge> tag, but found: " + uctx.getName());
         // the received string is rspauth, which can be ignored
         parseElementText(uctx, CHALLENGE_ELEMENT_NAME, streamCtx);
         // send final response
@@ -168,8 +165,6 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
         // receive final success or failure
         uctx.next();
         parseAndThrowFailure(uctx, streamCtx);
-        if (!uctx.isAt(NS_STREAM_SASL, "success"))
-            throw new XMPPException("Expecting <success> tag, but found: " + uctx.getName());
         parseElementText(uctx, "success", streamCtx);
     }
 
