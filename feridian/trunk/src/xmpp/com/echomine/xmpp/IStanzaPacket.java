@@ -1,5 +1,6 @@
 package com.echomine.xmpp;
 
+import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * Represents the XML stanza packet. These packets are the message, IQ, and
@@ -39,6 +40,13 @@ public interface IStanzaPacket extends IPacket {
     String getType();
 
     /**
+     * Retrieves the error packet if one exists
+     * 
+     * @return the error packet, or null if one is not found
+     */
+    StanzaErrorPacket getError();
+
+    /**
      * Retrieves the timeout set for the packet. This is used to indicate how
      * long the user should wait for a reply when sending a packet
      * synchronously. The implementation should set a default reasonable timeout
@@ -48,4 +56,11 @@ public interface IStanzaPacket extends IPacket {
      * @return the timeout in millis
      */
     long getTimeout();
+
+    /**
+     * Copies data from the specified packet over to the this object.
+     * 
+     * @param packet the packet containing data to copy from
+     */
+    void copyFrom(IStanzaPacket packet);
 }

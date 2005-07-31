@@ -10,6 +10,7 @@ import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.IQSessionPacket;
@@ -48,7 +49,7 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");
             if (result.isError())
-                throw new XMPPException(result.getError());
+                throw new XMPPStanzaErrorException(result.getError());
         } catch (JiBXException ex) {
             throw new XMPPException(ex);
         }

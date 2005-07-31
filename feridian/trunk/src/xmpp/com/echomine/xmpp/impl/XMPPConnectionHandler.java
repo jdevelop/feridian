@@ -24,6 +24,7 @@ import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPStreamFactory;
 import com.echomine.xmpp.packet.ErrorPacket;
@@ -179,7 +180,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      */
     public void handle(Socket socket, ConnectionContext connCtx) throws IOException {
         UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
-        // start reading incoming data packet through stream
+        // start incoming data packet reading and outgoing packet queue sending
         try {
             while (!shutdown) {
                 if (paused)
@@ -192,6 +193,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     }
                 if (shutdown)
                     break;
+                queue.resume();
                 streamCtx.getReader().startLogging();
                 // go into wait state if no data is incoming.
                 uctx.next();
@@ -227,6 +229,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                         // error packet is also sent back to the user, as
                         // specified by the specs.
                         if (IQPacket.class.getName().equals(iqpkt.getClass().getName()) && (IQPacket.TYPE_SET.equals(iqpkt.getType()) || IQPacket.TYPE_GET.equals(iqpkt.getType()))) {
+                            if (log.isDebugEnabled())
+                                log.debug("Found IQ packet with unknown extension inside.  Ignoring and sending unavailable error packet reply...");
                             streamCtx.getReader().flushIgnoredDataToLog();
                             IQPacket errpkt = new IQPacket();
                             errpkt.setTo(iqpkt.getFrom());
@@ -250,7 +254,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     } else if (uctx.isAt(NS_JABBER_STREAM, ERROR_ELEMENT_NAME)) {
                         // stream level error received = close stream
                         ErrorPacket errorPkt = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
-                        XMPPException ex = new XMPPException("Stream error", errorPkt);
+                        XMPPStanzaErrorException ex = new XMPPStanzaErrorException("Stream error", errorPkt);
                         IOException ioex = new IOException();
                         ioex.initCause(ex);
                         throw ioex;
@@ -261,7 +265,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     // match packets with those in queue in case any packets are
                     // waiting for replies
                     if (packet != null) {
-                        queue.packetReceived(packet);
+                        packet = queue.packetReceived(packet);
                         if (listenerManager != null)
                             listenerManager.firePacketReceived(packet);
                         streamCtx.getReader().flushLog();
@@ -392,6 +396,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         streamCtx.reset();
         sessCtx.reset();
         queue.start();
+        //start queue paused
+        queue.pause();
     }
 
     /*

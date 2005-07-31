@@ -33,7 +33,7 @@ public class FeridianConfiguration {
     private static final String EXTENSIONS_FILENAME = "feridian-extensions.xml";
     private static FeridianConfiguration config;
 
-    private HashMap iqMappings = new HashMap();
+    private HashMap extMappings = new HashMap();
     private HashMap streamMappings = new HashMap();
     private Class connectionFactoryClass;
     private Class streamFactoryClass;
@@ -104,7 +104,7 @@ public class FeridianConfiguration {
                         ext = (FeridianPacketExtension) iter.next();
                         if (log.isInfoEnabled())
                             log.info("Packet Extension Found: URI=" + ext.getNamespace() + ", class=" + ext.getPacketClass().getName());
-                        iqMappings.put(ext.getNamespace(), ext.getPacketClass());
+                        extMappings.put(ext.getNamespace(), ext.getPacketClass());
                     }
                     iter = extensions.getStreamList().iterator();
                     FeridianStreamExtension stream;
@@ -126,18 +126,18 @@ public class FeridianConfiguration {
     }
 
     /**
-     * Obtains the class that is associated with the specified IQ URI. If the
+     * Obtains the class that is associated with the specified extension URI. If the
      * class cannot be found or if the URI cannot be found, then null is
      * returned. No exceptions are thrown. This is used only to obtain the Class
-     * associated with IQ packets URIs
+     * associated with iq or extension packets URIs
      * 
      * @param ns the namespace URI to look up
      * @return the class associated with the NS or null if not found
      */
-    public Class getClassForIQUri(String ns) {
+    public Class getClassForUri(String ns) {
         if (ns == null)
             return null;
-        return (Class) iqMappings.get(ns);
+        return (Class) extMappings.get(ns);
     }
 
     /**

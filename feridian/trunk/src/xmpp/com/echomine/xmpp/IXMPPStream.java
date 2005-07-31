@@ -7,7 +7,8 @@ public interface IXMPPStream {
     /**
      * Does the processing of the XMPP stream. The unmarshalling context should
      * be positioned right at the start of the element that is required by the
-     * stream to process.
+     * stream to process. Subclasses of XMPPException can be thrown. You may
+     * check for those exceptions through the use of "instanceof".  
      * 
      * @param sessCtx the session context
      * @param uctx the unmarshalling context

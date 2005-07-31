@@ -8,6 +8,8 @@ import junit.framework.TestCase;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.MockXMPPConnectionHandler;
 import com.echomine.xmpp.SendPacketFailedException;
+import com.echomine.xmpp.packet.IQPacket;
+import com.echomine.xmpp.packet.IQRosterPacket;
 import com.echomine.xmpp.packet.PresencePacket;
 
 /**
@@ -32,22 +34,50 @@ public class PacketQueueTest extends TestCase {
         assertEquals(0, queue.getReplyTable().size());
     }
 
+    /**
+     * Tests that the reply packet's class should be the same as the request
+     * class, even if the reply packet is an IQ packet. This is specifically an
+     * IQ packet use case. Message and presence packets do not have this class
+     * casting issue.
+     */
+    public void testReplyPacketClassTypeSameAsRequest() throws Exception {
+        queue.start();
+        QueuePacketRunnable runner = new QueuePacketRunnable();
+        Thread thread = new Thread(runner);
+        thread.start();
+        // call reply received
+        IQPacket packet = new IQPacket();
+        packet.setId("id_001");
+        packet.setType(IQPacket.TYPE_RESULT);
+        queue.packetReceived(packet);
+        assertEquals(0, queue.getQueue().size());
+        assertEquals(0, queue.getReplyTable().size());
+        assertNotNull(runner.replyPacket);
+        assertTrue(runner.replyPacket instanceof IQRosterPacket);
+        assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
+    }
+
     public void testQueuePacketWithWait() throws Exception {
         queue.start();
         QueuePacketRunnable runner = new QueuePacketRunnable();
         Thread thread = new Thread(runner);
         thread.start();
         // call reply received
-        PresencePacket packet = new PresencePacket();
+        IQRosterPacket packet = new IQRosterPacket();
         packet.setId("id_001");
-        packet.setType(PresencePacket.TYPE_SUBSCRIBED);
+        packet.setType(IQPacket.TYPE_RESULT);
         queue.packetReceived(packet);
         assertEquals(0, queue.getQueue().size());
         assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
-        assertEquals(PresencePacket.TYPE_SUBSCRIBED, runner.replyPacket.getType());
+        assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
     }
 
+    public void testPacketReceived() throws Exception {
+        assertNull(queue.packetReceived(null));
+        assertNotNull(queue.packetReceived(new IQRosterPacket()));
+    }
+    
     /**
      * Checks that the start state has all variables set properly
      * 
@@ -64,9 +94,9 @@ public class PacketQueueTest extends TestCase {
         IStanzaPacket replyPacket;
 
         public void run() {
-            PresencePacket packet = new PresencePacket();
+            IQRosterPacket packet = new IQRosterPacket();
             packet.setId("id_001");
-            packet.setType(PresencePacket.TYPE_SUBSCRIBE);
+            packet.setType(IQPacket.TYPE_GET);
 
             // queue the packet, and wait for reply
             try {

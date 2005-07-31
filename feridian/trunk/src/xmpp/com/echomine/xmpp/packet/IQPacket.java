@@ -28,18 +28,4 @@ public class IQPacket extends StanzaPacketBase {
     public IQPacket() {
         super();
     }
-
-    /**
-     * copies the values in this object to the object specified.
-     * 
-     * @param packet the object that will have data be copied to
-     */
-    public void copyTo(IQPacket packet) {
-        packet.setType(getType());
-        packet.setId(getId());
-        packet.setTo(getTo());
-        packet.setFrom(getFrom());
-        if (getError() != null)
-            packet.setError(getError());
-    }
 }

@@ -9,6 +9,7 @@ import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.IQResourceBindPacket;
@@ -51,7 +52,7 @@ public class XMPPResourceBindingStream implements IXMPPStream {
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");
             if (result.isError())
-                throw new XMPPException(result.getError());
+                throw new XMPPStanzaErrorException(result.getError());
             if (result.getJid() == null)
                 throw new XMPPException("Resource Binding result does not include a JID.  Possibly bad server implementation");
             sessCtx.setResource(result.getJid().getResource());

@@ -127,4 +127,18 @@ public class StanzaPacketBase implements IStanzaPacket {
         else
             this.type = null;
     }
+    
+    /**
+     * copies the values from the specified packet to this object. this default
+     * method only copies stanza attributes and any errors from the packet.
+     * 
+     * @param packet the object that will have data be copied to
+     */
+    public void copyFrom(IStanzaPacket packet) {
+        type = packet.getType();
+        id = packet.getId();
+        to = packet.getTo();
+        from = packet.getFrom();
+        error = packet.getError();
+    }
 }

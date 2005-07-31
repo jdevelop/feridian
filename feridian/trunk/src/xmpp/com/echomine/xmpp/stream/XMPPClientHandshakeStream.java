@@ -12,6 +12,7 @@ import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.ErrorPacket;
 import com.echomine.xmpp.packet.StreamFeatures;
@@ -63,7 +64,7 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
             // read in any possible error element
             if (uctx.isAt(XMPPConstants.NS_JABBER_STREAM, "error")) {
                 ErrorPacket packet = (ErrorPacket) JiBXUtil.unmarshallObject(uctx, ErrorPacket.class);
-                throw new XMPPException("Error message received for handshake", packet);
+                throw new XMPPStanzaErrorException("Handshake Error", packet);
             }
             if (uctx.isAt(XMPPConstants.NS_JABBER_STREAM, "features")) {
                 StreamFeatures features = (StreamFeatures) JiBXUtil.unmarshallObject(uctx, StreamFeatures.class);

@@ -145,7 +145,7 @@ public abstract class AbstractIMPacketMapper extends AbstractStanzaPacketMapper 
     protected void unmarshallExtension(UnmarshallingContext ctx, IMPacket packet) throws JiBXException {
         // extension/unknown stanzas
         String ns = ctx.getNamespace();
-        Class extClass = FeridianConfiguration.getConfig().getClassForIQUri(ns);
+        Class extClass = FeridianConfiguration.getConfig().getClassForUri(ns);
         IPacket extPacket;
         if (extClass != null) {
             extPacket = (IPacket) JiBXUtil.unmarshallObject(ctx, extClass);

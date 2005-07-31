@@ -12,7 +12,7 @@ import com.echomine.util.ClassUtil;
 public abstract class XMPPStreamFactory {
     private static XMPPStreamFactory factory;
 
-    public static XMPPStreamFactory getFactory() throws XMPPException {
+    public static final XMPPStreamFactory getFactory() throws XMPPException {
         if (factory != null)
             return factory;
         try {

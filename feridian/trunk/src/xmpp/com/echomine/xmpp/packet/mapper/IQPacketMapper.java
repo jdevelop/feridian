@@ -102,7 +102,7 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
             if (ctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "error")) {
                 tpkt.setError((StanzaErrorPacket) JiBXUtil.unmarshallObject(ctx, StanzaErrorPacket.class));
             } else {
-                Class iqClass = FeridianConfiguration.getConfig().getClassForIQUri(ctx.getNamespace());
+                Class iqClass = FeridianConfiguration.getConfig().getClassForUri(ctx.getNamespace());
                 if (packet != null) {
                     if (log.isWarnEnabled())
                         log.warn("Invalid IQ Packet.  Already unmarshalled one child element, but found more than one.  This does not conform to XMPP specs.  Ignoring this child element");
@@ -118,7 +118,7 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
             }
         }
         if (packet != null) {
-            tpkt.copyTo(packet);
+            packet.copyFrom(tpkt);
             return packet;
         }
         return tpkt;

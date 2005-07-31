@@ -4,8 +4,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.SendPacketFailedException;
+import com.echomine.xmpp.packet.IQPacket;
 
 /**
  * An internally used queue that will perform multiple functions. First, it runs
@@ -16,8 +20,9 @@ import com.echomine.xmpp.SendPacketFailedException;
  * synchronicity in the API.
  */
 public class PacketQueue implements Runnable {
-    private final static String QUEUE_RUNNING = "Feridian Packet Queue";
-    private final static String QUEUE_PAUSED = "Feridian Packet Queue -- PAUSED";
+    private static Log log = LogFactory.getLog(PacketQueue.class);
+    private static final String QUEUE_RUNNING = "Feridian Packet Queue";
+    private static final String QUEUE_PAUSED = "Feridian Packet Queue -- PAUSED";
     protected LinkedList queue;
     protected HashMap packetReplyTable;
     protected HashMap replyPackets;
@@ -35,7 +40,7 @@ public class PacketQueue implements Runnable {
     /**
      * Clears the entire queue and any packets waiting for reply.
      */
-    public void clear() {
+    public synchronized void clear() {
         queue.clear();
         packetReplyTable.clear();
         replyPackets.clear();
@@ -45,7 +50,7 @@ public class PacketQueue implements Runnable {
      * Starts up the queue and the queue thread. This will also clear all
      * packets in the queue.
      */
-    public void start() {
+    public synchronized void start() {
         shutdown = false;
         paused = false;
         clear();
@@ -59,7 +64,8 @@ public class PacketQueue implements Runnable {
      * sent before shutting down and giving control back to the caller.
      */
     public synchronized void stop() {
-        if (shutdown) return;
+        if (shutdown)
+            return;
         shutdown = true;
         synchronized (queue) {
             queue.notifyAll();
@@ -109,22 +115,48 @@ public class PacketQueue implements Runnable {
      * a method that gets called to indicate that an incoming packet was
      * received. This will check if this packet is a reply packet for a previous
      * request packet. If so, it will notify and release the wait on that
-     * packet.
+     * packet. This method will also check if the reply packet is a IQPacket
+     * while the request packet is some other packet. If so, it will try to
+     * match the reply IQPacket with the request packet by instantiation and
+     * copying all data from the current reply packet. This will offer better
+     * conformance in case the reply packet received is an empty IQ packet, in
+     * which case the API will create an IQPacket. If caller is expecting a
+     * reply packet of the same type as the request packet, then class cast
+     * exception will occur. Anytime an error occurs during instantiation or
+     * copying, the original reply packet will be returned instead as a
+     * fail-safe mechanism.
      * 
-     * @param packet the packet received for matching with original packet
-     * @return the original packet if found, null if not
+     * @param replyPkt the packet received for matching with original packet
+     * @return the received reply packet (new instantiated version or the
+     *         original)
      */
-    public IStanzaPacket packetReceived(IStanzaPacket packet) {
-        if (packet == null || packet.getId() == null)
+    public IStanzaPacket packetReceived(IStanzaPacket replyPkt) {
+        if (replyPkt == null)
             return null;
-        IStanzaPacket oldPacket = (IStanzaPacket) packetReplyTable.remove(packet.getId());
+        if (replyPkt.getId() == null)
+            return replyPkt;
+        IStanzaPacket oldPacket = null;
+        synchronized (packetReplyTable) {
+            oldPacket = (IStanzaPacket) packetReplyTable.remove(replyPkt.getId());
+        }
+        IStanzaPacket newPkt = replyPkt;
         if (oldPacket != null) {
-            replyPackets.put(packet.getId(), packet);
+            // if reply packet is IQPacket, then we need to recast
+            if (IQPacket.class.getName().equals(replyPkt.getClass().getName())) {
+                try {
+                    newPkt = (IStanzaPacket) oldPacket.getClass().newInstance();
+                    newPkt.copyFrom(replyPkt);
+                } catch (Exception ex) {
+                    if (log.isWarnEnabled())
+                        log.warn("Unable to instantiate new packet for casting.. returning current reply packet instead...", ex);
+                }
+            }
+            replyPackets.put(newPkt.getId(), newPkt);
             synchronized (oldPacket) {
                 oldPacket.notifyAll();
             }
         }
-        return oldPacket;
+        return newPkt;
     }
 
     /**
@@ -155,7 +187,7 @@ public class PacketQueue implements Runnable {
                     // retrieve reply packet
                     return (IStanzaPacket) replyPackets.remove(packet.getId());
                 } catch (InterruptedException ex) {
-                    throw new SendPacketFailedException("Wait timed out or interrupted");
+                    throw new SendPacketFailedException("Wait interrupted");
                 }
             }
         }

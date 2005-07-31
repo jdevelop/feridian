@@ -3,6 +3,7 @@ package com.echomine.xmpp.stream;
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 
 /**
  * Tests the resource binding stream
@@ -52,7 +53,8 @@ public class XMPPResourceBindingStreamTest extends BaseStreamTestCase {
             runAndCompare(inRes, outRes, stream, false, false);
             fail("An error should be thrown");
         } catch (XMPPException ex) {
-            assertEquals(ErrorCode.C_BAD_REQUEST, ex.getErrorCondition());
+            assertTrue(ex instanceof XMPPStanzaErrorException);
+            assertEquals(ErrorCode.C_BAD_REQUEST, ((XMPPStanzaErrorException) ex).getErrorCondition());
         }
     }
 }

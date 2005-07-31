@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 
 /**
  * Tests the handshaking stream to make sure it's processing properly
@@ -48,9 +49,10 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
             run(inRes, stream);
             fail("The stream processing with error should throw an exception");
         } catch (XMPPException ex) {
+            assertTrue(ex instanceof XMPPStanzaErrorException);
             // assert that the error is properly parsed
-            assertNotNull(ex.getErrorPacket());
-            assertEquals(ErrorCode.S_UNSUPPORTED_VERSION, ex.getErrorCondition());
+            assertNotNull(((XMPPStanzaErrorException) ex).getErrorPacket());
+            assertEquals(ErrorCode.S_UNSUPPORTED_VERSION, ((XMPPStanzaErrorException) ex).getErrorCondition());
         }
     }
 

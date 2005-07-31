@@ -13,7 +13,7 @@ import com.echomine.xmpp.IPacketListener;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPConnection;
 import com.echomine.xmpp.PacketEvent;
-import com.echomine.xmpp.XMPPException;
+import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;
@@ -45,7 +45,7 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
     protected void tearDown() throws Exception {
         handler.shutdown();
     }
-    
+
     public void testHandshakeSuccess() throws Exception {
         String reply = "<stream:stream id='c2s_123' from='example.com' version='1.0' xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>"
                 + "<stream:features><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/></stream:features>";
@@ -89,8 +89,8 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
             fail("This should fail by throwing an exception");
         } catch (IOException ex) {
             assertNotNull(ex.getCause());
-            assertTrue(ex.getCause() instanceof XMPPException);
-            XMPPException xex = (XMPPException) ex.getCause();
+            assertTrue(ex.getCause() instanceof XMPPStanzaErrorException);
+            XMPPStanzaErrorException xex = (XMPPStanzaErrorException) ex.getCause();
             assertEquals(ErrorCode.S_XML_NOT_WELL_FORMED, xex.getErrorCondition());
         }
     }
@@ -107,6 +107,37 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         handler.handshake(socket, connectionCtx);
         handler.handle(socket, connectionCtx);
         compare(outRes);
+    }
+
+    /**
+     * This tests that message packets with no children and no known extensions
+     * are ignored (and consequently no packet receive event is fire)
+     */
+    public void testIgnoredMessagePacketNotFired() throws Exception {
+        String inRes = "com/echomine/xmpp/data/XMPPConnectionHandlerIgnoredMessage.xml";
+        socket.setOutputStream(os);
+        socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
+        PacketListenerManager listenerManager = new PacketListenerManager(new XMPPConnectionImpl());
+        handler.setPacketListenerManager(listenerManager);
+        PacketReceiver rec = new PacketReceiver();
+        listenerManager.addPacketListener(rec);
+        handler.handshake(socket, connectionCtx);
+        handler.handle(socket, connectionCtx);
+        assertNull(rec.packet);
+    }
+
+    public void testListenForPacketReceived() throws Exception {
+        String inRes = "com/echomine/xmpp/data/XMPPConnectionHandler_in1.xml";
+        socket.setOutputStream(os);
+        socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
+        PacketListenerManager listenerManager = new PacketListenerManager(new XMPPConnectionImpl());
+        handler.setPacketListenerManager(listenerManager);
+        PacketReceiver rec = new PacketReceiver();
+        listenerManager.addPacketListener(rec);
+        handler.handshake(socket, connectionCtx);
+        handler.handle(socket, connectionCtx);
+        assertNotNull(rec.packet);
+        assertTrue(rec.packet instanceof IQRosterPacket);
     }
 
     public void testIncomingPacketProcessor() throws Exception {
@@ -137,39 +168,6 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         // a reply should have broken us out of the wait
         assertNotNull(reply);
         assertTrue(reply instanceof IQRosterPacket);
-    }
-
-    /**
-     * This tests that message packets with no children and no known extensions
-     * are ignored (and consequently no packet receive event is fire)
-     */
-    public void testIgnoredMessagePacketNotFired() throws Exception {
-        String inRes = "com/echomine/xmpp/data/XMPPConnectionHandlerIgnoredMessage.xml";
-        socket.setOutputStream(os);
-        socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
-        PacketListenerManager listenerManager = new PacketListenerManager(new XMPPConnectionImpl());
-        handler.setPacketListenerManager(listenerManager);
-        PacketReceiver rec = new PacketReceiver();
-        listenerManager.addPacketListener(rec);
-        handler.start();
-        handler.handshake(socket, connectionCtx);
-        handler.handle(socket, connectionCtx);
-        assertNull(rec.packet);
-    }
-
-    public void testListenForPacketReceived() throws Exception {
-        String inRes = "com/echomine/xmpp/data/XMPPConnectionHandler_in1.xml";
-        socket.setOutputStream(os);
-        socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
-        PacketListenerManager listenerManager = new PacketListenerManager(new XMPPConnectionImpl());
-        handler.setPacketListenerManager(listenerManager);
-        PacketReceiver rec = new PacketReceiver();
-        listenerManager.addPacketListener(rec);
-        handler.start();
-        handler.handshake(socket, connectionCtx);
-        handler.handle(socket, connectionCtx);
-        assertNotNull(rec.packet);
-        assertTrue(rec.packet instanceof IQRosterPacket);
     }
 
     class PacketReceiver implements IPacketListener {
