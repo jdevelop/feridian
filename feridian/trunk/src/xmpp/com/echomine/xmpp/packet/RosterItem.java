@@ -91,6 +91,19 @@ public class RosterItem {
     }
 
     /**
+     * This sets the subscription state to remove to indicate that the specified
+     * JID in this item should be removed from the roster liste.
+     * 
+     * @param remove true to remove, false otherwise
+     */
+    public void setRemove(boolean remove) {
+        if (remove)
+            subscription = SUBSCRIBE_REMOVE;
+        else
+            subscription = null;
+    }
+
+    /**
      * sets the subscription state
      * 
      * @param subscription The subscription to set.

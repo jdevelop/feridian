@@ -7,6 +7,7 @@ import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IXMPPStream;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStanzaErrorException;
@@ -46,6 +47,11 @@ public class XMPPResourceBindingStream implements IXMPPStream {
             JiBXUtil.marshallIQPacket(writer, request);
             // start logging
             streamCtx.getReader().startLogging();
+            //synchronized for first access is required to prevent thread racing issue
+            synchronized (uctx) {
+                if (!uctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "iq"))
+                    uctx.next();
+            }
             // process result
             IQResourceBindPacket result = (IQResourceBindPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             streamCtx.getReader().stopLogging();

@@ -10,9 +10,14 @@ import com.echomine.net.HandshakeableSocketConnector;
 import com.echomine.xmpp.IPacketListener;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPConnection;
+import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.SendPacketFailedException;
+import com.echomine.xmpp.XMPPAuthCallback;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
+import com.echomine.xmpp.XMPPStreamContext;
+import com.echomine.xmpp.XMPPStreamFactory;
 
 /**
  * The primary default implementation for the API. It allows the user to
@@ -98,13 +103,46 @@ public class XMPPConnectionImpl implements IXMPPConnection {
     }
 
     /*
-     * (non-Javadoc)
+     * This method will authenticate the session stream with the provided
+     * information. Before authentication, there are only a few tasks that the
+     * server can provide -- authenticate, stream negotation, and possibly
+     * Jabber In-Band registration. The handler must be in a state to work with
+     * these streams. Once the stream is authenticated, full stanza processing
+     * can begin (asynchronous packet processing). What this means is that it is
+     * still safe to not be processing random incoming packets since it is
+     * assumed that the server will not send such packets before the session is
+     * authenticated.
      * 
-     * @see com.echomine.xmpp.IXMPPConnection#login(java.lang.String, char[],
-     *      java.lang.String)
+     * @param username the username @param password the password @param resource
+     * optional resource to bind to @throws XMPPErrorStanzaException if login
+     * process sent error reply (ie. selected resource not available, unable to
+     * create session) @throws SendPacketFailedException if packet cannot be
+     * sent
      */
     public void login(String username, char[] password, String resource) throws XMPPException {
-        handler.authenticateSession(username, password, resource);
+        XMPPAuthCallback callback = new XMPPAuthCallback();
+        callback.setUsername(username);
+        callback.setPassword(password);
+        callback.setResource(resource);
+        XMPPStreamContext streamCtx = handler.getStreamContext();
+        streamCtx.setAuthCallback(callback);
+        // see if SASL feature is supported
+        IXMPPStream stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SASL);
+        if (stream != null && streamCtx.getFeatures().isSaslSupported()) {
+            handler.processStream(stream, true);
+            // must do resource binding if supported
+            if (streamCtx.getFeatures().isBindingSupported()) {
+                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_BINDING);
+                handler.processStream(stream, false);
+            }
+            // must do session if supported
+            if (streamCtx.getFeatures().isSessionSupported()) {
+                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SESSION);
+                handler.processStream(stream, false);
+            }
+            return;
+        }
+        throw new XMPPException("No proper authentication method found.");
     }
 
     /*

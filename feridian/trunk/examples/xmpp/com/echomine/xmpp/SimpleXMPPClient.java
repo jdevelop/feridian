@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import com.echomine.net.ConnectionEvent;
 import com.echomine.net.ConnectionListener;
 import com.echomine.net.ConnectionVetoException;
-import com.echomine.xmpp.helper.RosterHelper;
 import com.echomine.xmpp.packet.XMLTextPacket;
 
 public class SimpleXMPPClient {

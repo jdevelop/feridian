@@ -15,7 +15,6 @@ import com.echomine.xmpp.impl.XMPPConnectionHandler;
  */
 public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
     boolean failHandshake;
-    boolean failAuthentication;
     String sessionId;
     String version;
 
@@ -33,17 +32,6 @@ public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
             Thread.yield();
     }
 
-    /**
-     * This will do a simulated authentication
-     */
-    public void authenticateSession(String username, char[] password, String resource) throws XMPPException {
-        if (failAuthentication)
-            throw new XMPPException("Unable to login -- Simulated authentication failure");
-        // after authentication, session context data must be set
-        sessCtx.setUsername(username);
-        sessCtx.setResource(resource);
-    }
-
     public void shutdown() {
         super.shutdown();
         connected = false;
@@ -59,9 +47,5 @@ public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public void setFailAuthentication(boolean fail) {
-        this.failAuthentication = fail;
     }
 }

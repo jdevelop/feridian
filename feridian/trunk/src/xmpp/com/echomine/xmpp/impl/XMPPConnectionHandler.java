@@ -20,7 +20,6 @@ import com.echomine.xmpp.IDGenerator;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.SendPacketFailedException;
-import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
@@ -195,7 +194,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     break;
                 queue.resume();
                 streamCtx.getReader().startLogging();
-                // purposely synchronize because of possible thread racing issue
+                // purposely synchronize because of possible multithread
+                // accessing issue
                 synchronized (uctx) {
                     uctx.next();
                 }
@@ -342,48 +342,23 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
     }
 
     /**
-     * This method will authenticate the session stream with the provided
-     * information. Before authentication, there are only a few tasks that the
-     * server can provide -- authenticate, stream negotation, and possibly
-     * Jabber In-Band registration. The handler must be in a state to work with
-     * these streams. Once the stream is authenticated, full stanza processing
-     * can begin (asynchronous packet processing). What this means is that it is
-     * still safe to not be processing random incoming packets since it is
-     * assumed that the server will not send such packets before the session is
-     * authenticated.
+     * This will put the current packet processing on hold and begin stream
+     * processing. After stream processing, packet processing will be resumed.
      * 
-     * @param username the username
-     * @param password the password
-     * @param resource optional resource to bind to
-     * @throws XMPPException
+     * @param stream the stream processor
+     * @param redoHandshake true to do handshake, false to simply process the
+     *            given stream
+     * @throws XMPPException if any processing exceptions occur
      */
-    public void authenticateSession(String username, char[] password, String resource) throws XMPPException {
-        pause();
-        XMPPAuthCallback callback = new XMPPAuthCallback();
-        callback.setUsername(username);
-        callback.setPassword(password);
-        callback.setResource(resource);
-        streamCtx.setAuthCallback(callback);
-        // see if SASL feature is supported
-        IXMPPStream stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SASL);
-        if (streamCtx.getFeatures().isSaslSupported() && stream != null) {
+    public void processStream(IXMPPStream stream, boolean redoHandshake) throws XMPPException {
+        try {
+            pause();
             stream.process(sessCtx, streamCtx);
-            handshakeStream.process(sessCtx, streamCtx);
-            // must do resource binding if supported
-            if (streamCtx.getFeatures().isBindingSupported()) {
-                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_BINDING);
-                stream.process(sessCtx, streamCtx);
-            }
-            // must do session if supported
-            if (streamCtx.getFeatures().isSessionSupported()) {
-                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SESSION);
-                stream.process(sessCtx, streamCtx);
-            }
+            if (redoHandshake)
+                handshakeStream.process(sessCtx, streamCtx);
+        } finally {
             resume();
-            return;
         }
-        resume();
-        throw new XMPPException("No proper authentication method found.");
     }
 
     /*

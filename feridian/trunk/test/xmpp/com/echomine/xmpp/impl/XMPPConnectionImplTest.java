@@ -108,6 +108,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
     }
 
     public void testSuccessfulLogin() throws Exception {
+        
         conn.login("romeo", "password".toCharArray(), "Home");
         assertEquals("romeo", handler.getSessionContext().getUsername());
         assertEquals("Home", handler.getSessionContext().getResource());
@@ -115,7 +116,6 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
 
     public void testFailedLogin() throws Exception {
         try {
-            handler.setFailAuthentication(true);
             conn.login("romeo", "password".toCharArray(), "Home");
             fail("Login should fail");
         } catch (XMPPException ex) {

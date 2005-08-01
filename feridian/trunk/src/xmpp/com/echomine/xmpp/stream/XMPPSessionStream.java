@@ -43,6 +43,11 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
             JiBXUtil.marshallIQPacket(writer, request);
             // start logging
             streamCtx.getReader().startLogging();
+            //synchronized for first access is required to prevent thread racing issue
+            synchronized (uctx) {
+                if (!uctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "iq"))
+                    uctx.next();
+            }
             // process result
             IQSessionPacket result = (IQSessionPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             streamCtx.getReader().stopLogging();
