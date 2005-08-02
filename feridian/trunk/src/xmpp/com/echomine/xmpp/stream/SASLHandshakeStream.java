@@ -205,8 +205,8 @@ public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
             uctx.parsePastElement(NS_STREAM_SASL, errorType);
             uctx.toEnd();
             streamCtx.getReader().stopLogging();
-            if (log.isWarnEnabled())
-                log.warn("SASL auth negotiation failed with error " + errorType);
+            if (log.isInfoEnabled())
+                log.info("SASL auth negotiation failed with error " + errorType);
             throw new XMPPException("SASL Failed with error: " + errorType);
         }
     }

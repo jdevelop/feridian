@@ -1,12 +1,19 @@
 package com.echomine.xmpp.impl;
 
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+
+import com.echomine.jibx.MockXMPPLoggableReader;
 import com.echomine.net.ConnectionEvent;
 import com.echomine.net.ConnectionException;
 import com.echomine.net.HandshakeFailedException;
 import com.echomine.net.MockConnectionListener;
+import com.echomine.net.MockSocket;
 import com.echomine.net.MockSocketConnector;
+import com.echomine.util.ClassUtil;
 import com.echomine.xmpp.IXMPPConnection;
 import com.echomine.xmpp.MockXMPPConnectionHandler;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPTestCase;
 
@@ -108,7 +115,18 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
     }
 
     public void testSuccessfulLogin() throws Exception {
-        
+        String inXml = "<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>";
+        String handshakeRes = "com/echomine/xmpp/data/XMPPClientHandshakeStream_in1.xml";
+        MockXMPPLoggableReader rdr = new MockXMPPLoggableReader(new ByteArrayInputStream(inXml.getBytes()), "UTF-8");
+        MockSocket socket = new MockSocket();
+        socket.setInputStream(ClassUtil.getResourceAsStream(handshakeRes));
+        uctx.setDocument(rdr);
+        handler.getStreamContext().setReader(rdr);
+        handler.getStreamContext().setSocket(socket);
+        ArrayList mechanisms = new ArrayList();
+        mechanisms.add("PLAIN");
+        handler.getStreamContext().getFeatures().addFeature(XMPPConstants.NS_STREAM_SASL, "mechanisms", mechanisms);
+        handler.getSessionContext().setHostName("example.com");
         conn.login("romeo", "password".toCharArray(), "Home");
         assertEquals("romeo", handler.getSessionContext().getUsername());
         assertEquals("Home", handler.getSessionContext().getResource());
@@ -116,6 +134,13 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
 
     public void testFailedLogin() throws Exception {
         try {
+            String inXml = "<failure xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><temporary-auth-failure/></failure>";
+            MockXMPPLoggableReader rdr = new MockXMPPLoggableReader(new ByteArrayInputStream(inXml.getBytes()), "UTF-8");
+            uctx.setDocument(rdr);
+            handler.getStreamContext().setReader(rdr);
+            ArrayList mechanisms = new ArrayList();
+            mechanisms.add("PLAIN");
+            handler.getStreamContext().getFeatures().addFeature(XMPPConstants.NS_STREAM_SASL, "mechanisms", mechanisms);
             conn.login("romeo", "password".toCharArray(), "Home");
             fail("Login should fail");
         } catch (XMPPException ex) {

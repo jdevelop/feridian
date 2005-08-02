@@ -27,7 +27,7 @@ public class JiBXUtil {
      * @return the object or null if it cannot unmarshall
      * @throws JiBXException
      */
-    public static Object unmarshallObject(Reader rdr, Class cls) throws JiBXException {
+    public static final Object unmarshallObject(Reader rdr, Class cls) throws JiBXException {
         if (rdr == null)
             throw new IllegalArgumentException("Reader cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(cls);
@@ -47,7 +47,7 @@ public class JiBXUtil {
      * @param cls the class object to unmarshall
      * @return the unmarshalled object
      */
-    public static Object unmarshallObject(UnmarshallingContext parentCtx, Class cls) throws JiBXException {
+    public static final Object unmarshallObject(UnmarshallingContext parentCtx, Class cls) throws JiBXException {
         if (parentCtx == null || cls == null)
             throw new IllegalArgumentException("Context or class reference cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(cls);
@@ -70,7 +70,7 @@ public class JiBXUtil {
      * @param cls the object's class type
      * @throws JiBXException
      */
-    public static void marshallObject(MarshallingContext parentCtx, Object obj) throws JiBXException {
+    public static final void marshallObject(MarshallingContext parentCtx, Object obj) throws JiBXException {
         if (parentCtx == null || obj == null)
             throw new IllegalArgumentException("Context or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
@@ -93,7 +93,7 @@ public class JiBXUtil {
      * @param idx the index of the marshaller
      * @throws JiBXException
      */
-    public static void marshallObject(XMPPStreamWriter writer, Object obj) throws JiBXException {
+    public static final void marshallObject(XMPPStreamWriter writer, Object obj) throws JiBXException {
         if (writer == null || obj == null)
             throw new IllegalArgumentException("Writer or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
@@ -113,7 +113,7 @@ public class JiBXUtil {
      * @param obj the object to marshall
      * @throws JiBXException
      */
-    public static void marshallObject(Writer writer, Object obj) throws JiBXException {
+    public static final void marshallObject(Writer writer, Object obj) throws JiBXException {
         if (writer == null || obj == null)
             throw new IllegalArgumentException("Writer or object to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(obj.getClass());
@@ -133,7 +133,7 @@ public class JiBXUtil {
      * @param packet the object to marshall
      * @throws JiBXException
      */
-    public static void marshallIQPacket(XMPPStreamWriter writer, IQPacket packet) throws JiBXException {
+    public static final void marshallIQPacket(XMPPStreamWriter writer, IQPacket packet) throws JiBXException {
         if (writer == null || packet == null)
             throw new IllegalArgumentException("Writer or packet to marshall cannot be null");
         IBindingFactory factory = BindingDirectory.getFactory(IQPacket.class);
