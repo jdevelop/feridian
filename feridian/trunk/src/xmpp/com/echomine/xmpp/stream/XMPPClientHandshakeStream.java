@@ -54,7 +54,7 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
             if (uctx.hasAttribute(null, "from"))
                 sessCtx.setHostName(uctx.attributeText(null, "from"));
             if (uctx.hasAttribute(null, "id"))
-                sessCtx.setSessionId(uctx.attributeText(null, "id"));
+                sessCtx.setStreamId(uctx.attributeText(null, "id"));
             if (uctx.hasAttribute(null, "version"))
                 sessCtx.setVersion(uctx.attributeText(null, "version"));
             if (uctx.hasAttribute(XMPPConstants.NS_XML, "lang"))

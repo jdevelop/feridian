@@ -1,4 +1,4 @@
-package com.echomine.xmpp.stream.sasl;
+package com.echomine.xmpp.auth.sasl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

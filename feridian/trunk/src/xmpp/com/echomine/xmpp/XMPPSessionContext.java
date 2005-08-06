@@ -16,7 +16,7 @@ public class XMPPSessionContext {
     private String resource;
     private String host;
     private String version;
-    private String sessionId;
+    private String streamId;
     private Locale locale;
 
     /**
@@ -24,7 +24,7 @@ public class XMPPSessionContext {
      */
     public void reset() {
         host = null;
-        sessionId = null;
+        streamId = null;
         version = null;
         username = null;
         resource = null;
@@ -48,17 +48,17 @@ public class XMPPSessionContext {
     /**
      * the unique session ID as sent by the remote entity
      * 
-     * @return Returns the sessionId.
+     * @return Returns the streamId.
      */
-    public String getSessionId() {
-        return sessionId;
+    public String getStreamId() {
+        return streamId;
     }
 
     /**
-     * @param sessionId The sessionId to set.
+     * @param streamId The streamId to set.
      */
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
+    public void setStreamId(String sessionId) {
+        this.streamId = sessionId;
     }
 
     /**

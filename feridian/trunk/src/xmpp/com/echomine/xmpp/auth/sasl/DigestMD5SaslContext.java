@@ -1,4 +1,4 @@
-package com.echomine.xmpp.stream.sasl;
+package com.echomine.xmpp.auth.sasl;
 
 import java.util.HashMap;
 import java.util.StringTokenizer;

@@ -1,5 +1,7 @@
 package com.echomine.xmpp.packet;
 
+import java.util.Locale;
+
 import com.echomine.xmpp.IPacket;
 import com.echomine.xmpp.NSI;
 
@@ -10,6 +12,7 @@ public class ErrorPacket implements IPacket {
     private String condition;
     private NSI applicationCondition;
     private String text;
+    private Locale textLocale;
 
     /**
      * @return Returns the application-custom condition code.
@@ -52,4 +55,27 @@ public class ErrorPacket implements IPacket {
     public void setText(String text) {
         this.text = text;
     }
+
+    /**
+     * retrieves optional text locale. Although XMPP states that the text SHOULD
+     * have an xml:lang attribute, it may not necessarily be the case. If the
+     * locale is not specified here, then you can assume that the locale is
+     * based off the stream-level locale.
+     * 
+     * @return Returns the textLocale, or null if none exists
+     */
+    public Locale getTextLocale() {
+        return textLocale;
+    }
+
+    /**
+     * sets the text locale. Set to null to remove. This is an optional
+     * attribute.
+     * 
+     * @param textLocale The textLocale to set.
+     */
+    public void setTextLocale(Locale textLocale) {
+        this.textLocale = textLocale;
+    }
+
 }

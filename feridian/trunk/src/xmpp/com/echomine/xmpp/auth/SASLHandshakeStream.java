@@ -1,4 +1,4 @@
-package com.echomine.xmpp.stream;
+package com.echomine.xmpp.auth;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.StreamFeatures;
-import com.echomine.xmpp.stream.sasl.DigestMD5SaslClient;
+import com.echomine.xmpp.auth.sasl.DigestMD5SaslClient;
 
 /**
  * This is the main stream that process SASL authentication. This particular
@@ -29,7 +29,7 @@ import com.echomine.xmpp.stream.sasl.DigestMD5SaslClient;
  * support. When this API is upgraded to 1.5 minimum requirement, then SASL will
  * be used.
  */
-public class SASLHandshakeStream implements IXMPPStream, XMPPConstants {
+public class SASLAuthenticator implements IXMPPStream, XMPPConstants {
     private static Log log = LogFactory.getLog(SASLHandshakeStream.class);
     protected final static int SOCKETBUF = 8192;
     private static final String PLAIN = "PLAIN";

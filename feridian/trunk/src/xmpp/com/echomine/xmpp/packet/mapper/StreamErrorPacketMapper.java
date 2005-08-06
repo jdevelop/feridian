@@ -10,13 +10,15 @@ import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.XMPPStreamWriter;
+import com.echomine.util.LocaleUtil;
 import com.echomine.xmpp.NSI;
+import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.ErrorPacket;
 
-public class StreamErrorPacketMapper extends AbstractPacketMapper {
+public class StreamErrorPacketMapper extends AbstractPacketMapper implements XMPPConstants {
     protected static final String TEXT_ELEMENT_NAME = "text";
     protected static final String ERROR_ELEMENT_NAME = "error";
-    private static final String NS_STREAMS_ERROR = "urn:ietf:params:xml:ns:xmpp-streams";
+    protected static final String ERROR_LANG_ATTRIBUTE_NAME = "lang";
     
     public StreamErrorPacketMapper(String uri, int index, String name) {
         super(uri, index, name);
@@ -84,8 +86,10 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper {
         ctx.startTagNamespaces(idx, packet.getCondition(), new int[] { idx }, new String[] { "" }).closeStartEmpty();
         // write out the error descriptive text
         if (packet.getText() != null) {
-            ctx.startTagNamespaces(idx, TEXT_ELEMENT_NAME, new int[] { idx }, new String[] { "" }).closeStartContent();
-            // TODO: add xml:lang attribute in future
+            ctx.startTagNamespaces(idx, TEXT_ELEMENT_NAME, new int[] { idx }, new String[] { "" });
+            if (packet.getTextLocale() != null)
+                ctx.attribute(IDX_XML, ERROR_LANG_ATTRIBUTE_NAME, LocaleUtil.format(packet.getTextLocale()));
+            ctx.closeStartContent();
             ctx.content(packet.getText());
             ctx.endTag(idx, TEXT_ELEMENT_NAME);
         }
@@ -130,6 +134,8 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper {
         ctx.parsePastEndTag(ctx.getNamespace(), ctx.getName());
         int eventType = ctx.toTag();
         if (eventType == UnmarshallingContext.START_TAG && TEXT_ELEMENT_NAME.equals(ctx.getName())) {
+            if (ctx.hasAttribute(NS_XML, ERROR_LANG_ATTRIBUTE_NAME))
+                packet.setTextLocale(LocaleUtil.parseLocale(ctx.attributeText(NS_XML, ERROR_LANG_ATTRIBUTE_NAME)));
             packet.setText(ctx.parseElementText(errorNs, TEXT_ELEMENT_NAME));
             eventType = ctx.toTag();
         }
@@ -140,5 +146,4 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper {
             ctx.parsePastEndTag(ctx.getNamespace(), ctx.getName());
         }
     }
-
 }
