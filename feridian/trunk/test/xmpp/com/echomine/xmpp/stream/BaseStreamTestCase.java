@@ -16,7 +16,7 @@ import com.echomine.xmpp.XMPPTestCase;
  */
 public class BaseStreamTestCase extends XMPPTestCase {
     private static final String NS_JABBER_STREAM = "http://etherx.jabber.org/streams";
-    XMPPStreamContext streamCtx;
+    protected XMPPStreamContext streamCtx;
 
     protected void setUp() throws Exception {
         super.setUp();

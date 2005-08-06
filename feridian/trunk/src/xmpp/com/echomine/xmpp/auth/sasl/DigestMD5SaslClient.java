@@ -43,7 +43,7 @@ public class DigestMD5SaslClient {
      * response.
      * 
      * @param streamCtx the stream context
-     * @return the auth string
+     * @return the stream string
      */
     public String getAuthResponse(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) {
         XMPPAuthCallback auth = streamCtx.getAuthCallback();
@@ -59,7 +59,7 @@ public class DigestMD5SaslClient {
         buf.append(",nonce=\"").append(challengeCtx.getNonce()).append("\"");
         buf.append(",cnonce=\"").append(cnonce).append("\"");
         buf.append(",nc=00000001");
-        buf.append(",qop=auth");
+        buf.append(",qop=stream");
         buf.append(",digest-uri=\"").append(digesturi).append("\"");
         buf.append(",response=\"").append(generatePasswordDigest(sessCtx, streamCtx.getAuthCallback())).append("\"");
         buf.append(",charset=utf-8");
@@ -95,7 +95,7 @@ public class DigestMD5SaslClient {
             md.reset();
             StringBuffer buf = new StringBuffer();
             buf.append(ha1).append(":").append(challengeCtx.getNonce());
-            buf.append(":00000001:").append(cnonce).append(":auth:");
+            buf.append(":00000001:").append(cnonce).append(":stream:");
             buf.append(ha2);
             String resp = HexDec.convertBytesToHexString(md.digest(buf.toString().getBytes()));
             return resp;

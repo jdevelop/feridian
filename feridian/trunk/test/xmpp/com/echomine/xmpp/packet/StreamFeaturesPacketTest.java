@@ -111,7 +111,7 @@ public class StreamFeaturesPacketTest extends XMPPTestCase implements XMPPConsta
         packet.addFeature(NS_STREAM_SASL, "mechanisms", list);
         packet.addFeature(NS_STREAM_BINDING, "bind", null);
         packet.addFeature(NS_STREAM_SESSION, "session", null);
-        packet.addFeature(NS_STREAM_IQ_AUTH, "iq-auth", null);
+        packet.addFeature(NS_STREAM_IQ_AUTH, "iq-stream", null);
         packet.addFeature(NS_STREAM_IQ_REGISTER, "iq-register", null);
         JiBXUtil.marshallObject(writer, packet);
         compare(reader);

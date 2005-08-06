@@ -23,7 +23,7 @@ public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
             throw new HandshakeFailedException("Simulated Handshake failure");
         connected = true;
         sessCtx.setHostName(socket.getInetAddress().getHostName());
-        sessCtx.setSessionId(sessionId);
+        sessCtx.setStreamId(sessionId);
         sessCtx.setVersion(version);
     }
 

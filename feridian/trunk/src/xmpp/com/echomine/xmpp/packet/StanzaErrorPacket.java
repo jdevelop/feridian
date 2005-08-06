@@ -7,7 +7,7 @@ package com.echomine.xmpp.packet;
  * <li>cancel -- do not retry (the error is unrecoverable)</li>
  * <li>continue -- proceed (the condition was only a warning)</li>
  * <li>modify -- retry after changing the data sent</li>
- * <li>auth -- retry after providing credentials</li>
+ * <li>stream -- retry after providing credentials</li>
  * <li>wait -- retry after waiting (the error is temporary)</li>
  * </ul>
  */
@@ -15,7 +15,7 @@ public class StanzaErrorPacket extends ErrorPacket {
     public static final String CANCEL = "cancel";
     public static final String CONTINUE = "continue";
     public static final String MODIFY = "modify";
-    public static final String AUTH = "auth";
+    public static final String AUTH = "stream";
     public static final String WAIT = "wait";
 
     private String errorType;

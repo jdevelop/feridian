@@ -20,7 +20,7 @@ public interface IXMPPConnection {
      * available/supported, then it will be used. Afterwards, if resource
      * binding and session feature is supported, then it will be used. If none
      * of these features are available or supported, then the implementator may
-     * possibly resort to older Jabber-compatible authentication if iq-auth
+     * possibly resort to older Jabber-compatible authentication if iq-stream
      * feature is available. No matter which method is used, this method
      * encapsulates the login procedure. <br/>The method will execute
      * SYNCHRONOUSLY, meaning that the method will not return until either an

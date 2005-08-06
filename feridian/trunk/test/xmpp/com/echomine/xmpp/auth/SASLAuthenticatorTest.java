@@ -1,23 +1,24 @@
-package com.echomine.xmpp.stream;
+package com.echomine.xmpp.auth;
 
 import java.util.ArrayList;
 
 import com.echomine.net.MockSocket;
 import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
+import com.echomine.xmpp.stream.BaseStreamTestCase;
 
 /**
  * This tests the TLS handshaking feature. It will not test the TLS negotiation,
  * which is assumed to be working since JSSE is used. However, it will tests the
  * XML handshaking.
  */
-public class SASLHandshakeStreamTest extends BaseStreamTestCase implements XMPPConstants {
-    SASLHandshakeStream stream;
+public class SASLAuthenticatorTest extends BaseStreamTestCase implements XMPPConstants {
+    SASLAuthenticator stream;
     ArrayList mechanisms;
 
     protected void setUp() throws Exception {
         super.setUp();
-        stream = new SASLHandshakeStream();
+        stream = new SASLAuthenticator();
         sessCtx.setHostName("example.com");
         mechanisms = new ArrayList(2);
         mechanisms.add("PLAIN");

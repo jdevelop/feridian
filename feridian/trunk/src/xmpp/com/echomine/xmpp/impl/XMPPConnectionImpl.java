@@ -1,7 +1,12 @@
 package com.echomine.xmpp.impl;
 
 import java.io.IOException;
+import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.ConnectionException;
 import com.echomine.net.ConnectionListener;
@@ -9,6 +14,7 @@ import com.echomine.net.ConnectionVetoException;
 import com.echomine.net.HandshakeableSocketConnector;
 import com.echomine.xmpp.IPacketListener;
 import com.echomine.xmpp.IStanzaPacket;
+import com.echomine.xmpp.IXMPPAuthenticator;
 import com.echomine.xmpp.IXMPPConnection;
 import com.echomine.xmpp.IXMPPStream;
 import com.echomine.xmpp.SendPacketFailedException;
@@ -26,9 +32,10 @@ import com.echomine.xmpp.XMPPStreamFactory;
  * obtain XMPPConnections.
  */
 public class XMPPConnectionImpl implements IXMPPConnection {
-    HandshakeableSocketConnector conn;
-    XMPPConnectionHandler handler;
-    PacketListenerManager listenerManager;
+    private static final Log log = LogFactory.getLog(XMPPConnectionImpl.class);
+    private HandshakeableSocketConnector conn;
+    private XMPPConnectionHandler handler;
+    private PacketListenerManager listenerManager;
 
     /**
      * The default constructor that most classes should use. It will use all
@@ -102,7 +109,7 @@ public class XMPPConnectionImpl implements IXMPPConnection {
         handler.shutdown();
     }
 
-    /*
+    /**
      * This method will authenticate the session stream with the provided
      * information. Before authentication, there are only a few tasks that the
      * server can provide -- authenticate, stream negotation, and possibly
@@ -113,11 +120,16 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * assumed that the server will not send such packets before the session is
      * authenticated.
      * 
-     * @param username the username @param password the password @param resource
-     * optional resource to bind to @throws XMPPErrorStanzaException if login
-     * process sent error reply (ie. selected resource not available, unable to
-     * create session) @throws SendPacketFailedException if packet cannot be
-     * sent
+     * Also, this login method actually searches through a list of registered
+     * authenticators and use the first one that indicates its ability to
+     * authenticate the stream.
+     * 
+     * @param username the username
+     * @param password the password
+     * @param resource optional resource to bind to
+     * @throws XMPPErrorStanzaException if login process sent error reply (ie.
+     *             selected resource not available, unable to create session)
+     * @throws SendPacketFailedException if packet cannot be sent
      */
     public void login(String username, char[] password, String resource) throws XMPPException {
         XMPPAuthCallback callback = new XMPPAuthCallback();
@@ -126,23 +138,32 @@ public class XMPPConnectionImpl implements IXMPPConnection {
         callback.setResource(resource);
         XMPPStreamContext streamCtx = handler.getStreamContext();
         streamCtx.setAuthCallback(callback);
-        // see if SASL feature is supported
-        IXMPPStream stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SASL);
-        if (stream != null && streamCtx.getFeatures().isSaslSupported()) {
-            handler.processStream(stream, true);
-            // must do resource binding if supported
-            if (streamCtx.getFeatures().isBindingSupported()) {
-                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_BINDING);
-                handler.processStream(stream, false);
+        Iterator iter = FeridianConfiguration.getConfig().getAuthenticators().iterator();
+        IXMPPAuthenticator auth = null;
+        while (iter.hasNext()) {
+            IXMPPAuthenticator tauth = (IXMPPAuthenticator) iter.next();
+            if (tauth.canAuthenticate(handler.getSessionContext(), handler.getStreamContext())) {
+                auth = tauth;
+                break;
             }
-            // must do session if supported
-            if (streamCtx.getFeatures().isSessionSupported()) {
-                stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SESSION);
-                handler.processStream(stream, false);
-            }
-            return;
         }
-        throw new XMPPException("No proper authentication method found.");
+        if (auth == null)
+            throw new XMPPException("No proper authenticator method found.");
+        // now authenticate
+        if (log.isDebugEnabled())
+            log.debug("Authenticating using the following authenticator: " + auth.getClass().getName());
+        handler.processStream(auth, auth.redoHandshake());
+        // now check if binding and session features are supported
+        // if so, binding and session negotiation must be done
+        IXMPPStream stream;
+        if (streamCtx.getFeatures().isBindingSupported()) {
+            stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_BINDING);
+            handler.processStream(stream, false);
+        }
+        if (streamCtx.getFeatures().isSessionSupported()) {
+            stream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_SESSION);
+            handler.processStream(stream, false);
+        }
     }
 
     /*

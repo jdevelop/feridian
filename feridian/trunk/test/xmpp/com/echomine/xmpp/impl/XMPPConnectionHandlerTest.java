@@ -53,7 +53,7 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         handler.handshake(socket, connectionCtx);
         assertEquals("1.0", sessCtx.getVersion());
         assertEquals("example.com", sessCtx.getHostName());
-        assertEquals("c2s_123", sessCtx.getSessionId());
+        assertEquals("c2s_123", sessCtx.getStreamId());
         assertNotNull(streamCtx.getSocket());
         assertNotNull(streamCtx.getWriter());
         assertNotNull(streamCtx.getUnmarshallingContext());

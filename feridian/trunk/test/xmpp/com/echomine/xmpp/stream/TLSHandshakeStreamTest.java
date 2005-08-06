@@ -73,7 +73,7 @@ public class TLSHandshakeStreamTest extends BaseStreamTestCase {
         assertTrue(streamCtx.getSocket() instanceof SSLSocket);
         //these values must be reset after successful TLS handshake
         assertEquals("example.com", sessCtx.getHostName());
-        assertNull(sessCtx.getSessionId());
+        assertNull(sessCtx.getStreamId());
         assertNull(sessCtx.getVersion());
     }
 

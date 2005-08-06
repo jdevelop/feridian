@@ -9,22 +9,38 @@ import java.util.List;
 public class FeridianExtensions {
     private List streamList;
     private List packetList;
+    private List authenticators;
 
     /**
      * retrieves non-modifiable list of packet extensions
      * 
-     * @return Returns the packet extensions.
+     * @return Returns the packet extensions, never null.
      */
     public List getPacketExtensions() {
+        if (packetList == null)
+            return Collections.EMPTY_LIST;
         return Collections.unmodifiableList(packetList);
     }
 
     /**
      * Retrieves non-modifiable list of streams
      * 
-     * @return list of streams registered in the config
+     * @return list of streams registered in the config, never null
      */
     public List getStreamList() {
+        if (streamList == null)
+            return Collections.EMPTY_LIST;
         return Collections.unmodifiableList(streamList);
+    }
+
+    /**
+     * Retrieves non-modifiable list of authenticators
+     * 
+     * @return list of authenticators registered in the config, never null
+     */
+    public List getAuthenticators() {
+        if (authenticators == null)
+            return Collections.EMPTY_LIST;
+        return Collections.unmodifiableList(authenticators);
     }
 }

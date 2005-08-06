@@ -134,7 +134,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
 
     public void testFailedLogin() throws Exception {
         try {
-            String inXml = "<failure xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><temporary-auth-failure/></failure>";
+            String inXml = "<failure xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><temporary-stream-failure/></failure>";
             MockXMPPLoggableReader rdr = new MockXMPPLoggableReader(new ByteArrayInputStream(inXml.getBytes()), "UTF-8");
             uctx.setDocument(rdr);
             handler.getStreamContext().setReader(rdr);

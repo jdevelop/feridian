@@ -1,4 +1,4 @@
-package com.echomine.xmpp.stream.sasl;
+package com.echomine.xmpp.auth.sasl;
 
 import junit.framework.TestCase;
 
@@ -14,7 +14,7 @@ public class DigestMD5SaslContextTest extends TestCase {
         ctx.unwrap(challenge);
         assertEquals("somerealm", ctx.getRealm());
         assertEquals("OA6MG9tEQGm2hh", ctx.getNonce());
-        assertEquals("auth", ctx.getQop());
+        assertEquals("stream", ctx.getQop());
         assertEquals("utf-8", ctx.getCharset());
         assertEquals("md5-sess", ctx.getAlgorithm());
     }

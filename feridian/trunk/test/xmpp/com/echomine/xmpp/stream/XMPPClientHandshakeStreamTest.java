@@ -26,7 +26,7 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
         run(rdr, stream);
         endOutgoingStreamHeader();
         compare(outRes);
-        assertEquals("c2s_123", sessCtx.getSessionId());
+        assertEquals("c2s_123", sessCtx.getStreamId());
         assertEquals("example.com", sessCtx.getHostName());
     }
 
@@ -36,7 +36,7 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
         run(rdr, stream);
         endOutgoingStreamHeader();
         compare(outRes);
-        assertEquals("c2s_123", sessCtx.getSessionId());
+        assertEquals("c2s_123", sessCtx.getStreamId());
         assertEquals("example.com", sessCtx.getHostName());
         assertEquals(Locale.US, sessCtx.getLocale());
     }

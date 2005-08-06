@@ -65,5 +65,5 @@ public interface ErrorCode {
     static final String SASL_INVALID_AUTHZID = "invalid-authzid";
     static final String SASL_INVALID_MECHANISM = "invalid-mechanism";
     static final String SASL_NOT_AUTHORIZED = "not-authorized";
-    static final String SASL_TEMP_AUTH_FAILURE = "temporary-auth-failure";
+    static final String SASL_TEMP_AUTH_FAILURE = "temporary-stream-failure";
 }

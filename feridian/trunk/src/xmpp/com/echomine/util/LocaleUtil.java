@@ -27,6 +27,8 @@ public class LocaleUtil {
      * @return the string of the locale
      */
     public static final String format(Locale locale) {
+        if (locale == null) 
+            throw new IllegalArgumentException("Locale must be specified and cannot be null");
         StringBuffer result = new StringBuffer(locale.getLanguage());
         boolean c = locale.getCountry().length() != 0;
         if (c)
@@ -43,6 +45,8 @@ public class LocaleUtil {
      * @return the locale or null if the locale string doesn't match
      */
     public static final Locale parseLocale(String localeStr) {
+        if (localeStr == null) 
+            throw new IllegalArgumentException("locale string cannot be null");
         Matcher matcher = localePat.matcher(localeStr);
         if (matcher.matches()) {
             int size = matcher.groupCount();

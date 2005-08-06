@@ -1,4 +1,4 @@
-package com.echomine.jabber;
+package com.echomine.jabber.packet;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,6 +10,8 @@ import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+
+import com.echomine.jabber.packet.VersionIQPacket;
 
 import junit.framework.TestCase;
 
