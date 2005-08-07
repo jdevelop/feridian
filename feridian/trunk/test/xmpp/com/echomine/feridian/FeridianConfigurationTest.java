@@ -2,7 +2,7 @@ package com.echomine.feridian;
 
 import junit.framework.TestCase;
 
-import com.echomine.xmpp.packet.IQResourceBindPacket;
+import com.echomine.xmpp.packet.ResourceBindIQPacket;
 
 /**
  * Tests the feridian configuration.
@@ -10,7 +10,7 @@ import com.echomine.xmpp.packet.IQResourceBindPacket;
 public class FeridianConfigurationTest extends TestCase {
     public void testFeridianConfig() throws Exception {
         FeridianConfiguration config = FeridianConfiguration.getConfig();
-        assertEquals(IQResourceBindPacket.class, config.getClassForUri("urn:ietf:params:xml:ns:xmpp-bind"));
+        assertEquals(ResourceBindIQPacket.class, config.getClassForUri("urn:ietf:params:xml:ns:xmpp-bind"));
     }
 
     public void testGetClassForURINPE() throws Exception {

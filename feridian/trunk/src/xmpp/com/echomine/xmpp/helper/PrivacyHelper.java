@@ -4,7 +4,7 @@ import com.echomine.xmpp.IXMPPConnection;
 import com.echomine.xmpp.SendPacketFailedException;
 import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQPrivacyPacket;
+import com.echomine.xmpp.packet.PrivacyIQPacket;
 import com.echomine.xmpp.packet.PrivacyList;
 
 /**
@@ -88,10 +88,10 @@ public class PrivacyHelper {
      *             error packet, then this exception will be thrown to indicate
      *             an error.
      */
-    public static final IQPrivacyPacket getLists(IXMPPConnection conn, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQPrivacyPacket req = new IQPrivacyPacket();
+    public static final PrivacyIQPacket getLists(IXMPPConnection conn, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
+        PrivacyIQPacket req = new PrivacyIQPacket();
         req.setType(IQPacket.TYPE_GET);
-        IQPrivacyPacket reply = (IQPrivacyPacket) conn.sendPacket(req, wait);
+        PrivacyIQPacket reply = (PrivacyIQPacket) conn.sendPacket(req, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
         return reply;
@@ -112,11 +112,11 @@ public class PrivacyHelper {
      *             an error.
      */
     public static final PrivacyList getList(IXMPPConnection conn, String listName, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQPrivacyPacket req = new IQPrivacyPacket();
+        PrivacyIQPacket req = new PrivacyIQPacket();
         req.setType(IQPacket.TYPE_GET);
         PrivacyList list = new PrivacyList(listName);
         req.addPrivacyList(list);
-        IQPrivacyPacket reply = (IQPrivacyPacket) conn.sendPacket(req, wait);
+        PrivacyIQPacket reply = (PrivacyIQPacket) conn.sendPacket(req, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
         if (reply != null)
@@ -144,10 +144,10 @@ public class PrivacyHelper {
      *             an error.
      */
     public static final void setActiveList(IXMPPConnection conn, String listName, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQPrivacyPacket req = new IQPrivacyPacket();
+        PrivacyIQPacket req = new PrivacyIQPacket();
         req.setType(IQPacket.TYPE_SET);
         req.setActiveName(listName);
-        IQPrivacyPacket reply = (IQPrivacyPacket) conn.sendPacket(req, wait);
+        PrivacyIQPacket reply = (PrivacyIQPacket) conn.sendPacket(req, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
     }
@@ -172,10 +172,10 @@ public class PrivacyHelper {
      *             an error.
      */
     public static final void setDefaultList(IXMPPConnection conn, String listName, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQPrivacyPacket req = new IQPrivacyPacket();
+        PrivacyIQPacket req = new PrivacyIQPacket();
         req.setType(IQPacket.TYPE_SET);
         req.setDefaultName(listName);
-        IQPrivacyPacket reply = (IQPrivacyPacket) conn.sendPacket(req, wait);
+        PrivacyIQPacket reply = (PrivacyIQPacket) conn.sendPacket(req, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
     }
@@ -213,10 +213,10 @@ public class PrivacyHelper {
      *             an error.
      */
     public static final void updateList(IXMPPConnection conn, PrivacyList list, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQPrivacyPacket req = new IQPrivacyPacket();
+        PrivacyIQPacket req = new PrivacyIQPacket();
         req.setType(IQPacket.TYPE_SET);
         req.addPrivacyList(list);
-        IQPrivacyPacket reply = (IQPrivacyPacket) conn.sendPacket(req, wait);
+        PrivacyIQPacket reply = (PrivacyIQPacket) conn.sendPacket(req, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
     }
@@ -243,11 +243,11 @@ public class PrivacyHelper {
      *             an error.
      */
     public static final void removeList(IXMPPConnection conn, String listName, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQPrivacyPacket req = new IQPrivacyPacket();
+        PrivacyIQPacket req = new PrivacyIQPacket();
         req.setType(IQPacket.TYPE_SET);
         PrivacyList list = new PrivacyList(listName);
         req.addPrivacyList(list);
-        IQPrivacyPacket reply = (IQPrivacyPacket) conn.sendPacket(req, wait);
+        PrivacyIQPacket reply = (PrivacyIQPacket) conn.sendPacket(req, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
     }

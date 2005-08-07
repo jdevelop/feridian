@@ -80,7 +80,7 @@ public class MessagePacketTest extends XMPPTestCase {
         packet.setFrom(JID.parseJID("juliet@shakespeare.com"));
         packet.setType(MessagePacket.TYPE_CHAT);
         packet.setId("id_0001");
-        IQRosterPacket ext = new IQRosterPacket();
+        RosterIQPacket ext = new RosterIQPacket();
         RosterItem item = new RosterItem();
         item.setJid(JID.parseJID("contact@example.org"));
         item.setName("MyContact");

@@ -9,7 +9,7 @@ import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.MockXMPPConnectionHandler;
 import com.echomine.xmpp.SendPacketFailedException;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQRosterPacket;
+import com.echomine.xmpp.packet.RosterIQPacket;
 import com.echomine.xmpp.packet.PresencePacket;
 
 /**
@@ -53,7 +53,7 @@ public class PacketQueueTest extends TestCase {
         assertEquals(0, queue.getQueue().size());
         assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
-        assertTrue(runner.replyPacket instanceof IQRosterPacket);
+        assertTrue(runner.replyPacket instanceof RosterIQPacket);
         assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
     }
 
@@ -63,7 +63,7 @@ public class PacketQueueTest extends TestCase {
         Thread thread = new Thread(runner);
         thread.start();
         // call reply received
-        IQRosterPacket packet = new IQRosterPacket();
+        RosterIQPacket packet = new RosterIQPacket();
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_RESULT);
         queue.packetReceived(packet);
@@ -75,7 +75,7 @@ public class PacketQueueTest extends TestCase {
 
     public void testPacketReceived() throws Exception {
         assertNull(queue.packetReceived(null));
-        assertNotNull(queue.packetReceived(new IQRosterPacket()));
+        assertNotNull(queue.packetReceived(new RosterIQPacket()));
     }
     
     /**
@@ -94,7 +94,7 @@ public class PacketQueueTest extends TestCase {
         IStanzaPacket replyPacket;
 
         public void run() {
-            IQRosterPacket packet = new IQRosterPacket();
+            RosterIQPacket packet = new RosterIQPacket();
             packet.setId("id_001");
             packet.setType(IQPacket.TYPE_GET);
 

@@ -43,10 +43,10 @@ import java.util.List;
  * OPTIONAL).
  * </p>
  */
-public class IQRosterPacket extends IQPacket {
+public class RosterIQPacket extends IQPacket {
     private List rosterItems;
 
-    public IQRosterPacket() {
+    public RosterIQPacket() {
         super();
     }
 

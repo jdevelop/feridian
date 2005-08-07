@@ -14,7 +14,7 @@ public class DigestMD5SaslContextTest extends TestCase {
         ctx.unwrap(challenge);
         assertEquals("somerealm", ctx.getRealm());
         assertEquals("OA6MG9tEQGm2hh", ctx.getNonce());
-        assertEquals("stream", ctx.getQop());
+        assertEquals("auth", ctx.getQop());
         assertEquals("utf-8", ctx.getCharset());
         assertEquals("md5-sess", ctx.getAlgorithm());
     }

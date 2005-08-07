@@ -15,7 +15,7 @@ public class StanzaErrorPacket extends ErrorPacket {
     public static final String CANCEL = "cancel";
     public static final String CONTINUE = "continue";
     public static final String MODIFY = "modify";
-    public static final String AUTH = "stream";
+    public static final String AUTH = "auth";
     public static final String WAIT = "wait";
 
     private String errorType;

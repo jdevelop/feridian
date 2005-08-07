@@ -9,7 +9,7 @@
 		deserializer="com.echomine.xmpp.JID.parseJID"/>
 
 	<mapping name="query" ns="jabber:iq:roster"
-		class="com.echomine.xmpp.packet.IQRosterPacket">
+		class="com.echomine.xmpp.packet.RosterIQPacket">
 		<collection field="rosterItems" type="java.util.ArrayList"
 			item-type="com.echomine.xmpp.packet.RosterItem" usage="optional"/>
 	</mapping>

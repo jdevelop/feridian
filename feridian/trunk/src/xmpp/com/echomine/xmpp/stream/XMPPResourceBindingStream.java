@@ -13,7 +13,7 @@ import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQResourceBindPacket;
+import com.echomine.xmpp.packet.ResourceBindIQPacket;
 
 /**
  * This stream checks to see if resource binding is required. Under XMPP specs,
@@ -40,7 +40,7 @@ public class XMPPResourceBindingStream implements IXMPPStream {
             XMPPStreamWriter writer = streamCtx.getWriter();
             UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
             // send bind request
-            IQResourceBindPacket request = new IQResourceBindPacket();
+            ResourceBindIQPacket request = new ResourceBindIQPacket();
             request.setId(IDGenerator.nextID());
             request.setType(IQPacket.TYPE_SET);
             request.setResourceName(sessCtx.getResource());
@@ -53,7 +53,7 @@ public class XMPPResourceBindingStream implements IXMPPStream {
                     uctx.next();
             }
             // process result
-            IQResourceBindPacket result = (IQResourceBindPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+            ResourceBindIQPacket result = (ResourceBindIQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             streamCtx.getReader().stopLogging();
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");

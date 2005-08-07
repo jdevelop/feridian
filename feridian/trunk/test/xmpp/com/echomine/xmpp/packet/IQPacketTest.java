@@ -9,15 +9,7 @@ import com.echomine.xmpp.packet.IQPacket;
 /**
  * Base class containing convenience methods to test IQ packets
  */
-public class IQStanzaTest extends XMPPTestCase {
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+public class IQPacketTest extends XMPPTestCase {
     public void testUnmarshallIQResultWithNoChild() throws Exception {
         String xml = "<iq xmlns='jabber:client' type='result' id='iq_001'/>";
         StringReader rdr = new StringReader(xml);

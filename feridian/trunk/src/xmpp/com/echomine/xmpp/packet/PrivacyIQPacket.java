@@ -20,7 +20,7 @@ import java.util.List;
  * </ul>
  * </p>
  */
-public class IQPrivacyPacket extends IQPacket {
+public class PrivacyIQPacket extends IQPacket {
     private PrivacyList defaultList;
     private PrivacyList activeList;
     private List privacyLists;

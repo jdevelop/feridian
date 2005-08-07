@@ -5,7 +5,7 @@
 	<namespace uri="jabber:iq:privacy" default="elements"/>
 
 	<mapping name="query" ns="jabber:iq:privacy"
-		class="com.echomine.xmpp.packet.IQPrivacyPacket" ordered="false">
+		class="com.echomine.xmpp.packet.PrivacyIQPacket" ordered="false">
 		<structure name="active" field="activeList" value-style="attribute" usage="optional">
 			<value name="name" field="name" usage="optional"/>
 		</structure>

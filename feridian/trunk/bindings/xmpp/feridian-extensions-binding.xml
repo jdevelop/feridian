@@ -2,7 +2,7 @@
 <binding direction="input">
 	<mapping name="feridian" class="com.echomine.feridian.FeridianExtensions">
 		<collection name="authenticators" field="authenticators" type="java.util.ArrayList"
-			usage="optional">
+			usage="optional"/>
 		<collection name="streams" field="streamList" type="java.util.ArrayList"
 			usage="optional"/>
 		<collection name="packets" field="packetList" type="java.util.ArrayList"

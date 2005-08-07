@@ -19,7 +19,7 @@ public interface XMPPConstants {
     static final String NS_STREAM_BINDING = "urn:ietf:params:xml:ns:xmpp-bind";
     static final String NS_STREAM_SESSION = "urn:ietf:params:xml:ns:xmpp-session";
     static final String NS_STREAM_SASL = "urn:ietf:params:xml:ns:xmpp-sasl";
-    static final String NS_STREAM_IQ_AUTH = "http://jabber.org/features/iq-stream";
+    static final String NS_STREAM_IQ_AUTH = "http://jabber.org/features/iq-auth";
     static final String NS_STREAM_IQ_REGISTER = "http://jabber.org/features/iq-register";
 
     // namespace constants for stanzas and extensions

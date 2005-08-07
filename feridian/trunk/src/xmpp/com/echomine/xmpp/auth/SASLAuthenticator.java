@@ -126,7 +126,7 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
     private void authPlain(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws IOException, JiBXException, XMPPException {
         int idx = writer.getNamespaces().length;
         // send <stream>
-        writer.startTagNamespaces(idx, "stream", new int[] { idx }, new String[] { "" });
+        writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
         writer.addAttribute(0, "mechanism", PLAIN);
         writer.closeStartTag();
         XMPPAuthCallback callback = streamCtx.getAuthCallback();
@@ -134,7 +134,7 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
         StringBuffer buf = new StringBuffer(128);
         buf.append(authid.toString()).append('\0').append(callback.getUsername()).append('\0').append(callback.getPassword());
         writer.writeTextContent(Base64.encodeString(buf.toString()));
-        writer.endTag(idx, "stream");
+        writer.endTag(idx, "auth");
         // send response immediately
         writer.flush();
         synchronized (uctx) {
@@ -159,7 +159,7 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
     private void authDigestMD5(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException, IOException, JiBXException {
         int idx = writer.getNamespaces().length;
         // send <stream>
-        writer.startTagNamespaces(idx, "stream", new int[] { idx }, new String[] { "" });
+        writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
         writer.addAttribute(0, "mechanism", DIGEST_MD5);
         writer.closeEmptyTag();
         writer.flush();

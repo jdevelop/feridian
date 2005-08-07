@@ -3,6 +3,7 @@ package com.echomine.xmpp.stream;
 import java.io.StringReader;
 import java.util.Locale;
 
+import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPStanzaErrorException;

@@ -3,9 +3,9 @@ package com.echomine.xmpp.auth;
 import java.util.ArrayList;
 
 import com.echomine.net.MockSocket;
+import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPConstants;
-import com.echomine.xmpp.stream.BaseStreamTestCase;
 
 /**
  * This tests the TLS handshaking feature. It will not test the TLS negotiation,

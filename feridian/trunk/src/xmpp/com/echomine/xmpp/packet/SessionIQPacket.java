@@ -5,8 +5,8 @@ package com.echomine.xmpp.packet;
  * mechanism, this class is created purely for binding purposes.  It contain no need
  * data as the session element is an empty element.
  */
-public class IQSessionPacket extends IQPacket {
-    public IQSessionPacket() {
+public class SessionIQPacket extends IQPacket {
+    public SessionIQPacket() {
         super();
     }
 }

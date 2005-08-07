@@ -1,5 +1,6 @@
 package com.echomine.xmpp.stream;
 
+import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;

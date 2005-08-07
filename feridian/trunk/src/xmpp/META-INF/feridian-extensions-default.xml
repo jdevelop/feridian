@@ -9,9 +9,9 @@
   	<stream ns="urn:ietf:params:xml:ns:xmpp-session" class="com.echomine.xmpp.stream.XMPPSessionStream"/>
   </streams>
   <packets>
-    <packet ns="urn:ietf:params:xml:ns:xmpp-bind" class="com.echomine.xmpp.packet.IQResourceBindPacket"/>
-    <packet ns="urn:ietf:params:xml:ns:xmpp-session" class="com.echomine.xmpp.packet.IQSessionPacket"/>
-    <packet ns="jabber:iq:roster" class="com.echomine.xmpp.packet.IQRosterPacket"/>
-    <packet ns="jabber:iq:privacy" class="com.echomine.xmpp.packet.IQPrivacyPacket"/>
+    <packet ns="urn:ietf:params:xml:ns:xmpp-bind" class="com.echomine.xmpp.packet.ResourceBindIQPacket"/>
+    <packet ns="urn:ietf:params:xml:ns:xmpp-session" class="com.echomine.xmpp.packet.SessionIQPacket"/>
+    <packet ns="jabber:iq:roster" class="com.echomine.xmpp.packet.RosterIQPacket"/>
+    <packet ns="jabber:iq:privacy" class="com.echomine.xmpp.packet.PrivacyIQPacket"/>
   </packets>
 </feridian>

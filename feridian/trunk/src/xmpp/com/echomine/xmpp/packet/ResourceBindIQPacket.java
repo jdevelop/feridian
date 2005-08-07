@@ -5,11 +5,11 @@ import com.echomine.xmpp.JID;
 /**
  * This packet maps to the resource binding IQ stanza.
  */
-public class IQResourceBindPacket extends IQPacket {
+public class ResourceBindIQPacket extends IQPacket {
     private String resourceName;
     private JID jid;
 
-    public IQResourceBindPacket() {
+    public ResourceBindIQPacket() {
         super();
     }
 

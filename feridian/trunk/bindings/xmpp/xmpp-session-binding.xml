@@ -6,5 +6,5 @@
 
 	<!-- iq session packet support -->
 	<mapping name="session" ns="urn:ietf:params:xml:ns:xmpp-session"
-		class="com.echomine.xmpp.packet.IQSessionPacket"/>
+		class="com.echomine.xmpp.packet.SessionIQPacket"/>
 </binding>

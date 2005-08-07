@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLSocket;
 
 import com.echomine.net.MockSSLSocket;
+import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.XMPPException;
 
 /**

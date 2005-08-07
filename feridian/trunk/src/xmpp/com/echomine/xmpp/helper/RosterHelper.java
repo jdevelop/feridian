@@ -8,7 +8,7 @@ import com.echomine.xmpp.JID;
 import com.echomine.xmpp.SendPacketFailedException;
 import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQRosterPacket;
+import com.echomine.xmpp.packet.RosterIQPacket;
 import com.echomine.xmpp.packet.RosterItem;
 
 /**
@@ -20,7 +20,7 @@ import com.echomine.xmpp.packet.RosterItem;
  * Please refer to the roster packet for more details on how to work with
  * rosters
  * 
- * @see com.echomine.xmpp.packet.IQRosterPacket
+ * @see com.echomine.xmpp.packet.RosterIQPacket
  * @see com.echomine.xmpp.packet.RosterItem
  */
 public class RosterHelper {
@@ -38,9 +38,9 @@ public class RosterHelper {
      *             an error.
      */
     public static final List getRosterList(IXMPPConnection conn, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQRosterPacket packet = new IQRosterPacket();
+        RosterIQPacket packet = new RosterIQPacket();
         packet.setType(IQPacket.TYPE_GET);
-        IQRosterPacket reply = (IQRosterPacket) conn.sendPacket(packet, wait);
+        RosterIQPacket reply = (RosterIQPacket) conn.sendPacket(packet, wait);
         if (reply != null && reply.isError())
             throw new XMPPStanzaErrorException(reply.getError());
         if (reply != null)
@@ -93,7 +93,7 @@ public class RosterHelper {
      *             an error.
      */
     public static final void addItem(IXMPPConnection conn, RosterItem item, boolean wait) throws SendPacketFailedException, XMPPStanzaErrorException {
-        IQRosterPacket packet = new IQRosterPacket();
+        RosterIQPacket packet = new RosterIQPacket();
         packet.setType(IQPacket.TYPE_SET);
         packet.addItem(item);
         IQPacket reply = (IQPacket) conn.sendPacket(packet, wait);
@@ -120,7 +120,7 @@ public class RosterHelper {
         RosterItem item = new RosterItem();
         item.setJid(jid);
         item.setRemove(true);
-        IQRosterPacket packet = new IQRosterPacket();
+        RosterIQPacket packet = new RosterIQPacket();
         packet.setType(IQPacket.TYPE_SET);
         packet.addItem(item);
         IQPacket reply = (IQPacket) conn.sendPacket(packet, wait);

@@ -13,7 +13,7 @@ import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQSessionPacket;
+import com.echomine.xmpp.packet.SessionIQPacket;
 
 /**
  * This stream will issue a session start request. Under XMPP specs, client must
@@ -37,7 +37,7 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
             XMPPStreamWriter writer = streamCtx.getWriter();
             UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
             // send request
-            IQSessionPacket request = new IQSessionPacket();
+            SessionIQPacket request = new SessionIQPacket();
             request.setId(IDGenerator.nextID());
             request.setType(IQPacket.TYPE_SET);
             JiBXUtil.marshallIQPacket(writer, request);
@@ -49,7 +49,7 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
                     uctx.next();
             }
             // process result
-            IQSessionPacket result = (IQSessionPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+            SessionIQPacket result = (SessionIQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             streamCtx.getReader().stopLogging();
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");

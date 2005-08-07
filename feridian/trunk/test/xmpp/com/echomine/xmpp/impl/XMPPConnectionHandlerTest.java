@@ -17,7 +17,7 @@ import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.IQRosterPacket;
+import com.echomine.xmpp.packet.RosterIQPacket;
 import com.echomine.xmpp.packet.PresencePacket;
 
 /**
@@ -65,7 +65,7 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
      */
     public void testSendIQPacket() throws Exception {
         String out = "<iq xmlns='jabber:client' " + "type='get' id='id_001'><query xmlns='jabber:iq:roster'/></iq>";
-        IQRosterPacket packet = new IQRosterPacket();
+        RosterIQPacket packet = new RosterIQPacket();
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_GET);
         handler.sendPacket(packet);
@@ -137,14 +137,14 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         handler.handshake(socket, connectionCtx);
         handler.handle(socket, connectionCtx);
         assertNotNull(rec.packet);
-        assertTrue(rec.packet instanceof IQRosterPacket);
+        assertTrue(rec.packet instanceof RosterIQPacket);
     }
 
     public void testIncomingPacketProcessor() throws Exception {
         String inRes = "com/echomine/xmpp/data/XMPPConnectionHandler_in1.xml";
         socket.setOutputStream(os);
         socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
-        IQRosterPacket packet = new IQRosterPacket();
+        RosterIQPacket packet = new RosterIQPacket();
         packet.setType(IQPacket.TYPE_GET);
         packet.setId("iq_0001");
         Thread thread = new Thread() {
@@ -167,7 +167,7 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         IStanzaPacket reply = handler.queuePacket(packet, true);
         // a reply should have broken us out of the wait
         assertNotNull(reply);
-        assertTrue(reply instanceof IQRosterPacket);
+        assertTrue(reply instanceof RosterIQPacket);
     }
 
     class PacketReceiver implements IPacketListener {
