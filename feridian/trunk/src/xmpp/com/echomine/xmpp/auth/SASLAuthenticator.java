@@ -100,7 +100,6 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
                 log.info("SASL authentication complete, resetting input and output streams for new handshake");
             // reset writer and unmarshalling context for handshake
             // renegotiation preparation
-            streamCtx.getReader().stopLogging();
             XMPPLoggableReader bis = new XMPPLoggableReader(streamCtx.getSocket().getInputStream(), "UTF-8");
             BufferedOutputStream bos = new BufferedOutputStream(streamCtx.getSocket().getOutputStream(), SOCKETBUF);
             writer.flush();
@@ -113,6 +112,8 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
             throw new XMPPException(ex);
         } catch (JiBXException ex) {
             throw new XMPPException(ex);
+        } finally {
+            streamCtx.getReader().stopLogging();
         }
     }
 

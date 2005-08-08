@@ -1,7 +1,8 @@
 <!-- Binding for JEP-0092: Software Version -->
 <binding>
 	<namespace uri="jabber:iq:version" default="elements"/>
-	<mapping name="query" class="com.echomine.jabber.packet.VersionIQPacket">
+	<mapping name="query" ns="jabber:iq:version" 
+		class="com.echomine.jabber.packet.VersionIQPacket">
   		<value name="name" field="name"/>
   		<value name="version" field="version"/>
   		<value name="os" field="os" usage="optional"/>

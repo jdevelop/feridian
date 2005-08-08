@@ -1,11 +1,13 @@
 package com.echomine.jabber.packet;
 
+import com.echomine.xmpp.packet.IQPacket;
+
 /**
  * The authentication packet is created to support the non-SASL authentication
- * (or in xmpp terms, the new iq-stream feature).  When sending authentication
+ * (or in xmpp terms, the new iq-stream feature). When sending authentication
  * packet, only the username and resource is required.
  */
-public class AuthIQPacket {
+public class AuthIQPacket extends IQPacket {
     String username;
     String password;
     String digest;
@@ -67,4 +69,27 @@ public class AuthIQPacket {
         this.username = username;
     }
 
+    /**
+     * This convenience method simply checks that the digest string is empty. If
+     * it is empty (not null), then we can safely assume that the remote entity
+     * supports this authentication method. Note that this method is only useful
+     * for working with an incoming AuthIQPacket.
+     * 
+     * @return true if digest is supported, false otherwise
+     */
+    public boolean isDigestSupported() {
+        return "".equals(digest);
+    }
+    
+    /**
+     * This convenience method simply checks that the passsword string is empty. If
+     * it is empty (not null), then we can safely assume that the remote entity
+     * supports this authentication method. Note that this method is only useful
+     * for working with an incoming AuthIQPacket.
+     * 
+     * @return true if plain is supported, false otherwise
+     */
+    public boolean isPlainSupported() {
+        return "".equals(password);
+    }
 }

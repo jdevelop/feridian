@@ -30,7 +30,12 @@
 
     <!-- taskdef for jibx -->
     <taskdef name="bind" classname="org.jibx.binding.ant.CompileTask">
-        <classpath refid="jibx.classpath"/>
+        <classpath>
+            <path refid="jibx.classpath"/>
+            <dirset dir="${build.dir}">
+                <include name="**/classes"/>
+            </dirset>
+        </classpath>
     </taskdef>
 
     <!-- ================================================================== -->
@@ -100,7 +105,9 @@
         <echo message="Jarring Module ${module.name}"/>
         <jar jarfile="${work.dir}/${project}-${module.name}.jar">
             <fileset dir="${build.dir}/${module.name}/classes"/>
+            <!--
             <metainf dir="${src.java.dir}/${module.name}/META-INF"/>
+            -->
             <manifest>
                 <attribute name="Implementation-Title" value="${project}-${module.name}"/>
                 <attribute name="Implementation-Version" value="${version}"/>
@@ -278,7 +285,7 @@
     <!-- ================================================================== -->
     <!-- jabber-compat Module tasks                                         -->
     <!-- ================================================================== -->
-    <target name="prepare-jabber-compat" depends="prepare-base">
+    <target name="prepare-jabber-compat" depends="prepare-base,bind-xmpp">
         <antcall target="prepare-module">
             <param name="module.name" value="jabber-compat"/>
         </antcall>
@@ -290,7 +297,6 @@
         </path>
         <path id="jabber-compat.classpath.depends">
             <path refid="xmpp.classpath"/>
-            <path refid="core.classpath"/>
             <path location="${build.dir}/xmpp/tests/classes"/>
         </path>    
         <antcall target="compile-module">

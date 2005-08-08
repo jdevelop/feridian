@@ -47,6 +47,11 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
             writer.flush();
             // start logging
             streamCtx.getReader().startLogging();
+            // no need to sync on first read from unmarshalling context
+            // because client handshake is either called before
+            // async packet processing starts OR it is called right
+            // after a separate stream processor, in which case the
+            // async packet processing activity is already paused.
             // now read in the xml stream
             if (!uctx.isAt(XMPPConstants.NS_JABBER_STREAM, STREAM_ELEMENT_NAME))
                 uctx.throwStartTagNameError(XMPPConstants.NS_JABBER_STREAM, STREAM_ELEMENT_NAME);

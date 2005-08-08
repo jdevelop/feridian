@@ -1,5 +1,7 @@
 package com.echomine.jabber.packet;
 
+import com.echomine.xmpp.packet.IQPacket;
+
 /**
  * Submits and parses a Client Version message. The message will return the
  * software (and its version) of the recipient that you sent the message to. It
@@ -10,11 +12,10 @@ package com.echomine.jabber.packet;
  * contains your own time information to send to the server. When such feature
  * is supported, the message will implement it.
  * <p>
- * <b>Current Implementation: <a
- * href="http://www.jabber.org/jeps/jep-0092.html">JEP-0092 Version 1.0</a></b>
+ * <b>See <a href="http://www.jabber.org/jeps/jep-0092.html">JEP-0092</a></b>
  * </p>
  */
-public class VersionIQPacket {
+public class VersionIQPacket extends IQPacket {
     private String name;
     private String version;
     private String os;

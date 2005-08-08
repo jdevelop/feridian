@@ -13,12 +13,12 @@ import com.echomine.xmpp.XMPPConstants;
  * XML handshaking.
  */
 public class SASLAuthenticatorTest extends BaseStreamTestCase implements XMPPConstants {
-    SASLAuthenticator stream;
+    SASLAuthenticator auth;
     ArrayList mechanisms;
 
     protected void setUp() throws Exception {
         super.setUp();
-        stream = new SASLAuthenticator();
+        auth = new SASLAuthenticator();
         sessCtx.setHostName("example.com");
         mechanisms = new ArrayList(2);
         mechanisms.add("PLAIN");
@@ -37,6 +37,10 @@ public class SASLAuthenticatorTest extends BaseStreamTestCase implements XMPPCon
         String inRes = "com/echomine/xmpp/data/SASLPlain_in.xml";
         String outRes = "com/echomine/xmpp/data/SASLPlain_out.xml";
         mechanisms.remove("DIGEST-MD5");
-        runAndCompare(inRes, outRes, stream, true, true);
+        runAndCompare(inRes, outRes, auth, true, true);
+    }
+    
+    public void testRedoHandshakeAlwaysTrue() {
+        assertTrue(auth.redoHandshake());
     }
 }

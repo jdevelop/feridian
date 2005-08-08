@@ -39,14 +39,14 @@ public class XMPPResourceBindingStream implements IXMPPStream {
                 return;
             XMPPStreamWriter writer = streamCtx.getWriter();
             UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
+            // start logging
+            streamCtx.getReader().startLogging();
             // send bind request
             ResourceBindIQPacket request = new ResourceBindIQPacket();
             request.setId(IDGenerator.nextID());
             request.setType(IQPacket.TYPE_SET);
             request.setResourceName(sessCtx.getResource());
             JiBXUtil.marshallIQPacket(writer, request);
-            // start logging
-            streamCtx.getReader().startLogging();
             //synchronized for first access is required to prevent thread racing issue
             synchronized (uctx) {
                 if (!uctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "iq"))
@@ -54,7 +54,6 @@ public class XMPPResourceBindingStream implements IXMPPStream {
             }
             // process result
             ResourceBindIQPacket result = (ResourceBindIQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
-            streamCtx.getReader().stopLogging();
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");
             if (result.isError())
@@ -64,6 +63,8 @@ public class XMPPResourceBindingStream implements IXMPPStream {
             sessCtx.setResource(result.getJid().getResource());
         } catch (JiBXException ex) {
             throw new XMPPException(ex);
+        } finally {
+            streamCtx.getReader().stopLogging();
         }
     }
 }

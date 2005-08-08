@@ -61,22 +61,20 @@ public class FeridianConfiguration {
      *             to be caught.
      */
     public static FeridianConfiguration getConfig() throws ConfigurationException {
-        if (config == null) {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILENAME);
-            if (is == null)
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/" + CONFIG_FILENAME);
-            if (is == null)
-                is = Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/" + DEFAULT_CONFIG_FILENAME);
-            if (is != null) {
-                Reader rdr = new InputStreamReader(is);
-                config = getConfig(rdr);
-            } else {
-                if (log.isWarnEnabled())
-                    log.warn("Unable to find feridian-config.xml in / or META-INF/.  Using empty config");
-                config = new FeridianConfiguration();
-            }
+        if (config != null) return config;
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILENAME);
+        if (is == null)
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/" + CONFIG_FILENAME);
+        if (is == null)
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/" + DEFAULT_CONFIG_FILENAME);
+        if (is != null) {
+            Reader rdr = new InputStreamReader(is);
+            config = getConfig(rdr);
+        } else {
+            if (log.isWarnEnabled())
+                log.warn("Unable to find feridian-config.xml in / or META-INF/.  Using empty config");
+            config = new FeridianConfiguration();
         }
-        config.loadExtensions();
         return config;
     }
 

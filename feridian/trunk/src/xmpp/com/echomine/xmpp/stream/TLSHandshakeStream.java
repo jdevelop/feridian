@@ -69,6 +69,8 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             writer.flush();
             // start logging
             streamCtx.getReader().startLogging();
+            // no need to sync the first unmarshalling cuz TLS handshake
+            // occurs before async packet processing begins.
             // check for error or proceed
             uctx.next();
             if (uctx.isAt(NS_STREAM_TLS, "failure")) {
