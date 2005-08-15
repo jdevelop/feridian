@@ -1,11 +1,13 @@
 <!-- Binding for JEP-0078: Non-SASL Authentication -->
 <binding>
 	<namespace uri="jabber:iq:auth" default="elements"/>
+	<namespace uri="http://www.jabber.com/schemas/connectionprops.xsd" prefix="jbext"/>
 	<mapping name="query" ns="jabber:iq:auth"
 		class="com.echomine.jabber.packet.AuthIQPacket">
   		<value name="username" field="username"/>
   		<value name="password" field="password" usage="optional"/>
   		<value name="digest" field="digest" usage="optional"/>
   		<value name="resource" field="resource" usage="optional"/>
+      <structure name="connection_properties" ns="http://www.jabber.com/schemas/connectionprops.xsd" usage="optional"/>
  	</mapping>
 </binding>
