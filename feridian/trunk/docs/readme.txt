@@ -1,27 +1,23 @@
 Echomine Feridian API
 ====================
-
 Echomine Feridian API provides an API to communicate with XMPP-compliant
 servers.  It also includes support to work with newer versions of Jabber
 servers and Jabber-specific JEPs.
 
 License
 ---------
-
 Echomine Feridian API is distributed under the Apache Software License.  See the enclosed
 license file for more information regarding legal issues on using this API.
 
 
 Changelog and Features
 ----------------------
-
 See the included Changelog file for more information on version updates
 
 
 Requirements
 --------------
-
-Feridian API is now developed under JDK 1.4 and requires JDK 1.4+ to run.  
+Feridian API is now developed under JDK 1.4 and requires JDK 1.4+ to run.
 
 There are also external libraries needed by Feridian.  These libraries come as
 part of the distribution, and should also be added into the classpath when
@@ -45,20 +41,18 @@ JUnit test cases are now part of the source code distribution.  The JUnit
 
 Installation
 ---------------
-
 Just add the required libraries in the lib/ directory into your classpath
 and you're ready to go.  Feridian API is meant to be a low-level developer API
-so it does not contain any application that can be run.  Well, there are
-some example codes under the examples/ directory.  Take a look and then
+so it does not contain any application that can be run.  There are some example
+codes under the examples/ directory for reference.  Take a lookand then
 you're ready to create your own application!
 
 
 Building From Source
 -----------------------
-
 There is an ANT build.xml file in the main directory.  You can simply run it from
-there to rebuild the entire source tree (ie. if you happen to modify it).  The
-default option is to make a jar for you to use.
+there to rebuild the entire source tree (ie. if you happen to modify the source).
+The default option is to make a jar for you to use.
 
 You must have ANT installed already on your system in order to compile.
 If you do not have ANT installed, you can download it at
@@ -74,13 +68,12 @@ You can jar up the examples as well using "ant jar-<module>-examples".
   the distribution.
 
 JUnit tests are not compiled and not packaged into the JAR files.  To run the junit tests,
-you simply run the ant task "test.junit" and it will do its work to run the tests.
+you simply run the ant task "test-all" and it will do its work to run the tests.
 
 More up-to-date installation instructions are posted on the website.
 
 Directory Structure
 ---------------------
-
 lib/ -- contains the API along with all the other dependent libraries.
     All the libraries in this directory should be included in your classpath.
 
@@ -91,11 +84,12 @@ build/ -- contains files necessary to build the API package.  This package
     java libraries that are required for compilation. These libraries are not
     necessary when running itself.
 
+contrib/ -- contains useful files (log4j config file) that is not
+    not required to run Feridian but is useful as reference to enhance your
+    experience in using the API.
+
 docs/ -- may/may not exist, but it contains the javadocs and other docs for
     the API.
-
-bin/ -- contains any build scripts or other binaries that comes along with
-    the package.
 
 license/ -- contains all the license files for Feridian and also any libraries that
 		it depends on.
@@ -110,7 +104,7 @@ examples/ -- contains any example classes that you can run directly to check out
     learn how to use the API as fast as possible.
 
 work/ -- contains all the temporary working sources and classes when you run
-    ANT.  This is where ANT does all its dirty work.  Running "ant clean" will
+    ANT.  This is where ANT keeps all its dirty work.  Running "ant clean" will
     remove this directory.  This directory is a temporary working directory
     and is not packaged with the distribution.
 
@@ -124,4 +118,4 @@ If you have any questions or problems, send email to:
     support@echomine.com
 
 
-Echomine Feridian (c) 2005 Echomine.  All right reserved.
+Echomine Feridian (c) 2005 Echomine.  All rights reserved.
