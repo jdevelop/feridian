@@ -42,7 +42,6 @@
     <!-- Basic preparation                                                  -->
     <!-- ================================================================== -->
     <target name="env">
-        <!--
         <echo message="project.home = ${project.home}"/>
         <echo message="java.home = ${java.home}"/>
         <echo message="java.version = ${java.version}"/>
@@ -50,7 +49,6 @@
         <echo message="os.name = ${os.name}"/>
         <echo message="java.class.path = ${java.class.path}"/>
         <echo message=""/>
-        -->
     </target>
 
     <target name="prepare-base" depends="env">
