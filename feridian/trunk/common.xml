@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="common">
+	<dirname property="common.basedir" file="${ant.file.common}"/>
+
+    <property file="${user.home}/build.properties"/>
+    <property file="build.properties"/>
+    <property file="${common.basedir}/build.properties"/>
+
+	<property name="module.home" value="${modules.dir}/${module.name}"/>
+	<property name="module.work" value="${work.dir}/${module.name}"/>
+
+    <path id="jibx.classpath">
+        <pathelement location="${lib.compile.dir}/bcel.jar"/>
+        <pathelement location="${lib.compile.dir}/jibx-bind.jar"/>
+        <pathelement location="${lib.compile.dir}/jibx-extras.jar"/>
+        <pathelement location="${src.lib.dir}/jibx-run.jar"/>
+        <pathelement location="${src.lib.dir}/xpp3.jar"/>
+    </path>
+
+    <path id="compile.classpath">
+        <fileset dir="${src.lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- taskdef for jibx -->
+    <taskdef name="bind" classname="org.jibx.binding.ant.CompileTask">
+        <classpath>
+            <path refid="jibx.classpath"/>
+            <dirset dir="${work.dir}">
+                <include name="**/classes"/>
+            </dirset>
+        </classpath>
+    </taskdef>
+
+    <!-- ================================================================== -->
+    <!-- Module tasks (compile, jar, etc)                                   -->
+    <!-- ================================================================== -->
+    
+    <!-- generic prepare module task -->
+    <target name="prepare" if="module.name">
+        <echo message="Preparing Module ${module.name}"/>
+        <mkdir dir="${module.work}"/>
+        <mkdir dir="${module.work}/classes"/>
+        <copy todir="${module.work}/classes">
+            <fileset dir="${module.home}/src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- compile the module -->
+    <target name="compile" depends="prepare" if="module.name">
+        <echo message="Compiling Module ${module.name}"/>
+        <javac srcdir="${module.home}/src"
+            destdir="${module.work}/classes" debug="${compile.debug}"
+            deprecation="${compile.deprecation}" optimize="${compile.optimize}">
+            <classpath refid="compile.classpath"/>
+            <classpath refid="module.classpath"/>
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+
+    <!-- jibx binding modifications to compiled classes -->
+    <target name="bind" depends="compile" if="module.name">
+        <echo message="Binding Module ${module.name}"/>
+        <bind verbose="false" load="true">
+            <bindingfileset dir="${module.home}/bindings"/>
+            <classpathset dir="${module.work}/classes"/>
+        </bind>
+    </target>
+
+    <!-- jars all the compiled module files -->
+    <target name="jar" depends="bind" if="module.name">
+        <echo message="Jarring Module ${module.name}"/>
+        <jar jarfile="${work.dir}/${project}-${module.name}.jar">
+            <fileset dir="${module.work}/classes"/>
+            <manifest>
+                <attribute name="Implementation-Title" value="${project}-${module.name}"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Implementation-Vendor" value="Echomine Inc."/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- Cleans up the module build directory  -->
+    <target name="clean" if="module.name">
+    	    <echo message="Cleaning Module ${module.name}"/>
+        <delete file="${work.dir}/${project}-${module.name}.jar" verbose="false"/>
+        <delete dir="${module.work}"/>
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Generic unit testing tasks for use by all modules                  -->
+    <!-- ================================================================== -->
+
+    <!-- prepares test sources -->
+    <target name="prepare-test" depends="bind" if="module.name">
+        <mkdir dir="${module.work}/test"/>
+        <mkdir dir="${module.work}/test/classes"/>
+    </target>
+
+    <!-- Compile unit tests -->
+    <target name="compile-test" depends="prepare-test" if="module.name">
+        <javac srcdir="${module.home}/test"
+            destdir="${module.work}/test/classes"
+            debug="${compile.debug}" optimize="${compile.optimize}"
+            deprecation="${compile.deprecation}">
+            <classpath location="${lib.compile.dir}/junit.jar"/>
+            <classpath location="${module.work}/classes"/>
+            <classpath refid="module.classpath"/>
+            <classpath refid="compile.classpath"/>
+            <classpath refid="jibx.classpath"/>
+        </javac>
+        <copy todir="${module.work}/test/classes">
+            <fileset dir="${module.home}/test">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- run the junit tests for a module -->
+    <target name="test" depends="compile-test" if="module.name">
+        <junit printsummary="yes" haltonfailure="no" haltonerror="no" fork="yes">
+            <!-- JUnit Configuration Options -->
+            <classpath location="${test.classpath.extra}"/>
+            <classpath location="${module.work}/classes"/>
+            <classpath location="${module.work}/test/classes"/>
+            <classpath refid="module.classpath"/>
+            <classpath refid="compile.classpath"/>
+            <classpath refid="jibx.classpath"/>
+            <formatter type="plain" usefile="false"/>
+            <batchtest fork="yes">
+                <fileset dir="${module.work}/test/classes">
+                    <include name="${test.fileset}"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <!-- Cleans up the module build directory  -->
+    <target name="clean-test-module" if="module.name">
+        <delete dir="${build.dir}/${module.name}/tests"/>
+    </target>
+    
+</project>

@@ -22,6 +22,11 @@ test.fileset=**/*Test.class
 
 #===============YOU CAN STOP HERE==========================
 
+# project settings
+project.home=${basedir}
+work.dir=${project.home}/work
+modules.dir=${project.home}/modules
+
 #dist jar names
 dist.zip.name=muse-${version}.zip
 dist.tar.name=muse-${version}.tar
@@ -37,9 +42,6 @@ src.docs.dir=${project.home}/docs
 src.license.dir=${project.home}/license
 src.bindings.dir=${project.home}/bindings
 
-# build settings
-work.dir=${project.home}/work
-build.dir=${work.dir}
 
 # dist settings
 dist.dir=${work.dir}/muse-${version}
