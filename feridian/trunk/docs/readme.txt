@@ -118,4 +118,4 @@ If you have any questions or problems, send email to:
     support@echomine.com
 
 
-Echomine Feridian (c) 2005 Echomine.  All rights reserved.
+Echomine Feridian (c) 2005, 2006 Echomine.  All rights reserved.
