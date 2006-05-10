@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!-- This build file can be used within an IDE environment to bind the JiBX
+  binding definition model classes - after building or modifying the model
+  classes, run the default "bind" target of this script to compile the internal
+  bindings. -->
+<project basedir="." default="bind">
+  
+  <!-- JiBX binding compiler task definition -->
+  <property environment="env"/>
+  <property name="jibxhome" value="${basedir}/.."/>
+  <taskdef name="bind" classname="org.jibx.binding.ant.CompileTask">
+    <classpath>
+      <pathelement location="${jibxhome}/lib/bcel.jar"/>
+      <pathelement location="${jibxhome}/lib/jibx-bind.jar"/>
+      <pathelement location="${jibxhome}/lib/jibx-run.jar"/>
+      <pathelement location="${jibxhome}/lib/jibx-extras.jar"/>
+      <pathelement location="${jibxhome}/lib/xpp3.jar"/>  
+    </classpath>
+  </taskdef>
+  
+  <!-- bind the class files -->
+  <target name="bind">
+    <echo message="Running binding compiler..."/>
+    <bind verbose="true" load="true" binding="${basedir}/src/org/jibx/binding/model/binding.xml">
+      <classpathset dir="${jibxhome}/lib/jibx-run.jar"/>
+      <classpathset dir="${jibxhome}/lib/jibx-extras.jar"/>
+      <classpathset dir="${basedir}/classes/main"/>
+    </bind> 
+  </target>
+
+</project>
