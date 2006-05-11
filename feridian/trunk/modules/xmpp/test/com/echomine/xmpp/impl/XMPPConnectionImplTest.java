@@ -123,7 +123,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
         uctx.setDocument(rdr);
         handler.getStreamContext().setReader(rdr);
         handler.getStreamContext().setSocket(socket);
-        ArrayList mechanisms = new ArrayList();
+        ArrayList<String> mechanisms = new ArrayList<String>();
         mechanisms.add("PLAIN");
         handler.getStreamContext().getFeatures().addFeature(XMPPConstants.NS_STREAM_SASL, "mechanisms", mechanisms);
         handler.getSessionContext().setHostName("example.com");
@@ -138,7 +138,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
             MockXMPPLoggableReader rdr = new MockXMPPLoggableReader(new ByteArrayInputStream(inXml.getBytes()), "UTF-8");
             uctx.setDocument(rdr);
             handler.getStreamContext().setReader(rdr);
-            ArrayList mechanisms = new ArrayList();
+            ArrayList<String> mechanisms = new ArrayList<String>();
             mechanisms.add("PLAIN");
             handler.getStreamContext().getFeatures().addFeature(XMPPConstants.NS_STREAM_SASL, "mechanisms", mechanisms);
             conn.login("romeo", "password".toCharArray(), "Home");

@@ -24,7 +24,8 @@ feridian-*-examples.jar (same as distribution version)
 - required only when running examples
 
 xpp3.jar (1.1.3.4.M)
-- optional, alternative parser for jabber module
+- required
+- optional if using StAX as alternative parser
 
-jibx.jar (CVS)
+jibx-run.jar (CVS)
 - required

@@ -23,7 +23,23 @@ import java.util.List;
 public class PrivacyIQPacket extends IQPacket {
     private PrivacyList defaultList;
     private PrivacyList activeList;
-    private List privacyLists;
+    private List<PrivacyList> privacyLists;
+
+    /**
+     * Constructs the IQ packet with the default "get" type
+     */
+    public PrivacyIQPacket() {
+        super();
+    }
+    
+    /**
+     * Constructs the IQ packet with the specified type
+     * 
+     * @param type the IQ query type
+     */
+    public PrivacyIQPacket(String type) {
+        super(type);
+    }
 
     /**
      * @return Returns the activeName. Null if not set
@@ -87,7 +103,7 @@ public class PrivacyIQPacket extends IQPacket {
      * @see PrivacyList
      * @param privacyLists an array of PrivacyList objects
      */
-    public void setPrivacyLists(List privacyLists) {
+    public void setPrivacyLists(List<PrivacyList> privacyLists) {
         this.privacyLists = privacyLists;
     }
 
@@ -101,7 +117,7 @@ public class PrivacyIQPacket extends IQPacket {
     public PrivacyList getPrivacyList(int idx) {
         if (privacyLists == null)
             return null;
-        return (PrivacyList) privacyLists.get(idx);
+        return privacyLists.get(idx);
     }
 
     /**
@@ -111,7 +127,7 @@ public class PrivacyIQPacket extends IQPacket {
      */
     public void addPrivacyList(PrivacyList list) {
         if (privacyLists == null)
-            privacyLists = new ArrayList();
+            privacyLists = new ArrayList<PrivacyList>();
         privacyLists.add(list);
     }
 

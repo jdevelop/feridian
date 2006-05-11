@@ -181,7 +181,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
                 unmarshallStartTLSFeature(ctx, packet);
             } else if (ctx.isAt(NS_STREAM_SASL, SASL_ELEMENT_NAME)) {
                 ctx.parsePastStartTag(NS_STREAM_SASL, SASL_ELEMENT_NAME);
-                ArrayList list = new ArrayList(5);
+                ArrayList<String> list = new ArrayList<String>(5);
                 while (ctx.isAt(NS_STREAM_SASL, MECHANISM_ELEMENT_NAME))
                     list.add(ctx.parseElementText(NS_STREAM_SASL, MECHANISM_ELEMENT_NAME));
                 packet.addFeature(NS_STREAM_SASL, SASL_ELEMENT_NAME, list);

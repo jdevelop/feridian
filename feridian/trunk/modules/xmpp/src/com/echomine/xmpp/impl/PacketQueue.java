@@ -2,7 +2,9 @@ package com.echomine.xmpp.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,69 +25,111 @@ public class PacketQueue implements Runnable {
     private static Log log = LogFactory.getLog(PacketQueue.class);
     private static final String QUEUE_RUNNING = "Feridian Packet Queue";
     private static final String QUEUE_PAUSED = "Feridian Packet Queue -- PAUSED";
-    protected LinkedList queue;
-    protected HashMap packetReplyTable;
-    protected HashMap replyPackets;
-    protected boolean shutdown = true;
+
+    protected enum RunningState {
+        RUNNING, PAUSED, STOPPED
+    }
+
+    protected LinkedBlockingQueue<IStanzaPacket> queue;
+    protected HashMap<String, IStanzaPacket> packetReplyTable;
+    protected HashMap<String, IStanzaPacket> replyPackets;
+    protected RunningState state = RunningState.STOPPED;
     private XMPPConnectionHandler handler;
-    private boolean paused;
+    private ReentrantLock lock;
+    private Semaphore pauseLock;
+    private Thread queueThread;
 
     public PacketQueue(XMPPConnectionHandler handler) {
         this.handler = handler;
-        queue = new LinkedList();
-        packetReplyTable = new HashMap(25);
-        replyPackets = new HashMap(25);
+        queue = new LinkedBlockingQueue<IStanzaPacket>();
+        lock = new ReentrantLock();
+        pauseLock = new Semaphore(1);
+        packetReplyTable = new HashMap<String, IStanzaPacket>(25);
+        replyPackets = new HashMap<String, IStanzaPacket>(25);
     }
 
     /**
      * Clears the entire queue and any packets waiting for reply.
      */
-    public synchronized void clear() {
-        queue.clear();
-        packetReplyTable.clear();
-        replyPackets.clear();
+    public void clear() {
+        lock.lock();
+        try {
+            queue.clear();
+            packetReplyTable.clear();
+            replyPackets.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Starts up the queue and the queue thread in a running (unpaused) state,
+     * ready to process any incoming/outgoing packets.
+     */
+    public void start() {
+        start(false);
     }
 
     /**
      * Starts up the queue and the queue thread. This will also clear all
      * packets in the queue.
+     * 
+     * @param paused true to start the queue paused, false otherwise
      */
-    public synchronized void start() {
-        shutdown = false;
-        paused = false;
-        clear();
-        Thread thread = new Thread(this);
-        thread.setName(QUEUE_RUNNING);
-        thread.start();
+    public void start(boolean paused) {
+        lock.lock();
+        try {
+            if (paused)
+                state = RunningState.PAUSED;
+            else
+                state = RunningState.RUNNING;
+            clear();
+            queueThread = new Thread(this);
+            queueThread.setName(QUEUE_RUNNING);
+            queueThread.start();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
-     * Stops the queue. This method will actually wait for all packets to be
-     * sent before shutting down and giving control back to the caller.
+     * Stops the queue. This method will actually send all currently queued
+     * outgoing packets before shutting down and giving control back to the
+     * caller.
      */
-    public synchronized void stop() {
-        if (shutdown)
+    public void stop() {
+        if (state == RunningState.STOPPED)
             return;
-        shutdown = true;
-        synchronized (queue) {
-            queue.notifyAll();
-            if (!queue.isEmpty())
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                    // intentionally left empty
-                }
-        }
-        // iterate through all the msgs waiting for a reply and interrupt them
-        synchronized (packetReplyTable) {
-            Iterator iter = packetReplyTable.values().iterator();
-            IStanzaPacket packet;
-            while (iter.hasNext()) {
-                packet = (IStanzaPacket) iter.next();
-                synchronized (packet) {
-                    packet.notifyAll();
+        lock.lock();
+        try {
+            state = RunningState.STOPPED;
+            if (queueThread != null)
+                queueThread.interrupt();
+            if (!queue.isEmpty()) {
+                // finish sending off all the remaining packets
+                Iterator<IStanzaPacket> iter = queue.iterator();
+                IStanzaPacket packet;
+                while (iter.hasNext()) {
+                    packet = iter.next();
+                    handler.sendPacket(packet);
                 }
             }
+            // iterate through all the msgs waiting for a reply and interrupt
+            // them
+            synchronized (packetReplyTable) {
+                Iterator<IStanzaPacket> iter = packetReplyTable.values().iterator();
+                IStanzaPacket packet;
+                while (iter.hasNext()) {
+                    packet = iter.next();
+                    synchronized (packet) {
+                        packet.notifyAll();
+                    }
+                }
+            }
+        } catch (SendPacketFailedException ex) {
+            // intentionally left empty (connection likely closed)
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -94,20 +138,28 @@ public class PacketQueue implements Runnable {
      * and queue packets, but will not send them out. This is normally used when
      * the entire xml processing is taken over by a stream processor.
      */
-    public synchronized void pause() {
-        paused = true;
+    public void pause() {
+        lock.lock();
+        try {
+            state = RunningState.PAUSED;
+            pauseLock.tryAcquire();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
      * resumes operation in sending out packets.
      * 
      */
-    public synchronized void resume() {
-        if (!paused)
-            return;
-        paused = false;
-        synchronized (queue) {
-            queue.notify();
+    public void resume() {
+        lock.lock();
+        try {
+            state = RunningState.RUNNING;
+            if (pauseLock.availablePermits() == 0)
+                pauseLock.release();
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -137,14 +189,14 @@ public class PacketQueue implements Runnable {
             return replyPkt;
         IStanzaPacket oldPacket = null;
         synchronized (packetReplyTable) {
-            oldPacket = (IStanzaPacket) packetReplyTable.remove(replyPkt.getId());
+            oldPacket = packetReplyTable.remove(replyPkt.getId());
         }
         IStanzaPacket newPkt = replyPkt;
         if (oldPacket != null) {
             // if reply packet is IQPacket, then we need to recast
             if (IQPacket.class.getName().equals(replyPkt.getClass().getName())) {
                 try {
-                    newPkt = (IStanzaPacket) oldPacket.getClass().newInstance();
+                    newPkt = oldPacket.getClass().newInstance();
                     newPkt.copyFrom(replyPkt);
                 } catch (Exception ex) {
                     if (log.isWarnEnabled())
@@ -175,21 +227,17 @@ public class PacketQueue implements Runnable {
                 packetReplyTable.put(packet.getId(), packet);
             }
         }
-        synchronized (queue) {
-            queue.addLast(packet);
-            // notify threads that's waiting for messages
-            queue.notify();
-        }
-        if (wait) {
-            synchronized (packet) {
-                try {
+        try {
+            queue.put(packet);
+            if (wait) {
+                synchronized (packet) {
                     packet.wait(packet.getTimeout());
                     // retrieve reply packet
-                    return (IStanzaPacket) replyPackets.remove(packet.getId());
-                } catch (InterruptedException ex) {
-                    throw new SendPacketFailedException("Wait interrupted");
+                    return replyPackets.remove(packet.getId());
                 }
             }
+        } catch (InterruptedException ex1) {
+            throw new SendPacketFailedException("Wait interrupted");
         }
         return null;
     }
@@ -203,21 +251,20 @@ public class PacketQueue implements Runnable {
     public void run() {
         IStanzaPacket packet;
         try {
-            while (!shutdown || !queue.isEmpty()) {
-                synchronized (queue) {
-                    if (paused && !shutdown) {
+            while (state != RunningState.STOPPED) {
+                while (state == RunningState.PAUSED) {
+                    try {
                         Thread.currentThread().setName(QUEUE_PAUSED);
-                        queue.wait();
+                        pauseLock.acquire();
                         Thread.currentThread().setName(QUEUE_RUNNING);
+                    } catch (InterruptedException ex) {
+                    } finally {
+                        pauseLock.release();
                     }
-                    // wait until there is a new request
-                    // or until we get interrupted
-                    if (queue.isEmpty() && !shutdown)
-                        queue.wait();
-                    if (!queue.isEmpty() && !paused) {
-                        packet = (IStanzaPacket) queue.removeFirst();
-                        handler.sendPacket(packet);
-                    }
+                }
+                if (state == RunningState.RUNNING) {
+                    packet = queue.take();
+                    handler.sendPacket(packet);
                 }
             }
         } catch (InterruptedException ex) {
@@ -225,9 +272,6 @@ public class PacketQueue implements Runnable {
         } catch (SendPacketFailedException ex) {
             // either packet cannot be marshalled or IO exception occurred.
         } finally {
-            synchronized (this) {
-                notifyAll();
-            }
             stop();
         }
     }

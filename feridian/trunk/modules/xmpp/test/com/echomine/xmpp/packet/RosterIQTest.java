@@ -21,7 +21,7 @@ public class RosterIQTest extends XMPPTestCase {
     public void testMarshallRosterRemove() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterRemove.xml";
         Reader rdr = getResourceAsReader(inRes);
-        RosterIQPacket packet = new RosterIQPacket();
+        RosterIQPacket packet = new RosterIQPacket(IQPacket.TYPE_SET);
         packet.setFrom(JID.parseJID("juliet@example.com/balcony"));
         RosterItem item = new RosterItem();
         item.setJid(JID.parseJID("nurse@example.com"));
@@ -35,6 +35,7 @@ public class RosterIQTest extends XMPPTestCase {
         String inRes = "com/echomine/xmpp/data/RosterNoneWithPending.xml";
         Reader rdr = getResourceAsReader(inRes);
         RosterIQPacket packet = (RosterIQPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);
+        assertEquals(IQPacket.TYPE_RESULT, packet.getType());
         assertNotNull(packet.getRosterItems());
         assertEquals(1, packet.getRosterItems().size());
         RosterItem item = (RosterItem) packet.getRosterItems().get(0);
@@ -50,7 +51,7 @@ public class RosterIQTest extends XMPPTestCase {
     public void testMarshallRosterResultNoChild() throws Exception {
         String inRes = "com/echomine/xmpp/data/RosterAdd.xml";
         Reader rdr = getResourceAsReader(inRes);
-        RosterIQPacket packet = new RosterIQPacket();
+        RosterIQPacket packet = new RosterIQPacket(IQPacket.TYPE_SET);
         RosterItem item = new RosterItem();
         item.setJid(JID.parseJID("contact@example.org"));
         item.setName("MyContact");
@@ -64,6 +65,7 @@ public class RosterIQTest extends XMPPTestCase {
         String inRes = "com/echomine/xmpp/data/RosterListResult.xml";
         Reader rdr = getResourceAsReader(inRes);
         RosterIQPacket packet = (RosterIQPacket) JiBXUtil.unmarshallObject(rdr, IQPacket.class);
+        assertEquals(IQPacket.TYPE_RESULT, packet.getType());
         assertNotNull(packet.getRosterItems());
         assertEquals(2, packet.getRosterItems().size());
         RosterItem item = (RosterItem) packet.getRosterItems().get(0);

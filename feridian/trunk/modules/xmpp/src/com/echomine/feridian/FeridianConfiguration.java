@@ -43,9 +43,9 @@ public class FeridianConfiguration {
     private static final String DEFAULT_EXTENSIONS_FILENAME = "feridian-extensions-default.xml";
     private static FeridianConfiguration config;
 
-    private HashMap extMappings = new HashMap();
-    private HashMap streamMappings = new HashMap();
-    private LinkedList authenticators = new LinkedList();
+    private HashMap<String, Class> extMappings = new HashMap<String, Class>();
+    private HashMap<String, FeridianStreamExtension> streamMappings = new HashMap<String, FeridianStreamExtension>();
+    private LinkedList<IXMPPAuthenticator> authenticators = new LinkedList<IXMPPAuthenticator>();
     private Class connectionFactoryClass;
     private Class streamFactoryClass;
     private Class idGeneratorClass;
@@ -104,7 +104,7 @@ public class FeridianConfiguration {
      * 
      * @return non-modifiable, never-null list of authenticators
      */
-    public List getAuthenticators() {
+    public List<IXMPPAuthenticator> getAuthenticators() {
         return Collections.unmodifiableList(authenticators);
     }
 
@@ -120,7 +120,7 @@ public class FeridianConfiguration {
     public Class getClassForUri(String ns) {
         if (ns == null)
             return null;
-        return (Class) extMappings.get(ns);
+        return extMappings.get(ns);
     }
 
     /**
@@ -132,7 +132,7 @@ public class FeridianConfiguration {
     public Class getStreamForFeature(String ns) {
         if (ns == null)
             return null;
-        FeridianStreamExtension ext = (FeridianStreamExtension) streamMappings.get(ns);
+        FeridianStreamExtension ext = streamMappings.get(ns);
         if (ext != null)
             return ext.getStreamClass();
         return null;
@@ -148,7 +148,7 @@ public class FeridianConfiguration {
     public Class getUnmarshallerForFeature(String ns) {
         if (ns == null)
             return null;
-        FeridianStreamExtension ext = (FeridianStreamExtension) streamMappings.get(ns);
+        FeridianStreamExtension ext = streamMappings.get(ns);
         if (ext != null)
             return ext.getUnmarshallerClass();
         return null;
@@ -241,7 +241,7 @@ public class FeridianConfiguration {
                     auth = (FeridianAuthenticator) list.get(i);
                     if (log.isInfoEnabled())
                         log.info("Authenticator Found: " + auth.getAuthenticatorClass().getName());
-                    authenticators.add(i, ClassUtil.newInstance(auth.getAuthenticatorClass(), IXMPPAuthenticator.class));
+                    authenticators.add(i, (IXMPPAuthenticator) ClassUtil.newInstance(auth.getAuthenticatorClass(), IXMPPAuthenticator.class));
                 }
             } catch (Throwable thr) {
                 if (log.isWarnEnabled())

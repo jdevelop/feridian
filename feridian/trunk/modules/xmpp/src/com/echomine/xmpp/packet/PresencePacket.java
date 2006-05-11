@@ -66,7 +66,7 @@ public class PresencePacket extends IMPacket {
     public static final String SHOW_XA = "xa";
 
     private String show;
-    private LinkedHashMap statuses = new LinkedHashMap();
+    private LinkedHashMap<Locale, String> statuses = new LinkedHashMap<Locale, String>();
     private int priority;
 
     public PresencePacket() {
@@ -128,7 +128,7 @@ public class PresencePacket extends IMPacket {
      * @return Returns the status or null if none exists
      */
     public String getStatus(Locale locale) {
-        return (String) statuses.get(locale);
+        return statuses.get(locale);
     }
 
     /**

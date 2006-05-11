@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class PrivacyList {
     private String name;
-    private List privacyItems;
+    private List<PrivacyItem> privacyItems;
 
     public PrivacyList() {
     }
@@ -54,7 +54,7 @@ public class PrivacyList {
      * 
      * @param privacyItems The privacyItems to set.
      */
-    public void setItems(List privacyItems) {
+    public void setItems(List<PrivacyItem> privacyItems) {
         this.privacyItems = privacyItems;
     }
 
@@ -68,7 +68,7 @@ public class PrivacyList {
     public PrivacyItem getItem(int idx) {
         if (privacyItems == null)
             return null;
-        return (PrivacyItem) privacyItems.get(idx);
+        return privacyItems.get(idx);
     }
 
     /**
@@ -78,7 +78,7 @@ public class PrivacyList {
      */
     public void addItem(PrivacyItem item) {
         if (privacyItems == null)
-            privacyItems = new ArrayList();
+            privacyItems = new ArrayList<PrivacyItem>();
         privacyItems.add(item);
     }
 

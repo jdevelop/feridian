@@ -27,6 +27,15 @@ public class StanzaPacketBase implements IStanzaPacket {
     }
 
     /**
+     * Constructs a packet base with a default type
+     * 
+     * @param type the packet's type attribute
+     */
+    public StanzaPacketBase(String type) {
+        this.type = type;
+    }
+    
+    /**
      * @return Returns the from.
      */
     public JID getFrom() {

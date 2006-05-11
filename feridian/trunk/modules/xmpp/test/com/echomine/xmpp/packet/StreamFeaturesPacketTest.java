@@ -105,7 +105,7 @@ public class StreamFeaturesPacketTest extends XMPPTestCase implements XMPPConsta
         Reader reader = getResourceAsReader(inRes);
         StreamFeatures packet = new StreamFeatures();
         packet.setTLSRequired(true);
-        ArrayList list = new ArrayList(5);
+        ArrayList<String> list = new ArrayList<String>(5);
         list.add("DIGEST-MD5");
         list.add("PLAIN");
         packet.addFeature(NS_STREAM_SASL, "mechanisms", list);

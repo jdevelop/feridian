@@ -16,12 +16,11 @@ import com.echomine.xmpp.IPacket;
  * users who wish to work with this class MUST subclass or use a subclass of this class.
  */
 public abstract class IMPacket extends StanzaPacketBase {
-    private HashMap extensions;
+    private HashMap<String,IPacket> extensions;
     private Locale locale;
 
     public IMPacket() {
         super();
-
     }
 
     /**
@@ -66,7 +65,7 @@ public abstract class IMPacket extends StanzaPacketBase {
      */
     public void addExtension(String ns, IPacket packet) {
         if (extensions == null)
-            extensions = new HashMap();
+            extensions = new HashMap<String, IPacket>();
         extensions.put(ns, packet);
     }
 
@@ -82,7 +81,7 @@ public abstract class IMPacket extends StanzaPacketBase {
     public IPacket removeExtension(String ns) {
         if (extensions == null)
             return null;
-        return (IPacket) extensions.remove(ns);
+        return extensions.remove(ns);
     }
 
     /**
@@ -94,7 +93,7 @@ public abstract class IMPacket extends StanzaPacketBase {
     public IPacket getExtension(String ns) {
         if (extensions == null)
             return null;
-        return (IPacket) extensions.get(ns);
+        return extensions.get(ns);
     }
 
     /**

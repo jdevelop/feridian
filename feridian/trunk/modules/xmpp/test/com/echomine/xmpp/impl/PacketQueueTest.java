@@ -1,7 +1,7 @@
 package com.echomine.xmpp.impl;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import junit.framework.TestCase;
 
@@ -9,8 +9,8 @@ import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.MockXMPPConnectionHandler;
 import com.echomine.xmpp.SendPacketFailedException;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.RosterIQPacket;
 import com.echomine.xmpp.packet.PresencePacket;
+import com.echomine.xmpp.packet.RosterIQPacket;
 
 /**
  * Tests the packet queue and make sure it works properly
@@ -45,7 +45,8 @@ public class PacketQueueTest extends TestCase {
         QueuePacketRunnable runner = new QueuePacketRunnable();
         Thread thread = new Thread(runner);
         thread.start();
-        // call reply received
+        while (queue.getReplyTable().size() == 0)
+            Thread.yield();
         IQPacket packet = new IQPacket();
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_RESULT);
@@ -62,7 +63,8 @@ public class PacketQueueTest extends TestCase {
         QueuePacketRunnable runner = new QueuePacketRunnable();
         Thread thread = new Thread(runner);
         thread.start();
-        // call reply received
+        while (queue.getReplyTable().size() == 0)
+            Thread.yield();
         RosterIQPacket packet = new RosterIQPacket();
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_RESULT);
@@ -71,13 +73,14 @@ public class PacketQueueTest extends TestCase {
         assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
         assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
+        queue.stop();
     }
 
     public void testPacketReceived() throws Exception {
         assertNull(queue.packetReceived(null));
         assertNotNull(queue.packetReceived(new RosterIQPacket()));
     }
-    
+
     /**
      * Checks that the start state has all variables set properly
      * 
@@ -102,6 +105,7 @@ public class PacketQueueTest extends TestCase {
             try {
                 replyPacket = queue.queuePacket(packet, true);
             } catch (SendPacketFailedException ex) {
+            } finally {
             }
         }
     }
@@ -112,10 +116,10 @@ public class PacketQueueTest extends TestCase {
         }
 
         public boolean isShutdown() {
-            return shutdown;
+            return state == RunningState.STOPPED;
         }
 
-        public LinkedList getQueue() {
+        public LinkedBlockingQueue getQueue() {
             return queue;
         }
 

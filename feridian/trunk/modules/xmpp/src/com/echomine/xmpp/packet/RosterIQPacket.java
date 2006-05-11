@@ -44,10 +44,22 @@ import java.util.List;
  * </p>
  */
 public class RosterIQPacket extends IQPacket {
-    private List rosterItems;
+    private List<RosterItem> rosterItems;
 
+    /**
+     * Constructs the IQ packet with the default "get" type
+     */
     public RosterIQPacket() {
         super();
+    }
+
+    /**
+     * Constructs a IQ packet with the specified type
+     * 
+     * @param type the IQ query type
+     */
+    public RosterIQPacket(String type) {
+        super(type);
     }
 
     /**
@@ -66,7 +78,7 @@ public class RosterIQPacket extends IQPacket {
      * 
      * @param rosterItems The rosterItems to set.
      */
-    public void setRosterItems(List rosterItems) {
+    public void setRosterItems(List<RosterItem> rosterItems) {
         this.rosterItems = rosterItems;
     }
 
@@ -79,7 +91,7 @@ public class RosterIQPacket extends IQPacket {
         if (item == null)
             return;
         if (rosterItems == null)
-            rosterItems = new ArrayList();
+            rosterItems = new ArrayList<RosterItem>();
         rosterItems.add(item);
     }
 }

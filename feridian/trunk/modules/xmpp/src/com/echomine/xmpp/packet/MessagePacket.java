@@ -49,8 +49,8 @@ public class MessagePacket extends IMPacket {
     public static final String TYPE_GROUPCHAT = "groupchat";
     public static final String TYPE_HEADLINE = "headline";
     public static final String TYPE_NORMAL = "normal";
-    private LinkedHashMap subjects = new LinkedHashMap();
-    private LinkedHashMap bodies = new LinkedHashMap();
+    private LinkedHashMap<Locale, String> subjects = new LinkedHashMap<Locale, String>();
+    private LinkedHashMap<Locale, String> bodies = new LinkedHashMap<Locale, String>();
     private String threadID;
 
     public MessagePacket() {
@@ -80,7 +80,7 @@ public class MessagePacket extends IMPacket {
      * @return Returns the body or null if none exists
      */
     public String getBody(Locale locale) {
-        return (String) bodies.get(locale);
+        return bodies.get(locale);
     }
 
     /**
@@ -136,7 +136,7 @@ public class MessagePacket extends IMPacket {
      * @return Returns the body or null if none exists
      */
     public String getSubject(Locale locale) {
-        return (String) subjects.get(locale);
+        return subjects.get(locale);
     }
 
     /**

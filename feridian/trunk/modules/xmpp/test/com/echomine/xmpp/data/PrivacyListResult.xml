@@ -1,4 +1,4 @@
-<iq xmlns="jabber:client">
+<iq xmlns="jabber:client" type="result">
 <query xmlns='jabber:iq:privacy'>
   <active name='private'/>
   <default name='public'/>

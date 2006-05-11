@@ -77,7 +77,7 @@ Directory Structure
 lib/ -- contains the API along with all the other dependent libraries.
     All the libraries in this directory should be included in your classpath.
 
-src/ -- contains the API source files
+modules/ -- contains the source files and test sources for each module.
 
 build/ -- contains files necessary to build the API package.  This package
     uses ANT to build and create distributions.  This directory also contains
@@ -94,14 +94,13 @@ docs/ -- may/may not exist, but it contains the javadocs and other docs for
 license/ -- contains all the license files for Feridian and also any libraries that
 		it depends on.
 
-test/ -- contains all the unit testing codes.  You can run the tests
-    to make sure the Feridian is doing its job and test if it's compatible under
-    certain JDKs just in case you run into problems.
-
 examples/ -- contains any example classes that you can run directly to check out
     the capabilities of Feridian.  You can read the comments as well as check out the
     code on how to write a sample client.  The examples are there for you to
     learn how to use the API as fast as possible.
+
+vendor/ -- contains external 3rd party library source trees used by Feridian
+    that requires custom code changes not present in the library itself.
 
 work/ -- contains all the temporary working sources and classes when you run
     ANT.  This is where ANT keeps all its dirty work.  Running "ant clean" will

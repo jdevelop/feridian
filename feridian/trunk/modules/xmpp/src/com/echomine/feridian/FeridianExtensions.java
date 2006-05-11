@@ -7,9 +7,9 @@ import java.util.List;
  * Represents one feridian-extensions.xml config file.
  */
 public class FeridianExtensions {
-    private List streamList;
-    private List packetList;
-    private List authenticators;
+    private List<FeridianStreamExtension> streamList;
+    private List<FeridianPacketExtension> packetList;
+    private List<FeridianAuthenticator> authenticators;
 
     /**
      * retrieves non-modifiable list of packet extensions

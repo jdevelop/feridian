@@ -18,7 +18,7 @@ import com.echomine.xmpp.XMPPConstants;
 public class StreamFeatures implements IPacket {
     private static Log log = LogFactory.getLog(StreamFeatures.class);
     private boolean tlsRequired;
-    private LinkedHashMap features = new LinkedHashMap();
+    private LinkedHashMap<String, StreamFeature> features = new LinkedHashMap<String, StreamFeature>();
 
     /**
      * Clears all the data for reuse of this object
@@ -140,7 +140,7 @@ public class StreamFeatures implements IPacket {
      * @return the feature, or null if none is found
      */
     public StreamFeature getFeature(String namespace) {
-        return (StreamFeature) features.get(namespace);
+        return features.get(namespace);
     }
 
     /**
@@ -157,7 +157,7 @@ public class StreamFeatures implements IPacket {
      * @return true if mechanism is supported, false otherwise.
      */
     public boolean isSaslMechanismSupported(String mechanism) {
-        StreamFeature feature = (StreamFeature) getFeature(XMPPConstants.NS_STREAM_SASL);
+        StreamFeature feature = getFeature(XMPPConstants.NS_STREAM_SASL);
         if (feature == null)
             return false;
         return ((List) feature.getValue()).contains(mechanism);
@@ -172,6 +172,6 @@ public class StreamFeatures implements IPacket {
         StreamFeature feature = (StreamFeature) getFeature(XMPPConstants.NS_STREAM_SASL);
         if (feature == null)
             return Collections.EMPTY_LIST;
-        return Collections.unmodifiableList((List) feature.getValue());
+        return Collections.unmodifiableList((List<? extends String>) feature.getValue());
     }
 }

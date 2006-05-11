@@ -14,13 +14,13 @@ import com.echomine.xmpp.XMPPConstants;
  */
 public class SASLAuthenticatorTest extends BaseStreamTestCase implements XMPPConstants {
     SASLAuthenticator auth;
-    ArrayList mechanisms;
+    ArrayList<String> mechanisms;
 
     protected void setUp() throws Exception {
         super.setUp();
         auth = new SASLAuthenticator();
         sessCtx.setHostName("example.com");
-        mechanisms = new ArrayList(2);
+        mechanisms = new ArrayList<String>(2);
         mechanisms.add("PLAIN");
         mechanisms.add("DIGEST-MD5");
         streamCtx.getFeatures().addFeature(NS_STREAM_SASL, "mechanisms", mechanisms);

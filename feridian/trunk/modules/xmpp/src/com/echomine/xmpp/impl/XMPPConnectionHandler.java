@@ -182,7 +182,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         // start incoming data packet reading and outgoing packet queue sending
         try {
             while (!shutdown) {
-                if (paused)
+                while (paused && !shutdown)
                     synchronized (this) {
                         try {
                             wait();
@@ -324,7 +324,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * @throws SendPacketFailedException if packet cannot be sent (connection
      *             closed, IO error, etc)
      */
-    public synchronized void sendPacket(IStanzaPacket packet) throws SendPacketFailedException {
+    synchronized void sendPacket(IStanzaPacket packet) throws SendPacketFailedException {
+        if (packet == null) return;
         try {
             // IQ Packets are marshalled differently
             if (packet instanceof IQPacket)
@@ -372,16 +373,15 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         paused = false;
         streamCtx.reset();
         sessCtx.reset();
-        queue.start();
         // start queue paused
-        queue.pause();
+        queue.start(true);
     }
 
     /*
      * shutdown the connection. This method will actually block until all
      * packets are sent out. Note that even if sent packets errored, sending of
-     * subsequently packets are stopped because likely there was the output
-     * stream is already closed.
+     * subsequently packets are stopped because likely the output stream
+     * is already closed.
      * 
      * @see com.echomine.net.SocketHandler#shutdown()
      */
@@ -390,6 +390,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
             if (shutdown)
                 return;
             shutdown = true;
+            // release any waiting monitors if any
+            notify();
         }
         // must physically shutdown input stream in order to release
         // the unmarshalling context's parser wait status
@@ -399,8 +401,6 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         } catch (IOException ex) {
             // intentionally left empty
         }
-        // to release
-        resume();
         queue.stop();
     }
 

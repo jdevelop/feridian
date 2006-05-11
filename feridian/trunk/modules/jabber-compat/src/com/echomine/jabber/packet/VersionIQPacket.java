@@ -16,6 +16,14 @@ public class VersionIQPacket extends IQPacket {
     private String version;
     private String os;
 
+    public VersionIQPacket() {
+        super();
+    }
+    
+    public VersionIQPacket(String type) {
+        super(type);
+    }
+
     /**
      * @return Returns the client software name, ie. Feridian.
      */

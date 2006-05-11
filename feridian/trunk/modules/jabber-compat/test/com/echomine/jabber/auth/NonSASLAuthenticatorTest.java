@@ -24,7 +24,7 @@ public class NonSASLAuthenticatorTest extends BaseStreamTestCase implements XMPP
     }
 
     public void testNoAuthenticateWhenSaslSupported() throws Exception {
-        ArrayList mechanisms = new ArrayList(2);
+        ArrayList<String> mechanisms = new ArrayList<String>(2);
         mechanisms.add("PLAIN");
         mechanisms.add("DIGEST-MD5");
         streamCtx.getFeatures().addFeature(NS_STREAM_SASL, "mechanisms", mechanisms);

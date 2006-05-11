@@ -20,7 +20,7 @@ public class RosterItem {
     private String subscription;
     private JID jid;
     private String name;
-    private List groups;
+    private List<String> groups;
 
     /**
      * @return Returns the ask.
@@ -48,7 +48,7 @@ public class RosterItem {
      * 
      * @param groups The groups to set.
      */
-    public void setGroups(List groups) {
+    public void setGroups(List<String> groups) {
         this.groups = groups;
     }
 
@@ -122,7 +122,7 @@ public class RosterItem {
     public String getGroup(int idx) {
         if (groups == null)
             return null;
-        return (String) groups.get(idx);
+        return groups.get(idx);
     }
 
     /**
@@ -132,7 +132,7 @@ public class RosterItem {
      */
     public void addGroup(String groupName) {
         if (groups == null)
-            groups = new ArrayList();
+            groups = new ArrayList<String>();
         groups.add(groupName);
     }
 

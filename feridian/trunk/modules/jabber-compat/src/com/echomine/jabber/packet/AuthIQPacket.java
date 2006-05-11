@@ -14,6 +14,22 @@ public class AuthIQPacket extends IQPacket {
     String resource;
 
     /**
+     * default auth iq packet with type "get" 
+     */
+    public AuthIQPacket() {
+        super();
+    }
+
+    /**
+     * constructs an auth IQ packet with the specified type
+     * 
+     * @param type
+     */
+    public AuthIQPacket(String type) {
+        super(type);
+    }
+
+    /**
      * @return Returns the digest.
      */
     public String getDigest() {

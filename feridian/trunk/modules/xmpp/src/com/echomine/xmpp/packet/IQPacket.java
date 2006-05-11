@@ -25,7 +25,19 @@ public class IQPacket extends StanzaPacketBase {
     public static final String TYPE_RESULT = "result";
     public static final String TYPE_ERROR = "error";
 
+    /**
+     * Constructs a default iq packet with a default type of "get".
+     */
     public IQPacket() {
-        super();
+        super(TYPE_GET);
+    }
+    
+    /**
+     * Constructs an iq packet with the specified type.
+     * 
+     * @param type the type as indicated by the static data
+     */
+    public IQPacket(String type) {
+        super(type);
     }
 }

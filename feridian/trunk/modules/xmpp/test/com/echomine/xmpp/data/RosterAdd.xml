@@ -1,4 +1,4 @@
-<iq xmlns="jabber:client">
+<iq xmlns="jabber:client" type="set">
 	<query xmlns='jabber:iq:roster'>
 	  <item
 	      jid='contact@example.org'

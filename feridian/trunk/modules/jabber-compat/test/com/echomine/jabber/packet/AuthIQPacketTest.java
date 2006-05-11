@@ -1,10 +1,9 @@
 package com.echomine.jabber.packet;
 
-public class AuthIQPacketTest {
+import com.echomine.xmpp.packet.IQPacket;
 
+public class AuthIQPacketTest extends IQPacket {
     public AuthIQPacketTest() {
         super();
-
     }
-
 }

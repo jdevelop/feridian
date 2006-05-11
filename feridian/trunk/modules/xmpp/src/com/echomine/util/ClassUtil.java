@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
  * A set of utility methods for working with classes, classloading, resource
  * loading, etc.
  */
+@SuppressWarnings("unchecked")
 public class ClassUtil {
 
     /**
