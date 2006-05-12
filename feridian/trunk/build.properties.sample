@@ -11,7 +11,7 @@ compile.deprecation=off
 # these can include a custom or separate classpath or directory
 # where you put log4j configuration or perhaps other configuration
 # files used during testing.
-test.classpath.extra=
+test.classpath.extra=contrib/log4j
 
 # test settings
 # These allow you to specify the specific test to run.
@@ -23,6 +23,10 @@ test.fileset=**/*Test.class
 #===============YOU CAN STOP HERE==========================
 
 # project settings
+project.name=Echomine Feridian
+project=feridian
+version=1.0a1
+year=2005, 2006
 project.home=${basedir}
 work.dir=${project.home}/work
 modules.dir=${project.home}/modules

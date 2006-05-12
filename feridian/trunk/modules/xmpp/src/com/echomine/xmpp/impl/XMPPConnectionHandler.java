@@ -2,6 +2,8 @@ package com.echomine.xmpp.impl;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,23 +65,28 @@ import com.echomine.xmpp.packet.XMLTextPacket;
  * the request is unknown.
  * </p>
  */
-public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPConstants {
+public class XMPPConnectionHandler implements HandshakeableSocketHandler,
+        XMPPConstants {
     private static final Log log = LogFactory.getLog(XMPPConnectionHandler.class);
     private static final String PRESENCE_ELEMENT_NAME = "presence";
     private static final String IQ_ELEMENT_NAME = "iq";
     private static final String MESSAGE_ELEMENT_NAME = "message";
     private static final String ERROR_ELEMENT_NAME = "error";
 
+    protected enum RunningState {
+        HANDSHAKING, RUNNING, PAUSED, STOPPED
+    };
+
     protected XMPPSessionContext sessCtx;
-    protected boolean shutdown;
-    protected boolean connected;
+    protected RunningState state = RunningState.STOPPED;
     protected XMPPStreamContext streamCtx;
     private IXMPPStream handshakeStream;
     private IXMPPStream tlsStream;
     private PacketQueue queue;
     private PacketListenerManager listenerManager;
-    private boolean paused;
     private Socket mainSocket;
+    private ReentrantLock lock;
+    private Semaphore pauseLock = new Semaphore(1);
 
     /**
      * The constructor for the handler. It accepts a connection context to use
@@ -106,13 +113,15 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         this.sessCtx = sessCtx;
         this.streamCtx = streamCtx;
         this.queue = new PacketQueue(this);
+        lock = new ReentrantLock();
         try {
             handshakeStream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_HANDSHAKE);
             if (handshakeStream == null)
                 throw new IllegalArgumentException("Unable to find handshake stream. Must be declared in config");
             tlsStream = XMPPStreamFactory.getFactory().createStream(XMPPConstants.NS_STREAM_TLS);
         } catch (XMPPException ex) {
-            throw new IllegalArgumentException("Error while retrieving stream: " + ex.getMessage());
+            throw new IllegalArgumentException("Error while retrieving stream: "
+                    + ex.getMessage());
         }
     }
 
@@ -127,7 +136,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      *      com.echomine.net.ConnectionContext)
      */
     public void handshake(Socket socket, ConnectionContext connCtx) throws HandshakeFailedException {
-        shutdown = false;
+        state = RunningState.HANDSHAKING;
         try {
             this.mainSocket = socket;
             socket.setKeepAlive(true);
@@ -151,7 +160,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
             }
             if (log.isDebugEnabled())
                 log.debug("Handshake completed... Ready for XMPP Stanza processing...");
-            connected = true;
+            state = RunningState.RUNNING;
         } catch (IOException ex) {
             throw new HandshakeFailedException("Socket error during handshake", ex);
         } catch (JiBXException ex) {
@@ -181,18 +190,17 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
         UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
         // start incoming data packet reading and outgoing packet queue sending
         try {
-            while (!shutdown) {
-                while (paused && !shutdown)
-                    synchronized (this) {
-                        try {
-                            wait();
-                        } catch (InterruptedException ex) {
-                            // intentionally left empty
-                        }
+            while (state != RunningState.STOPPED) {
+                while (state == RunningState.PAUSED)
+                    try {
+                        pauseLock.acquire();
+                    } catch (InterruptedException ex) {
+                        //intentionally left empty
+                    } finally {
+                        pauseLock.release();
                     }
-                if (shutdown)
+                if (state == RunningState.STOPPED)
                     break;
-                queue.resume();
                 streamCtx.getReader().startLogging();
                 // purposely synchronize because of possible multithread
                 // accessing issue
@@ -200,7 +208,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                     uctx.next();
                 }
                 IStanzaPacket packet = null;
-                if (!paused) {
+                if (state == RunningState.RUNNING) {
                     // parse incoming data
                     if (uctx.currentEvent() == UnmarshallingContext.END_DOCUMENT) {
                         break;
@@ -216,7 +224,10 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                         // This translates to this API ignoring message stanzas
                         // with no child elements
                         // and no extensions in this API.
-                        if (msgPkt.getBodies().isEmpty() && msgPkt.getExtensions().isEmpty() && msgPkt.getSubjects().isEmpty() && msgPkt.getThreadID() == null)
+                        if (msgPkt.getBodies().isEmpty()
+                                && msgPkt.getExtensions().isEmpty()
+                                && msgPkt.getSubjects().isEmpty()
+                                && msgPkt.getThreadID() == null)
                             streamCtx.getReader().flushIgnoredDataToLog();
                         else
                             packet = msgPkt;
@@ -230,7 +241,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
                         // Here, it is ignored as well. In addition, an
                         // error packet is also sent back to the user, as
                         // specified by the specs.
-                        if (IQPacket.class.getName().equals(iqpkt.getClass().getName()) && (IQPacket.TYPE_SET.equals(iqpkt.getType()) || IQPacket.TYPE_GET.equals(iqpkt.getType()))) {
+                        if (IQPacket.class.getName().equals(iqpkt.getClass().getName())
+                                && (IQPacket.TYPE_SET.equals(iqpkt.getType()) || IQPacket.TYPE_GET.equals(iqpkt.getType()))) {
                             if (log.isDebugEnabled())
                                 log.debug("Found IQ packet with unknown extension inside.  Ignoring and sending unavailable error packet reply...");
                             streamCtx.getReader().flushIgnoredDataToLog();
@@ -324,8 +336,10 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * @throws SendPacketFailedException if packet cannot be sent (connection
      *             closed, IO error, etc)
      */
-    synchronized void sendPacket(IStanzaPacket packet) throws SendPacketFailedException {
-        if (packet == null) return;
+    void sendPacket(IStanzaPacket packet) throws SendPacketFailedException {
+        if (packet == null)
+            return;
+        lock.lock();
         try {
             // IQ Packets are marshalled differently
             if (packet instanceof IQPacket)
@@ -339,6 +353,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
             throw new SendPacketFailedException(ex);
         } catch (IOException ex) {
             throw new SendPacketFailedException(ex);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -368,40 +384,44 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * @see com.echomine.net.SocketHandler#start()
      */
     public void start() {
-        shutdown = false;
-        connected = false;
-        paused = false;
-        streamCtx.reset();
-        sessCtx.reset();
-        // start queue paused
-        queue.start(true);
+        lock.lock();
+        try {
+            state = RunningState.STOPPED;
+            streamCtx.reset();
+            sessCtx.reset();
+            // start queue paused
+            queue.start(true);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /*
      * shutdown the connection. This method will actually block until all
      * packets are sent out. Note that even if sent packets errored, sending of
-     * subsequently packets are stopped because likely the output stream
-     * is already closed.
+     * subsequently packets are stopped because likely the output stream is
+     * already closed.
      * 
      * @see com.echomine.net.SocketHandler#shutdown()
      */
     public void shutdown() {
-        synchronized (this) {
-            if (shutdown)
-                return;
-            shutdown = true;
-            // release any waiting monitors if any
-            notify();
-        }
-        // must physically shutdown input stream in order to release
-        // the unmarshalling context's parser wait status
+        if (state == RunningState.STOPPED)
+            return;
+        lock.lock();
         try {
-            if (mainSocket != null)
-                IOUtil.closeStream(mainSocket.getInputStream());
-        } catch (IOException ex) {
-            // intentionally left empty
+            state = RunningState.STOPPED;
+            // must physically shutdown input stream in order to release
+            // the unmarshalling context's parser wait status
+            try {
+                if (mainSocket != null)
+                    IOUtil.closeStream(mainSocket.getInputStream());
+            } catch (IOException ex) {
+                // intentionally left empty
+            }
+            queue.stop();
+        } finally {
+            lock.unlock();
         }
-        queue.stop();
     }
 
     /*
@@ -410,7 +430,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * @see com.echomine.net.SocketHandler#isConnected()
      */
     public boolean isConnected() {
-        return connected;
+        return state == RunningState.RUNNING;
     }
 
     /**
@@ -454,21 +474,33 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler, XMPPCo
      * indicate that some stream wishes to take over the stream processing for
      * serialized processing.
      */
-    protected synchronized void pause() {
-        paused = true;
-        queue.pause();
+    protected void pause() {
+        if (state == RunningState.PAUSED)
+            return;
+        lock.lock();
+        try {
+            state = RunningState.PAUSED;
+            queue.pause();
+            pauseLock.tryAcquire();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
      * This is called to resume processing of incoming packets after a pause.
      */
-    protected synchronized void resume() {
-        if (!paused)
+    protected void resume() {
+        if (state == RunningState.RUNNING)
             return;
-        paused = false;
-        queue.resume();
-        synchronized (this) {
-            notify();
+        lock.lock();
+        try {
+            state = RunningState.RUNNING;
+            queue.resume();
+            if (pauseLock.availablePermits() == 0)
+                pauseLock.release();
+        } finally {
+            lock.unlock();
         }
     }
 

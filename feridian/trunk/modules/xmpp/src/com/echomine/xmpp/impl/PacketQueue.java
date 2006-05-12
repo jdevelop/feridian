@@ -103,8 +103,7 @@ public class PacketQueue implements Runnable {
         lock.lock();
         try {
             state = RunningState.STOPPED;
-            if (queueThread != null)
-                queueThread.interrupt();
+            queueThread.interrupt();
             if (!queue.isEmpty()) {
                 // finish sending off all the remaining packets
                 Iterator<IStanzaPacket> iter = queue.iterator();
@@ -136,9 +135,12 @@ public class PacketQueue implements Runnable {
     /**
      * Pauses current processing of sending packets. It will continue to accept
      * and queue packets, but will not send them out. This is normally used when
-     * the entire xml processing is taken over by a stream processor.
+     * the entire xml processing is taken over by a stream processor. State must
+     * be running in order to pause.
      */
     public void pause() {
+        if (state != RunningState.RUNNING)
+            return;
         lock.lock();
         try {
             state = RunningState.PAUSED;
@@ -149,10 +151,12 @@ public class PacketQueue implements Runnable {
     }
 
     /**
-     * resumes operation in sending out packets.
-     * 
+     * resumes operation in sending out packets. State must be paused in order
+     * to resume.
      */
     public void resume() {
+        if (state != RunningState.PAUSED)
+            return;
         lock.lock();
         try {
             state = RunningState.RUNNING;

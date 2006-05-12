@@ -21,20 +21,20 @@ public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
     public void handshake(Socket socket, ConnectionContext connCtx) throws HandshakeFailedException {
         if (failHandshake)
             throw new HandshakeFailedException("Simulated Handshake failure");
-        connected = true;
+        state = RunningState.RUNNING;
         sessCtx.setHostName(socket.getInetAddress().getHostName());
         sessCtx.setStreamId(sessionId);
         sessCtx.setVersion(version);
     }
 
     public void handle(Socket socket, ConnectionContext connCtx) throws IOException {
-        while (!shutdown)
+        while (state != RunningState.STOPPED)
             Thread.yield();
     }
 
     public void shutdown() {
         super.shutdown();
-        connected = false;
+        state = RunningState.STOPPED;
     }
 
     public void setFailHandshake(boolean fail) {

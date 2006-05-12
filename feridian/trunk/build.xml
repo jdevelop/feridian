@@ -4,14 +4,8 @@
     <!-- =================================================================== -->
     <!-- Variable Initialization                                             -->
     <!-- =================================================================== -->
-    <property name="Name" value="Echomine Feridian"/>
-    <property name="project" value="feridian"/>
-    <property name="version" value="1.0a1"/>
-    <property name="year" value="2005, 2006"/>
-
     <property file="${user.home}/build.properties"/>
     <property file="build.properties"/>
-    <property file="${ant.file.common}/build.properties"/>
 
     	<macrodef name="iterate">
 		<attribute name="target"/>
@@ -62,44 +56,12 @@
 		<iterate target="clean"/>
 	</target>
 	
-	<!-- ================================================================== -->
-    <!-- Generic example tasks for use by all modules                       -->
-    <!-- ================================================================== -->
-
-    <target name="prepare-examples-module" if="module.name">
-        <mkdir dir="${build.dir}/${module.name}/examples"/>
-        <mkdir dir="${build.dir}/${module.name}/examples/src"/>
-        <mkdir dir="${build.dir}/${module.name}/examples/classes"/>
-        <copy todir="${build.dir}/${module.name}/examples/src">
-            <fileset dir="${src.examples.dir}/${module.name}"/>
-        </copy>
-    </target>
-    
-    <target name="compile-examples-module" depends="prepare-examples-module" if="module.name">
-        <javac srcdir="${build.dir}/${module.name}/examples/src"
-            destdir="${build.dir}/${module.name}/examples/classes"
-            debug="${compile.debug}" optimize="${compile.optimize}"
-            deprecation="${compile.deprecation}">
-            <classpath location="${build.dir}/${module.name}/classes"/>
-            <classpath refid="module.classpath"/>
-            <classpath refid="compile.classpath"/>
-            <classpath refid="jibx.classpath"/>
-        </javac>
-    </target>
-    
-    <target name="jar-examples-module" depends="compile-examples-module" if="module.name">
-        <echo message="Jarring Examples for Module ${module.name}"/>
-        <jar jarfile="${work.dir}/${project}-${module.name}-examples.jar">
-            <fileset dir="${build.dir}/${module.name}/examples/classes"/>
-            <manifest>
-                <attribute name="Implementation-Title" value="${project}-${module.name}-examples"/>
-                <attribute name="Implementation-Version" value="${version}"/>
-                <attribute name="Implementation-Vendor" value="Echomine Inc."/>
-            </manifest>
-        </jar>
-    </target>
-    
-    
+	<target name="jar-examples" depends="jar">
+		<subant target="jar" inheritall="true">
+			<fileset dir="examples" includes="build.xml"/>
+		</subant>
+	</target>
+	
     <!-- =================================================================== -->
     <!-- Creates the API documentation for all modules                       -->
     <!-- =================================================================== -->
