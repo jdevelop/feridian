@@ -37,10 +37,19 @@ public class XMPPTestCase extends TestCase {
         os = new ByteArrayOutputStream(256);
         sessCtx = new XMPPSessionContext();
         uctx = new UnmarshallingContext();
-        writer = new XMPPStreamWriter();
+        writer = createXMPPStreamWriter();
         writer.setOutput(os);
     }
 
+    /**
+     * Creates a new XMPP Stream writer for use during setup.  This method
+     * is here so that subclasses can override to create customized stream writers
+     * for testing (such as changing the URIs).
+     */
+    protected XMPPStreamWriter createXMPPStreamWriter() {
+        return new XMPPStreamWriter();
+    }
+    
     /*
      * (non-Javadoc)
      * 

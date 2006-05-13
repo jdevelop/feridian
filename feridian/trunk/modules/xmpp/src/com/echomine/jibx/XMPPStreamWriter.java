@@ -26,6 +26,8 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      */
     public XMPPStreamWriter() {
         this(STREAM_URIS);
+        defineNamespace(IDX_JABBER_STREAM, STREAM_PREFIX);
+        defineNamespace(IDX_XMPP_CLIENT, CLIENT_PREFIX);
     }
 
     /**
@@ -39,8 +41,6 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      */
     public XMPPStreamWriter(String[] uris) {
         super(uris);
-        defineNamespace(IDX_JABBER_STREAM, STREAM_PREFIX);
-        defineNamespace(IDX_XMPP_CLIENT, CLIENT_PREFIX);
     }
 
     /*
