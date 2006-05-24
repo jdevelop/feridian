@@ -40,7 +40,14 @@ public class StructureAttributes extends AttributeBase
 {
     /** Enumeration of allowed attribute names */
     public static final StringArray s_allowedAttributes =
-        new StringArray(new String[] { "choice", "label", "ordered", "using" });
+        new StringArray(new String[] { "choice", "flexible", "label", "ordered",
+        "using" });
+    
+    //
+    // Instance data.
+    
+    /** Flexible element handling flag. */
+    private boolean m_isFlexible;
     
     /** Flag for ordered child content. */
     protected boolean m_isOrdered;
@@ -59,6 +66,24 @@ public class StructureAttributes extends AttributeBase
      */
     public StructureAttributes() {
         m_isOrdered = true;
+    }
+    
+    /**
+     * Get flexible flag.
+     * 
+     * @return flexible flag
+     */
+    public boolean isFlexible() {
+        return m_isFlexible;
+    }
+
+    /**
+     * Set flexible flag.
+     * 
+     * @param flexible
+     */
+    public void setFlexible(boolean flexible) {
+        m_isFlexible = flexible;
     }
 
     /**
@@ -139,8 +164,19 @@ public class StructureAttributes extends AttributeBase
      * @see org.jibx.binding.model.AttributeBase#prevalidate(org.jibx.binding.model.ValidationContext)
      */
     public void prevalidate(ValidationContext vctx) {
-        if (m_isChoice && m_isOrdered) {
-            vctx.addError("Choice cannot be used with ordered children");
+        if (m_isOrdered) {
+            if (m_isChoice) {
+                vctx.addError
+                    ("choice='true' cannot be used with ordered children");
+            }
+            if (m_isFlexible) {
+                vctx.addError
+                    ("flexible='true' cannot be used with ordered children");
+            }
+            if (m_isChoice && m_isFlexible) {
+                vctx.addError
+                    ("choice='true' and flexible='true' cannot be used together");
+            }
         }
         super.prevalidate(vctx);
     }

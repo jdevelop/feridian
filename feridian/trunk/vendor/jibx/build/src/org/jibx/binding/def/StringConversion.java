@@ -32,6 +32,7 @@ import org.apache.bcel.classfile.Utility;
 
 import org.jibx.binding.classes.*;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * String conversion handling. Defines serialization handling for converting
@@ -83,9 +84,6 @@ public abstract class StringConversion
 
     //
     // Actual instance data
-    
-    /** Name of format. */
-    protected String m_formatName;
 
     /** Default value used for this type (wrapper for primitives, otherwise
      <code>String</code> or <code>null</code>). */

@@ -21,6 +21,7 @@
             style="element"/>
         <value name="state" get-method="getState" set-method="setState"/>
         <value name="zip" get-method="getZip" set-method="setZip"/>
+        <structure name="ignored" usage="optional"/>
       </structure>
     </collection>
   </mapping>

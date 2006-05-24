@@ -131,15 +131,21 @@ public class ISO88591StreamWriter extends StreamWriterBase
      */
     protected void defineNamespace(int index, String prefix)
         throws IOException {
-        byte[] buff = new byte[prefix.length()];
-        for (int i = 0; i < buff.length; i++) {
-            char chr = prefix.charAt(i);
-            if (chr > 0xFF) {
-                throw new IOException("Unable to write character code 0x" +
-                    Integer.toHexString(chr) + " in encoding ISO-8859-1");
-            } else {
-                buff[i] = (byte)chr;
+        byte[] buff;
+        if (prefix.length() > 0) {
+            buff = new byte[prefix.length()+1];
+            for (int i = 0; i < buff.length-1; i++) {
+                char chr = prefix.charAt(i);
+                if (chr > 0xFF) {
+                    throw new IOException("Unable to write character code 0x" +
+                        Integer.toHexString(chr) + " in encoding ISO-8859-1");
+                } else {
+                    buff[i] = (byte)chr;
+                }
             }
+            buff[buff.length-1] = ':';
+        } else {
+            buff = new byte[0];
         }
         if (index < m_prefixBytes.length) {
             m_prefixBytes[index] = buff;
@@ -228,6 +234,7 @@ public class ISO88591StreamWriter extends StreamWriterBase
      * @throws IOException on error writing to document
      */
     public void writeTextContent(String text) throws IOException {
+        flagTextContent();
         int length = text.length();
         makeSpace(length);
         int fill = m_fillOffset;
@@ -239,8 +246,6 @@ public class ISO88591StreamWriter extends StreamWriterBase
                 fill = writeEntity(LT_ENTITY, fill);
             } else if (chr == '>' && i > 2 && text.charAt(i-1) == ']' &&
                 text.charAt(i-2) == ']') {
-                m_buffer[fill++] = (byte)']';
-                m_buffer[fill++] = (byte)']';
                 fill = writeEntity(GT_ENTITY, fill);
             } else if (chr < 0x20) {
                 if (chr != 0x9 && chr != 0xA && chr != 0xD) {
@@ -279,7 +284,6 @@ public class ISO88591StreamWriter extends StreamWriterBase
             }
         }
         m_fillOffset = fill;
-        m_textSeen = m_contentSeen = true;
     }
     
     /**
@@ -289,6 +293,7 @@ public class ISO88591StreamWriter extends StreamWriterBase
      * @throws IOException on error writing to document
      */
     public void writeCData(String text) throws IOException {
+        flagTextContent();
         int length = text.length();
         makeSpace(length + 12);
         int fill = m_fillOffset;
@@ -317,7 +322,6 @@ public class ISO88591StreamWriter extends StreamWriterBase
             }
         }
         m_fillOffset = writeEntity(LT_CDATAEND, fill);
-        m_textSeen = m_contentSeen = true;
     }
     
     /**

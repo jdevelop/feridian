@@ -29,8 +29,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.jibx.binding.model;
 
 import org.jibx.binding.util.StringArray;
+import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Model component for <b>format</b> element. This element defines conversion to
@@ -49,6 +51,9 @@ public class FormatElement extends ElementBase
     
     /** Format label. */
     private String m_label;
+    
+    /** Format qualified name. */
+    private QName m_qname;
     
     /** Default format for type flag. */
     private boolean m_isDefault;
@@ -80,12 +85,34 @@ public class FormatElement extends ElementBase
     }
     
     /**
-     * Set format label.
+     * Set format label. This method changes the qualified name to match the
+     * label.
      * 
      * @param label format label (<code>null</code> if none)
      */
     public void setLabel(String label) {
         m_label = label;
+        m_qname = (label == null) ? null : new QName(label);
+    }
+    
+    /**
+     * Get format qualified name.
+     * 
+     * @return format qualified name (<code>null</code> if none)
+     */
+    public QName getQName() {
+        return m_qname;
+    }
+    
+    /**
+     * Set format qualified name. This method changes the label value to match
+     * the qualified name.
+     * 
+     * @return format qualified name (<code>null</code> if none)
+     */
+    public void setQName(QName qname) {
+        m_qname = qname;
+        m_label = (qname == null) ? null : qname.toString();
     }
     
     /**
@@ -235,6 +262,31 @@ public class FormatElement extends ElementBase
     
     //
     // Validation methods
+    
+    /**
+     * JiBX access method to set format label as qualified name.
+     * 
+     * @param label format label text (<code>null</code> if none)
+     * @param ictx unmarshalling context
+     * @throws JiBXException on deserialization error
+     */
+    private void setQualifiedLabel(String label, IUnmarshallingContext ictx)
+        throws JiBXException {
+        m_label = label;
+        m_qname = QName.deserialize(label, ictx);
+    }
+    
+    /**
+     * JiBX access method to get format label as qualified name.
+     * 
+     * @param ictx marshalling context
+     * @return format label text (<code>null</code> if none)
+     * @throws JiBXException on deserialization error
+     */
+    private String getQualifiedLabel(IMarshallingContext ictx)
+        throws JiBXException {
+        return QName.serialize(m_qname, ictx);
+    }
     
     /**
      * Make sure all attributes are defined.

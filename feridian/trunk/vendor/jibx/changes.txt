@@ -11,6 +11,8 @@ property (which uses the same object as the container, but perhaps with a
 downcast type).
 5. Added warning for non-extension mapping when some sibling classes have
 mappings extending the mapping for a parent class.
+6. Added error on non-abstract input mapping with no default constructor or
+factory method.
 
 Fixes since 1.0:
 

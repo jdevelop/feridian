@@ -446,13 +446,17 @@ look like for the <a href="#figure20">Figure 20</a> binding:</p>
 }
 
 public static int deserializeDollarsCents(String text) {
-    int split = text.indexOf('.');
-    int cents = 0;
-    if (split > 0) {
-        cents = Integer.parseInt(text.substring(0, split)) * 100;
-        text = text.substring(split+1);
+    if (text == null) {
+        return 0;
+    } else {
+        int split = text.indexOf('.');
+        int cents = 0;
+        if (split > 0) {
+            cents = Integer.parseInt(text.substring(0, split)) * 100;
+            text = text.substring(split+1);
+        }
+        return cents + Integer.parseInt(text);
     }
-    return cents + Integer.parseInt(text);
 }
 
 public static String serializeIntArray(int[] values) {
@@ -473,25 +477,39 @@ private static int[] resizeArray(int[] array, int size) {
 }
 
 public static int[] deserializeIntArray(String text) {
-    int split = 0;
-    text = text.trim();
-    int fill = 0;
-    int[] values = new int[10];
-    while (split &lt; text.length()) {
-        int base = split;
-        split = text.indexOf(' ', split);
-        if (split &lt; 0) {
-            split = text.length();
+    if (text == null) {
+        return new int[0];
+    } else {
+        int split = 0;
+        text = text.trim();
+        int fill = 0;
+        int[] values = new int[10];
+        while (split &lt; text.length()) {
+            int base = split;
+            split = text.indexOf(' ', split);
+            if (split &lt; 0) {
+                split = text.length();
+            }
+            int value = Integer.parseInt(text.substring(base, split));
+            if (fill >= values.length) {
+                values = resizeArray(values, values.length*2);
+            }
+            values[fill++] = value;
+            while (split &lt; text.length() &amp;&amp; text.charAt(++split) == ' ');
         }
-        int value = Integer.parseInt(text.substring(base, split));
-        if (fill >= values.length) {
-            values = resizeArray(values, values.length*2);
-        }
-        values[fill++] = value;
-        while (split &lt; text.length() &amp;&amp; text.charAt(++split) == ' ');
+        return resizeArray(values, fill);
     }
-    return resizeArray(values, fill);
 }</pre></div>
+
+<p>When an optional value is missing in the input document the JiBX binding code
+will call the deserialize method with <code>null</code>, since there's no text
+value to pass. Calling the deserialize method allows this method to handle the
+case of a missing value in whatever manner is appropriate. In the
+<a href="#figure20">Figure 20</a> binding the deserialize methods are only used
+for required values, so strictly speaking the above implementations would not
+need to handle the <code>null</code> case. It's often best to code for this case
+anyway, though, in case new uses of the deserializers are added in the
+future.</p>
 
 <div><p align="center"><a href="binding-custom.html"><b>Next: Customizing JiBX binding behavior</b></a></p></div>
 
@@ -508,7 +526,7 @@ public static int[] deserializeIntArray(String text) {
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

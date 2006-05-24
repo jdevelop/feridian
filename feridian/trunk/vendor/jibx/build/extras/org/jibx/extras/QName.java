@@ -160,7 +160,7 @@ public class QName
         } else {
             
             // get the default namespace URI
-            String uri = ((UnmarshallingContext)ictx).getNamespaceUri(null);
+            String uri = ((UnmarshallingContext)ictx).getNamespaceUri("");
             if (uri == null) {
                 uri = "";
             }
@@ -175,7 +175,7 @@ public class QName
      * instances of the class. The namespace must be active in the output
      * document at the point where this is called.
      * 
-     * @param text value text
+     * @param qname instance to be serialized
      * @param ictx unmarshalling context
      * @return created class instance
      * @throws JiBXException on error in marshalling

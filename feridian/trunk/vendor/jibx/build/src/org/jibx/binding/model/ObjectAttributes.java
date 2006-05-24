@@ -42,8 +42,8 @@ public class ObjectAttributes extends AttributeBase
 {
     /** Enumeration of allowed attribute names */
     public static final StringArray s_allowedAttributes =
-        new StringArray(new String[] { "factory", "marshaller", "post-set",
-        "pre-get", "pre-set", "unmarshaller" });
+        new StringArray(new String[] { "create-type", "factory", "marshaller",
+        "nillable", "post-set", "pre-get", "pre-set", "unmarshaller" });
     
 	//
 	// Constants and such related to code generation.
@@ -102,6 +102,13 @@ public class ObjectAttributes extends AttributeBase
     
     /** Object unmarshaller class name. */
     private String m_unmarshallerName;
+    
+    /** Nillable object flag. */
+    private boolean m_isNillable;
+    
+    /** Instance type for creation (fully qualified, including package and
+     class). */
+    private String m_createType;
 	
 	/** Factory method information. */
 	private IClassItem m_factoryItem;
@@ -120,6 +127,9 @@ public class ObjectAttributes extends AttributeBase
 	
 	/** Object unmarshaller class. */
 	private IClass m_unmarshallerClass;
+    
+    /** Class to use for new instance creation. */
+    private IClass m_createClass;
 	
 	/**
 	 * Constructor.
@@ -297,16 +307,107 @@ public class ObjectAttributes extends AttributeBase
 		m_unmarshallerName = name;
 	}
     
+    /**
+     * Check if nillable object.
+     * 
+     * @return nillable flag
+     */
+    public boolean isNillable() {
+        return m_isNillable;
+    }
+
+    /**
+     * Set nillable flag.
+     * 
+     * @param nillable flag
+     */
+    public void setNillable(boolean nillable) {
+        m_isNillable = nillable;
+    }
+    
+    /**
+     * Get type to be used for creating new instance.
+     * 
+     * @return class name for type to be created (or <code>null</code> if none)
+     */
+    public String getCreateType() {
+        return m_createType;
+    }
+    
+    /**
+     * Get new instance creation class information. This method is only usable
+     * after a call to {@link #validate}.
+     * 
+     * @return class information for type to be created (or <code>null</code> if
+     * none)
+     */
+    public IClass getCreateClass() {
+        return m_createClass;
+    }
+    
+    /**
+     * Set new instance type class name.
+     * 
+     * @param name class name to be used for creating new instance
+     */
+    public void setCreateType(String name) {
+        m_createType = name;
+    }
+
     /* (non-Javadoc)
      * @see org.jibx.binding.model.AttributeBase#prevalidate(org.jibx.binding.model.ValidationContext)
      */
     public void prevalidate(ValidationContext vctx) {
         
-        // first check for factory supplied
+        // first check for actual object association
         IClass iclas;
         ElementBase element = vctx.getParentElement(0);
         if (element instanceof StructureElementBase) {
-            iclas = ((StructureElementBase)element).getType();
+            if (!((StructureElementBase)element).hasObject()) {
+                if (m_factoryName != null) {
+                    vctx.addWarning
+                        ("No object for structure; factory attribute ignored");
+                    m_factoryName = null;
+                }
+                if (m_preSetName != null) {
+                    vctx.addWarning
+                        ("No object for structure; pre-set attribute ignored");
+                    m_preSetName = null;
+                }
+                if (m_preGetName != null) {
+                    vctx.addWarning
+                        ("No object for structure; pre-get attribute ignored");
+                    m_preGetName = null;
+                }
+                if (m_postSetName != null) {
+                    vctx.addWarning
+                        ("No object for structure; post-set attribute ignored");
+                    m_postSetName = null;
+                }
+                if (m_marshallerName != null) {
+                    vctx.addWarning
+                        ("No object for structure; marshaller attribute ignored");
+                    m_marshallerName = null;
+                }
+                if (m_unmarshallerName != null) {
+                    vctx.addWarning
+                        ("No object for structure; unmarshaller attribute ignored");
+                    m_unmarshallerName = null;
+                }
+                if (m_createType != null) {
+                    vctx.addWarning
+                        ("No object for structure; create-type attribute ignored");
+                    m_createType = null;
+                }
+                if (m_isNillable) {
+                    vctx.addWarning
+                        ("No object for structure; nillable attribute ignored");
+                    m_isNillable = false;
+                }
+                return;
+            } else {
+                iclas = ((StructureElementBase)element).getType();
+            }
         } else if (element instanceof MappingElement) {
             iclas = ((MappingElement)element).getHandledClass();
         } else {
@@ -314,11 +415,71 @@ public class ObjectAttributes extends AttributeBase
                 ("Unknown element for object attributes");
         }
         String type = iclas.getName();
-        if (m_factoryName != null && m_factoryItem == null) {
-            if (iclas == null) {
-                vctx.addWarning
-                    ("No object for structure; factory attribute ignored");
+        
+        // first check for marshaller and unmarshaller classes
+        if (m_marshallerName != null) {
+            if (vctx.isOutBinding()) {
+                IClass mclas = vctx.getClassInfo(m_marshallerName);
+                if (mclas == null) {
+                    vctx.addError("Marshaller class " + m_marshallerName +
+                        " not found");
+                } else if (!mclas.isImplements(MARSHALLER_INTERFACETYPE)) {
+                    vctx.addError("Marshaller class " + m_marshallerName +
+                        " does not implement interface " + MARSHALLER_INTERFACE);
+                } else {
+                    m_marshallerClass = mclas;
+                }
             } else {
+                vctx.addWarning
+                    ("marshaller attribute ignored for input-only binding");
+            }
+        }
+        if (m_unmarshallerName != null) {
+            if (vctx.isInBinding()) {
+                
+                // get the unmarshaller information
+                IClass uclas = vctx.getClassInfo(m_unmarshallerName);
+                if (uclas == null) {
+                    vctx.addError("Unmarshaller class " + m_unmarshallerName +
+                        " not found");
+                } else if (!uclas.isImplements(UNMARSHALLER_INTERFACETYPE)) {
+                    vctx.addError("Unmarshaller class " + m_unmarshallerName +
+                        " does not implement interface " + UNMARSHALLER_INTERFACE);
+                } else {
+                    m_unmarshallerClass = uclas;
+                }
+                
+                // check for incompatible attributes
+                if (m_factoryName != null) {
+                    vctx.addWarning
+                        ("unmarshaller supplied, factory attribute ignored");
+                    m_factoryName = null;
+                }
+                if (m_createType != null) {
+                    vctx.addWarning
+                        ("unmarshaller supplied, create-type attribute ignored");
+                    m_createType = null;
+                }
+            } else {
+                vctx.addWarning
+                    ("unmarshaller attribute ignored for output-only binding");
+            }
+        }
+        
+        // make sure both are supplied if either is supplied
+        if (vctx.isInBinding() && vctx.isOutBinding()) {
+            if (m_unmarshallerName != null && m_marshallerName == null) {
+                vctx.addError
+                    ("Marshaller is required if unmarshaller is supplied");
+            } else if (m_marshallerName != null && m_unmarshallerName == null) {
+                vctx.addError
+                    ("Unmarshaller is required if marshaller is supplied");
+            }
+        }
+        
+        // next check for factory supplied
+        if (m_factoryName != null) {
+            if (vctx.isInBinding()) {
                 
                 // find factory method and verify signature
                 m_factoryItem = ClassUtils.findStaticMethod(m_factoryName,
@@ -333,100 +494,69 @@ public class ObjectAttributes extends AttributeBase
                     vctx.addError("Static factory method " + m_factoryName +
                         " return type is not compatible with " + type);
                 }
+                
+                // check for incompatible attributes
+                if (m_createType != null) {
+                    vctx.addWarning
+                        ("unmarshaller supplied, create-type attribute ignored");
+                    m_createType = null;
+                }
+                
+            } else {
+                vctx.addWarning
+                    ("factory attribute ignored for output-only binding");
+            }
+        }
+        
+        // check for create-type attribute
+        if (m_createType != null) {
+            if (vctx.isInBinding()) {
+                
+                // find create type class and verify compatibility
+                m_createClass = vctx.getClassInfo(m_createType);
+                if (m_createClass == null) {
+                    vctx.addError("create-type class " + m_createType +
+                        " not found");
+                } else {
+                    if (!ClassUtils.isAssignable(m_createType, type, vctx) &&
+                        !ClassUtils.isAssignable(type, m_createType, vctx))
+                    vctx.addError("create-type " + m_createType +
+                        " is not compatible with expected type " + type);
+                }
+                
+            } else {
+                vctx.addWarning
+                    ("create-type attribute ignored for output-only binding");
             }
         }
         
         // handle pre-set, post-set, and pre-get methods
         if (vctx.isInBinding()) {
             if (m_preSetName != null) {
-                if (iclas == null) {
-                    vctx.addWarning
-                        ("No object for structure; pre-set attribute ignored");
-                } else {
-                    m_preSetItem = iclas.getMethod(m_preSetName,
-                        UNMARSHAL_HOOK_SIGNATURES);
-                    if (m_preSetItem == null) {
-                        vctx.addError("Nonstatic pre-set method " +
-                            m_preSetName + " not found");
-                    }
+                m_preSetItem = iclas.getMethod(m_preSetName,
+                    UNMARSHAL_HOOK_SIGNATURES);
+                if (m_preSetItem == null) {
+                    vctx.addError("Nonstatic pre-set method " +
+                        m_preSetName + " not found");
                 }
             }
             if (m_postSetName != null) {
-                if (iclas == null) {
-                    vctx.addWarning
-                        ("No object for structure; post-set attribute ignored");
-                } else {
-                    m_postSetItem = iclas.getMethod(m_postSetName,
-                        UNMARSHAL_HOOK_SIGNATURES);
-                    if (m_postSetItem == null) {
-                        vctx.addError("Nonstatic post-set method " +
-                            m_postSetName + " not found");
-                    }
+                m_postSetItem = iclas.getMethod(m_postSetName,
+                    UNMARSHAL_HOOK_SIGNATURES);
+                if (m_postSetItem == null) {
+                    vctx.addError("Nonstatic post-set method " +
+                        m_postSetName + " not found");
                 }
             }
         }
         if (vctx.isOutBinding()) {
             if (m_preGetName != null) {
-                if (iclas == null) {
-                    vctx.addWarning
-                        ("No object for structure; pre-get attribute ignored");
-                } else {
-                    m_preGetItem = iclas.getMethod(m_preGetName,
-                        MARSHAL_HOOK_SIGNATURES);
-                    if (m_preGetItem == null) {
-                        vctx.addError("Nonstatic pre-get method " +
-                            m_preGetName + " not found");
-                    }
+                m_preGetItem = iclas.getMethod(m_preGetName,
+                    MARSHAL_HOOK_SIGNATURES);
+                if (m_preGetItem == null) {
+                    vctx.addError("Nonstatic pre-get method " +
+                        m_preGetName + " not found");
                 }
-            }
-        }
-        
-        // finish with marshaller and unmarshaller classes
-        if (vctx.isOutBinding() && m_marshallerName != null) {
-            if (iclas == null) {
-                vctx.addWarning
-                    ("No object for structure; marshaller attribute ignored");
-            } else {
-                IClass mclas = vctx.getClassInfo(m_marshallerName);
-                if (mclas == null) {
-                    vctx.addError("Marshaller class " + m_marshallerName +
-                        " not found");
-                } else if (!mclas.isImplements(MARSHALLER_INTERFACETYPE)) {
-                    vctx.addError("Marshaller class " + m_marshallerName +
-                        " does not implement interface " +
-                        MARSHALLER_INTERFACE);
-                } else {
-                    m_marshallerClass = mclas;
-                }
-            }
-        }
-        if (vctx.isInBinding() && m_unmarshallerName != null) {
-            if (iclas == null) {
-                vctx.addWarning
-                    ("No object for structure; unmarshaller attribute ignored");
-            } else {
-                IClass uclas = vctx.getClassInfo(m_unmarshallerName);
-                if (uclas == null) {
-                    vctx.addError("Unmarshaller class " + m_unmarshallerName +
-                        " not found");
-                } else if (!uclas.isImplements(UNMARSHALLER_INTERFACETYPE)) {
-                    vctx.addError("Unmarshaller class " + m_unmarshallerName +
-                        " does not implement interface " +
-                        UNMARSHALLER_INTERFACE);
-                } else {
-                    m_unmarshallerClass = uclas;
-                }
-            }
-        }
-        
-        // make sure both are supplied if either is supplied
-        if (vctx.isInBinding() && vctx.isOutBinding()) {
-            if (m_unmarshallerName != null && m_marshallerName == null) {
-                vctx.addError
-                    ("Marshaller is required if unmarshaller is supplied");
-            } else if (m_marshallerName != null && m_unmarshallerName == null) {
-                vctx.addError
-                ("Unmarshaller is required if marshaller is supplied");
             }
         }
     }

@@ -40,11 +40,11 @@ public interface IBindingFactory
 {
     /** Current binary version number. This is a byte-ordered value, allowing
      for two levels of major and two levels of minor version. */
-    public static final int CURRENT_VERSION_NUMBER = 0x00010000;
+    public static final int CURRENT_VERSION_NUMBER = 0x00020000;
     
     /** Current distribution file name. This is filled in by the Ant build
      process to match the current distribution. */
-    public static final String CURRENT_VERSION_NAME = "@distrib@";
+    public static final String CURRENT_VERSION_NAME = "jibx_1_1_beta3";
     
     /** Mask for portions of version number that effect compatibility. */
     public static final int COMPATIBLE_VERSION_MASK = 0xFFFF0000;

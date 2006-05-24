@@ -146,6 +146,9 @@ implements IComponent, IContextObj
     /** Preget method for object. */
     private final ClassItem m_preGetMethod;
     
+    /** Type to be used for creating new instances. */
+    private final ClassFile m_createClass;
+    
     /** Generated new instance method. */
     private ClassItem m_newInstanceMethod;
     
@@ -220,10 +223,12 @@ implements IComponent, IContextObj
      * @param pres user preset method for unmarshalling
      * @param posts user postset method for unmarshalling
      * @param pget user preget method for marshalling
+     * @param ctype type to use for creating new instance (<code>null</code> if
+     * not specified)
      * @throws JiBXException if method not found
      */
     public ObjectBinding(IContainer contain, IContextObj objc, String type,
-        String fact, String pres, String posts, String pget)
+        String fact, String pres, String posts, String pget, String ctype)
         throws JiBXException {
         
         // initialize the basics
@@ -231,6 +236,11 @@ implements IComponent, IContextObj
         BoundClass ctxc = (objc == null) ? null : objc.getBoundClass();
         m_class = BoundClass.getInstance(type, ctxc);
         ClassFile cf = m_class.getClassFile();
+        if (ctype == null) {
+            m_createClass = cf;
+        } else {
+            m_createClass = ClassCache.getClassFile(ctype);
+        }
         
         // check instance creation for unmarshalling
         if (fact == null) {
@@ -310,6 +320,7 @@ implements IComponent, IContextObj
         m_preSetMethod = base.m_preSetMethod;
         m_postSetMethod = base.m_postSetMethod;
         m_preGetMethod = base.m_preGetMethod;
+        m_createClass = base.m_createClass;
         m_idChild = base.m_idChild;
         m_component = base.m_component;
         m_isThisBinding = true;
@@ -343,6 +354,7 @@ implements IComponent, IContextObj
         m_unmarshalContentMethod = base.m_unmarshalContentMethod;
         m_marshalAttributeMethod = base.m_marshalAttributeMethod;
         m_marshalContentMethod = base.m_marshalContentMethod;
+        m_createClass = base.m_createClass;
         m_idChild = base.m_idChild;
         m_component = base.m_component;
     }
@@ -399,30 +411,26 @@ implements IComponent, IContextObj
         
         // check for factory supplied to create instance
         if (m_factoryMethod == null) {
-            if (m_class.getClassFile().isArray()) {
+            if (m_createClass.isArray()) {
                 
                 // construct array instance directly with basic size
                 mb.appendLoadConstant(Utility.MINIMUM_GROWN_ARRAY_SIZE);
-                String type = m_class.getClassFile().getName();
+                String type = m_createClass.getName();
                 mb.appendCreateArray(type.substring(0, type.length()-2));
                 
             } else {
                 
                 // make sure we have a no argument constructor
-                ClassFile cf = m_class.getClassFile();
-                if (cf.getInitializerMethod("()V") != null) {
-                
-                    // no factory, so create an instance, duplicate the
-                    //  reference, and then call the null constructor
-                    mb.appendCreateNew(cf.getName());
-                    mb.appendDUP();
-                    mb.appendCallInit(cf.getName(),"()V");
-                    
-                } else {
-                    throw new JiBXException
-                        ("Need no-argument constructor or factory for " +
-                        cf.getName());
+                if (m_createClass.getInitializerMethod("()V") == null) {
+                    m_createClass.addDefaultConstructor();
                 }
+                
+                // no factory, so create an instance, duplicate the
+                //  reference, and then call the null constructor
+                mb.appendCreateNew(m_createClass.getName());
+                mb.appendDUP();
+                mb.appendCallInit(m_createClass.getName(),"()V");
+                
             }
             
         } else {

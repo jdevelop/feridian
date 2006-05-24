@@ -514,6 +514,7 @@ public class UtilityTest extends TestCase {
 		assertEquals(dt, result);
 	}
     
+//#!j2me{
     private void trySerializeSqlDate(String dt)
         throws JiBXException, ParseException {
         java.sql.Date date = java.sql.Date.valueOf(dt);
@@ -534,6 +535,7 @@ public class UtilityTest extends TestCase {
         String result = Utility.serializeSqlDate(date1);
         assertEquals(dt, result);
     }
+//#j2me}
 
 	public void testSerializeDate() throws JiBXException, ParseException {
 		trySerializeDate("1970-01-01");
@@ -607,6 +609,7 @@ public class UtilityTest extends TestCase {
 		tryRoundtripDate("-0198-01-01");
 	}
 
+//#!j2me{
     public void testSerializeSqlDate() throws JiBXException, ParseException {
         trySerializeSqlDate("1970-01-01");
         trySerializeSqlDate("1970-02-01");
@@ -679,6 +682,7 @@ public class UtilityTest extends TestCase {
         tryRoundtripOnlySqlDate("-0199-12-31");
         tryRoundtripOnlySqlDate("-0198-01-01");
     }
+//#j2me}
 	
 	private void trySerializeDateTime(String dt)
 		throws JiBXException, ParseException {

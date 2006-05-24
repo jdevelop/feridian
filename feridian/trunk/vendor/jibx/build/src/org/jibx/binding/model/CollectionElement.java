@@ -460,30 +460,32 @@ public class CollectionElement extends StructureElementBase
         ArrayList children) {
         for (int i = 0; i < children.size(); i++) {
             ElementBase child = (ElementBase)children.get(i);
-            boolean expand = true;
-            if (child instanceof IComponent) {
-                IComponent comp = (IComponent)child;
-                IClass ctype = comp.getType();
-                expand = false;
-                if (comp instanceof ContainerElementBase) {
-                    ContainerElementBase contain = (ContainerElementBase)comp;
-                    if (contain.hasObject()) {
-                        ctype = contain.getObjectType();
-                    } else {
-                        expand = true;
+            if (!vctx.isSkipped(child)) {
+                boolean expand = true;
+                if (child instanceof IComponent) {
+                    IComponent comp = (IComponent)child;
+                    IClass ctype = comp.getType();
+                    expand = false;
+                    if (comp instanceof ContainerElementBase) {
+                        ContainerElementBase contain = (ContainerElementBase)comp;
+                        if (contain.hasObject()) {
+                            ctype = contain.getObjectType();
+                        } else {
+                            expand = true;
+                        }
+                    }
+                    if (!expand) {
+                        if (!ctype.isAssignable(type)) {
+                            vctx.addFatal("References to collection items must " +
+                                "use compatible types: " + ctype.getName() +
+                                " cannot be used as " + type.getName(), child);
+                        }
                     }
                 }
-                if (!expand) {
-                    if (!ctype.isAssignable(type)) {
-                        vctx.addFatal("References to collection items must " +
-                            "use compatible types: " + ctype.getName() +
-                            " cannot be used as " + type.getName(), child);
-                    }
+                if (expand && child instanceof NestingElementBase) {
+                    checkCollectionChildren(vctx, type,
+                        ((NestingElementBase)child).children());
                 }
-            }
-            if (expand && child instanceof NestingElementBase) {
-                checkCollectionChildren(vctx, type,
-                    ((NestingElementBase)child).children());
             }
         }
     }

@@ -420,17 +420,9 @@ extends ContainerElementBase implements IComponent
         m_propertyAttrs.validate(vctx);
         if (!vctx.isSkipped(this)) {
             
-            // check for way of constructing instance on input
-            if (vctx.isInBinding() && m_propertyAttrs.hasProperty() &&
-                getFactory() == null && getMarshaller() == null &&
-                children().size() > 0) {
-                IClass type = m_propertyAttrs.getType();
-                if (!type.getName().endsWith("[]")) {
-                    if (type.getInitializerMethod("()V") == null) {
-                        vctx.addError("Need no-argument constructor or " +
-                            "factory method for class " + type.getName());
-                    }
-                }
+            // check for way of constructing object instance on input
+            if (m_propertyAttrs.hasProperty() && children().size() > 0) {
+                verifyConstruction(vctx, m_propertyAttrs.getType());
             }
             
             // check use of text values in children of structure with name

@@ -100,6 +100,14 @@ public interface IClass
 	 */
 	public boolean isImplements(String sig);
 
+    /**
+     * Check if class is modifiable.
+     *
+     * @return <code>true</code> if class is modifiable, <code>false</code> if
+     * not
+     */
+    public boolean isModifiable();
+
 	/**
 	 * Check if another class is a superclass of this one.
 	 *

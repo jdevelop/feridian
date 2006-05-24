@@ -83,9 +83,11 @@ public class BindingGenerator
         s_objectPrimitiveSet.add("java.lang.Short");
         s_objectPrimitiveSet.add("java.math.BigDecimal");
         s_objectPrimitiveSet.add("java.math.BigInteger");
+//#!j2me{
         s_objectPrimitiveSet.add("java.sql.Date");
         s_objectPrimitiveSet.add("java.sql.Time");
         s_objectPrimitiveSet.add("java.sql.Timestamp");
+//#j2me}
         s_objectPrimitiveSet.add("java.util.Date");
     }
     
@@ -350,12 +352,19 @@ public class BindingGenerator
                     
                 } else if (tname.endsWith("[]")) {
                     
-                    // array, only supported for mapped base type
+                    // array, check if item type has a mapping
                     String bname = tname.substring(0, tname.length()-2);
                     if (m_mappedNames.get(bname) == null) {
+                        
+                        // no mapping, use collection with inline structure
+                        // TODO: fill it in
                         throw new JiBXException("Base element type " + bname +
                             " must be mapped");
+                        
                     } else {
+                        
+                        // mapping for type, use direct collection
+                        // TODO: convert to simple collection
                         StructureElement structure = new StructureElement();
                         structure.setUsageName("optional");
                         structure.setFieldName(fname);

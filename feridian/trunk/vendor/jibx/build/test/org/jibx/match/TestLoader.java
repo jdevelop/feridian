@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2003-2004, Dennis M. Sosnoski
+Copyright (c) 2003-2005, Dennis M. Sosnoski
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -44,7 +44,6 @@ import org.jibx.binding.Loader;
  * @author Dennis M. Sosnoski
  * @version 1.0
  */
-
 public class TestLoader
 {
     private static final Class[] RUNNER_PARAM_TYPES =
@@ -54,8 +53,7 @@ public class TestLoader
     
     private TestLoader() {}
     
-    public static void main(String[] args)
-        throws ClassNotFoundException, NoSuchMethodException {
+    public static void main(String[] args) {
         if (args.length >= 3 && args.length % 3 == 0) {
             
             // delete generated output file if present

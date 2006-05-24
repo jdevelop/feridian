@@ -39,11 +39,12 @@ import org.jibx.binding.classes.ClassCache;
 import org.jibx.binding.classes.ClassFile;
 import org.jibx.binding.classes.ClassItem;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
 /**
- * Binding definition constants. This gives the definitions for names and
- * namespaces used by the binding definition file.
+ * Binding definition builder. This processes the binding definition file to
+ * generate the code generation structure.
  *
  * @author Dennis M. Sosnoski
  * @version 1.0
@@ -78,6 +79,7 @@ public abstract class BindingBuilder
     private static final String COMMON_PREGET = "pre-get";
     private static final String COMMON_MARSHALLER = "marshaller";
     private static final String COMMON_UNMARSHALLER = "unmarshaller";
+    private static final String COMMON_CREATETYPE = "create-type";
 
     /* Common property attributes. */
     private static final String COMMON_FIELD = "field";
@@ -99,6 +101,10 @@ public abstract class BindingBuilder
     /* Common ordered and choice attributes. */
     private static final String COMMON_ORDERED = "ordered";
     private static final String COMMON_CHOICE = "choice";
+    private static final String COMMON_FLEXIBLE = "flexible";
+    
+    /* Common nillable attribute. */
+    private static final String COMMON_NILLABLE = "nillable";
 
     /** Definitions for "binding" element use "BINDING" prefix. */
     private static final String BINDING_ELEMENT = "binding";
@@ -565,7 +571,7 @@ public abstract class BindingBuilder
         } else {
             prop = unmarshalProperty(ctx, parent, cobj,
                 ctx.hasAttribute(URI_ATTRIBUTES, COMMON_DEFAULT));
-            if (constant == null && prop.isThis()) {
+/*            if (constant == null && prop.isThis()) {
                 ctx.throwStartTagException("No property for value");
             } else if (prop.isOptional()) {
                 if (ident == ValueChild.DEF_IDENT) {
@@ -574,7 +580,7 @@ public abstract class BindingBuilder
             } else if (uord) {
                 ctx.throwStartTagException("All items in unordered " +
                     "structure must be optional");
-            }
+            }   */
         }
         if (ident != ValueChild.DIRECT_IDENT && uord) {
             ctx.throwStartTagException(VALUE_IDENT +
@@ -597,8 +603,21 @@ public abstract class BindingBuilder
                 ClassFile target = ClassCache.getClassFile(type);
                 convert = defc.getConversion(target);
                 
-                // generate specific converter for object derivative
-                if (convert.getTypeName().equals("java.lang.Object")) {
+                // check for a Java 5 enumeration
+                boolean isenum = false;
+                ClassFile sclas = target;
+                while ((sclas = sclas.getSuperFile()) != null) {
+                    if (sclas.getName().equals("java.lang.Enum")) {
+                        isenum = true;
+                        break;
+                    }
+                }
+                
+                // generate specific converter based on general form
+                if (isenum) {
+                    String dser = type + '.' + "valueOf";
+                    convert = convert.derive(type, null, dser, null);
+                } else if (convert.getTypeName().equals("java.lang.Object")) {
                     convert = new ObjectStringConversion(type,
                         (ObjectStringConversion)convert);
                 }
@@ -607,7 +626,8 @@ public abstract class BindingBuilder
         } else {
             
             // format name supplied, look it up and check compatibility
-            convert = defc.getNamedConversion(format);
+            QName qname = QName.deserialize(format, ctx);
+            convert = defc.getNamedConversion(qname);
             if (convert == null) {
                 ctx.throwStartTagException
                     ("Unknown format \"" + format + "\"");
@@ -630,8 +650,13 @@ public abstract class BindingBuilder
         }
         
         // create the instance to be returned
+        boolean nillable = ctx.attributeBoolean(URI_ATTRIBUTES,
+            COMMON_NILLABLE, false);
+        if (nillable) {
+            parent.getBindingRoot().setSchemaInstanceUsed();
+        }
         ValueChild value = new ValueChild(parent, cobj, name, prop, convert,
-            style, ident, constant);
+            style, ident, constant, nillable);
         
         // handle identifier property flag
         if (ident == ValueChild.DEF_IDENT || ident == ValueChild.AUTO_IDENT) {
@@ -742,8 +767,10 @@ public abstract class BindingBuilder
         
         // build the actual component to be returned
         String type = (prop == null) ? null : prop.getTypeName();
-        type = ctx.attributeText(URI_ATTRIBUTES, STRUCTURE_MAPAS, type);
-        return new MappingReference(parent, prop, type, objc, name, false);
+        String text = ctx.attributeText(URI_ATTRIBUTES, STRUCTURE_MAPAS, type);
+        QName qname = QName.deserialize(text, ctx);
+        return new MappingReference(parent, prop, type, text, qname.toString(),
+            objc, name, false);
     }
 
     /**
@@ -847,10 +874,12 @@ public abstract class BindingBuilder
         String pres = ctx.attributeText(URI_ATTRIBUTES, COMMON_PRESET, null);
         String posts = ctx.attributeText(URI_ATTRIBUTES, COMMON_POSTSET, null);
         String preg = ctx.attributeText(URI_ATTRIBUTES, COMMON_PREGET, null);
+        String ctype = ctx.attributeText(URI_ATTRIBUTES,
+            COMMON_CREATETYPE, null);
         ObjectBinding bind = null;
         try {
             bind = new ObjectBinding(parent, objc, type, fact, pres,
-                posts, preg);
+                posts, preg, ctype);
         } catch (JiBXException ex) {
             ctx.throwStartTagException(ex.getMessage(), ex);
         }
@@ -914,11 +943,12 @@ public abstract class BindingBuilder
                 unmarshalStringConversion(ctx, base, type);
             
             // handle based on presence or absence of name attribute
-            String name = ctx.attributeText(URI_ATTRIBUTES, FORMAT_NAME, null);
-            if (name == null) {
+            String text = ctx.attributeText(URI_ATTRIBUTES, FORMAT_NAME, null);
+            if (text == null) {
                 defc.setConversion(format);
             } else {
-                defc.setNamedConversion(name, format);
+                QName qname = QName.deserialize(text, ctx);
+                defc.setNamedConversion(qname, format);
             }
             
             // scan past end of definition
@@ -980,7 +1010,9 @@ public abstract class BindingBuilder
             ctx.throwStartTagException
                 ("All items in unordered structure must be optional");
         }
+        boolean incoll = false;
         if (contain instanceof NestedCollection) {
+            incoll = true;
             opt = false;
         }
         
@@ -989,7 +1021,7 @@ public abstract class BindingBuilder
         boolean hasprop = isPropertyPresent(ctx);
         boolean thisref = false;
         if (!hasprop) {
-            thisref = ctx.hasAttribute(URI_ATTRIBUTES, COMMON_TYPE);
+            thisref = incoll || ctx.hasAttribute(URI_ATTRIBUTES, COMMON_TYPE);
         }
         boolean mapping = isMappingRef(ctx);
         if (hasprop || coll || implic || thisref) {
@@ -1008,7 +1040,12 @@ public abstract class BindingBuilder
                         COMMON_TYPE, null);
                     if (type == null) {
                         if (!mapping) {
-                            type = "java.lang.Object";
+                            if (incoll) {
+                                type = ((NestedCollection)contain).getItemType();
+                                hasobj = true;
+                            } else {
+                                type = "java.lang.Object";
+                            }
                         }
                     } else {
                         hasobj = true;
@@ -1225,11 +1262,13 @@ public abstract class BindingBuilder
                     NestedBase nest;
                     boolean ordered = ctx.attributeBoolean(URI_ATTRIBUTES,
                         COMMON_ORDERED, true);
+                    boolean flex = ctx.attributeBoolean(URI_ATTRIBUTES,
+                        COMMON_FLEXIBLE, false);
                     if (coll) {
                         
                         // create collection definition
                         nest = new NestedCollection(contain, icobj,
-                            ordered, itype, load, store);
+                            ordered, flex, itype, load, store);
                         nest.unmarshal(ctx);
                         ctx.parsePastStartTag(URI_ELEMENTS,
                             COLLECTION_ELEMENT);
@@ -1240,7 +1279,7 @@ public abstract class BindingBuilder
                         boolean choice = ctx.attributeBoolean(URI_ATTRIBUTES,
                             COMMON_CHOICE, false);
                         nest = new NestedStructure(contain, icobj,
-                            ordered, choice, false, hasobj);
+                            ordered, choice, flex, false, hasobj);
                         nest.unmarshal(ctx);
                         ctx.parsePastStartTag(URI_ELEMENTS,
                             STRUCTURE_ELEMENT);
@@ -1255,88 +1294,128 @@ public abstract class BindingBuilder
                     if (top == null) {
                         top = nest;
                     }
-                        
-                    // check for children defined
+                    
+                    // special check for structure wrapping value
+                    boolean impstruct = false;
                     boolean childs = nest.hasContent();
-                    boolean addref = false;
-                    if (!childs) {
-                        if (coll) {
-                            
-                            // add mapping as only child
-                            if (ctype.equals("java.lang.Object")) {
-                                nest.addComponent
-                                    (new DirectGeneric(nest, null));
+                    if (implic && !coll && childs) {
+                        ArrayList contents = nest.getContents();
+                        impstruct = true;
+                        for (int i = 0; i < contents.size(); i++) {
+                            if (!(contents.get(i) instanceof ValueChild)) {
+                                impstruct = false;
+                                break;
                             } else {
-                                nest.addComponent(new MappingReference(contain, 
-                                    new PropertyDefinition(ctype, cobj, false),
-                                    ctype, icobj, null, true));
+                                ValueChild vchild = (ValueChild)contents.get(i);
+                                if (!vchild.isImplicit()) {
+                                    impstruct = false;
+                                    break;
+                                }
                             }
-                            childs = true;
-                            
-                        } else if (name != null) {
-                            
-                            // must be abstract mappping reference, create child
-                            addref = true;
-                            
                         }
                     }
-                    
-                    // handle nested children
-                    comp = top;
-                    if (childs || addref) {
-                        
-                        // define component property wrapping object binding
-                        boolean optprop = hasprop && prop.isOptional();
-                        if (bind != null) {
-                            boolean skip = name != null && optprop;
-                            comp = new ComponentProperty(prop, comp, skip);
-                            bind.setWrappedComponent(nest);
-                        }
-                        
-                        // create reference to mapping as special case
-                        //  this allows structure with name but no children to
-                        //  use abstract mapping
-                        if (addref) {
-                            PropertyDefinition thisprop =
-                                new PropertyDefinition(bind, false);
-                            nest.addComponent(new MappingReference
-                                (nest, thisprop, comp.getType(), icobj, null,
-                                false));
-                        }
+                    if (impstruct) {
+                        comp = nest;
+                        nest.setObjectContext(cobj);
                         if (name != null) {
                             comp = new ElementWrapper(defc, name, comp);
                             if (bind != null && implic) {
                                 if (!hasprop) {
-                                    ((ElementWrapper)comp).setDirect(true);
+                                    ArrayList contents = nest.getContents();
+                                    impstruct = true;
+                                    for (int i = 0; i < contents.size(); i++) {
+                                        if (contents.get(i) instanceof ValueChild) {
+                                            ValueChild vchild = (ValueChild)contents.get(i);
+                                            vchild.switchProperty();
+                                        }
+                                    }
                                 }
                                 prop.setOptional(false);
                             }
-                            if (optprop) {
-                                ((ElementWrapper)comp).setOptionalNormal(true);
-                                boolean isobj = bind != null;
-                                ((ElementWrapper)comp).
-                                    setStructureObject(isobj);
-                                comp = new OptionalStructureWrapper(comp, prop,
-                                    isobj);
-                                prop.setOptional(false);
-                            } else if (opt && !implic) {
-                                ((ElementWrapper)comp).setOptionalNormal(true);
-                                comp = new OptionalStructureWrapper(comp, prop,
-                                    false);
-                                prop.setOptional(false);
+                        }
+                    } else {
+                        
+                        // check for children defined
+                        boolean addref = false;
+                        if (!childs) {
+                            if (coll) {
+                                
+                                // add mapping as only child
+                                if (ctype.equals("java.lang.Object")) {
+                                    nest.addComponent
+                                        (new DirectGeneric(nest, null));
+                                } else {
+                                    nest.addComponent(new MappingReference(contain, 
+                                        new PropertyDefinition(ctype, cobj, false),
+                                        ctype, null, null, icobj, null, true));
+                                }
+                                childs = true;
+                                
+                            } else if (name != null) {
+                                
+                                // must be abstract mappping reference, create child
+                                addref = true;
+                                
                             }
                         }
                         
-                    } else {
+                        // handle nested children
+                        comp = top;
+                        if (childs || addref) {
                             
-                        // treat as mapping, with either type or generic
-                        String type = prop.getTypeName();
-                        if (prop.equals("java.lang.Object")) {
-                            comp = new ComponentProperty(prop, new
-                                DirectGeneric(contain, null), false);
+                            // define component property wrapping object binding
+                            boolean optprop = hasprop && prop.isOptional();
+                            if (bind != null) {
+                                boolean skip = name != null && optprop;
+                                comp = new ComponentProperty(prop, comp, skip);
+                                bind.setWrappedComponent(nest);
+                            }
+                            
+                            // create reference to mapping as special case
+                            //  this allows structure with name but no children to
+                            //  use abstract mapping
+                            if (addref) {
+                                PropertyDefinition thisprop =
+                                    new PropertyDefinition(bind, false);
+                                nest.addComponent(new MappingReference
+                                    (nest, thisprop, comp.getType(), null, null,
+                                    icobj, null, false));
+                            }
+                            if (name != null) {
+                                comp = new ElementWrapper(defc, name, comp);
+                                if (bind != null && implic) {
+                                    if (!hasprop) {
+                                        ((ElementWrapper)comp).setDirect(true);
+                                    }
+                                    prop.setOptional(false);
+                                }
+                                if (optprop) {
+                                    ((ElementWrapper)comp).setOptionalNormal(true);
+                                    boolean isobj = bind != null;
+                                    ((ElementWrapper)comp).
+                                        setStructureObject(isobj);
+                                    comp = new OptionalStructureWrapper(comp, prop,
+                                        isobj);
+                                    prop.setOptional(false);
+                                } else if (opt && !implic) {
+                                    ((ElementWrapper)comp).setOptionalNormal(true);
+                                    comp = new OptionalStructureWrapper(comp, prop,
+                                        false);
+                                    prop.setOptional(false);
+                                }
+                            }
+                            
                         } else {
-                            comp = new MappingReference(contain, prop, type,
-                                icobj, name, false);
+                                
+                            // treat as mapping, with either type or generic
+                            String type = prop.getTypeName();
+                            if (prop.equals("java.lang.Object")) {
+                                comp = new ComponentProperty(prop, new
+                                    DirectGeneric(contain, null), false);
+                            } else {
+                                comp = new MappingReference(contain, prop, type,
+                                    null, null, icobj, name, false);
+                            }
                         }
                     }
                     
@@ -1386,8 +1465,10 @@ public abstract class BindingBuilder
                     COMMON_ORDERED, true);
                 boolean choice = ctx.attributeBoolean(URI_ATTRIBUTES,
                     COMMON_CHOICE, false);
+                boolean flex = ctx.attributeBoolean(URI_ATTRIBUTES,
+                    COMMON_FLEXIBLE, false);
                 NestedStructure nest = new NestedStructure(contain, cobj,
-                    ordered, choice, false, hasprop);
+                    ordered, choice, flex, false, hasprop);
                 nest.unmarshal(ctx);
         
                 // unmarshal child bindings with optional label
@@ -1471,6 +1552,13 @@ public abstract class BindingBuilder
             name = unmarshalName(ctx, false);
         }
         
+        // get type name information
+        String text = ctx.attributeText(URI_ATTRIBUTES, MAPPING_TYPENAME, null);
+        String tname = null;
+        if (text != null) {
+            tname = QName.deserialize(text, ctx).toString();
+        }
+        
         // check if using direct object marshalling and unmarshalling
         IMapping mapping;
         if (isDirectObject(ctx)) {
@@ -1490,8 +1578,8 @@ public abstract class BindingBuilder
             
             // validate and configure direct marshalling and unmarshalling
             int slot = parent.getBindingRoot().getMappedClassIndex(type);
-            mapping = new MappingDirect(parent, type,
-                unmarshalDirectObj(ctx, type, parent, defc, slot, name));
+            mapping = new MappingDirect(parent, type, tname,
+                unmarshalDirectObj(ctx, type, parent, defc, slot, name), abs);
                         
         } else {
             
@@ -1504,8 +1592,6 @@ public abstract class BindingBuilder
             // check for optional definitions
             String label = ctx.attributeText(URI_ATTRIBUTES,
                 COMMON_LABEL, null);
-            String tname = ctx.attributeText(URI_ATTRIBUTES,
-                MAPPING_TYPENAME, null);
             
             // create definition context for namespaces and formats
             String base = ctx.attributeText(URI_ATTRIBUTES,
@@ -1516,8 +1602,10 @@ public abstract class BindingBuilder
                 COMMON_ORDERED, true);
             boolean choice = ctx.attributeBoolean(URI_ATTRIBUTES,
                 COMMON_CHOICE, false);
+            boolean flex = ctx.attributeBoolean(URI_ATTRIBUTES,
+                COMMON_FLEXIBLE, false);
             NestedStructure nest = new NestedStructure(parent, bind,
-                ordered, choice, true, true);
+                ordered, choice, flex, true, true);
             nest.unmarshal(ctx);
             
             // add all outer namespaces to context

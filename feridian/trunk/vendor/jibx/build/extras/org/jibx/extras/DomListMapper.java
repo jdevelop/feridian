@@ -37,6 +37,7 @@ import org.jibx.runtime.IMarshaller;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshaller;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 import org.w3c.dom.Node;
@@ -122,7 +123,7 @@ public class DomListMapper extends DomMapperBase
                 ("Unmarshalling context not of expected type");
         } else {
             return ((UnmarshallingContext)ctx).currentEvent() !=
-                UnmarshallingContext.END_TAG;
+                IXMLReader.END_TAG;
         }
     }
 

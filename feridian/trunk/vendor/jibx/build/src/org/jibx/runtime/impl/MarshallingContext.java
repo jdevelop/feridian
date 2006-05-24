@@ -97,6 +97,9 @@ public class MarshallingContext implements IMarshallingContext
     /** Output document handler. */
     private IXMLWriter m_writer;
     
+    /** User context object (not used by JiBX, only for user convenience). */
+    protected Object m_userContext;
+    
     /**
      * Constructor.
      *
@@ -323,6 +326,8 @@ public class MarshallingContext implements IMarshallingContext
         if (parent.m_writer instanceof XMLWriterBase) {
             m_writer =
                 ((XMLWriterBase)parent.m_writer).createChildWriter(m_uris);
+        } else if (parent.m_writer instanceof StAXWriter) {
+            m_writer = ((StAXWriter)parent.m_writer).createChildWriter(m_uris);
         } else {
             m_writer = parent.m_writer;
         }
@@ -944,29 +949,52 @@ public class MarshallingContext implements IMarshallingContext
             }
             try {
                 
-                // first try loading class from context classloader
+                // first try loading class from binding factory class loader
                 Class clas = null;
-                ClassLoader loader =
-                    Thread.currentThread().getContextClassLoader();
-                if (loader != null) {
+                ClassLoader factldr = null;
+                if (m_factory != null) {
+                    factldr = m_factory.getClass().getClassLoader();
                     try {
-                        clas = loader.loadClass(mname);
+                        clas = factldr.loadClass(mname);
                     } catch (ClassNotFoundException e) { /* fall through */ }
                 }
                 if (clas == null) {
                     
-                    // if not found, try the loader that loaded this class
-                    clas = UnmarshallingContext.class.getClassLoader().
-                        loadClass(mname);
+                    // next try the context class loader, if set
+                    ClassLoader ctxldr =
+                        Thread.currentThread().getContextClassLoader();
+                    if (ctxldr != null) {
+                        try {
+                            clas = ctxldr.loadClass(mname);
+                        } catch (ClassNotFoundException e) { /* fall through */ }
+                    }
+                    if (clas == null) {
+                        
+                        // not found, try the loader that loaded this class
+                        ClassLoader thisldr =
+                            MarshallingContext.class.getClassLoader();
+                        if (thisldr != factldr && thisldr != ctxldr) {
+                            try {
+                                clas = thisldr.loadClass(mname);
+                            } catch (ClassNotFoundException e)
+                                { /* fall through */ }
+                        }
+                    }
+                }
+                if (clas == null) {
+                    throw new JiBXException("Unable to load marshaller class " +
+                        mname);
                 }
                 
                 // create an instance of marshaller class
                 IMarshaller m = (IMarshaller)clas.newInstance();
                 m_marshallers[index] = m;
                 
+            } catch (JiBXException e) {
+                throw e;
             } catch (Exception e) {
                 throw new JiBXException
-                    ("Unable to create unmarshaller of class " + mname + ":",
+                    ("Unable to create marshaller of class " + mname + ":",
                     e);
             }
         }
@@ -1109,6 +1137,35 @@ public class MarshallingContext implements IMarshallingContext
             m_idMap = new HashMap();
         }
         return m_idMap;
+    }
+    
+    /**
+     * Set a user context object. This context object is not used directly by
+     * JiBX, but can be accessed by all types of user extension methods. The
+     * context object is automatically cleared by the {@link #reset()} method,
+     * so to make use of this you need to first call the appropriate version of
+     * the <code>setOutput()</code> method, then this method, and finally one of
+     * the <code>marshalDocument</code> methods which uses the previously-set
+     * output (not the ones which take a stream or writer as parameter, since
+     * they call <code>setOutput()</code> themselves).
+     * 
+     * @param obj user context object, or <code>null</code> if clearing existing
+     * context object
+     * @see #getUserContext()
+     */
+    public void setUserContext(Object obj) {
+        m_userContext = obj;
+    }
+    
+    /**
+     * Get the user context object.
+     * 
+     * @return user context object, or <code>null</code> if no context object
+     * set
+     * @see #setUserContext(Object)
+     */
+    public Object getUserContext() {
+        return m_userContext;
     }
 
     /**

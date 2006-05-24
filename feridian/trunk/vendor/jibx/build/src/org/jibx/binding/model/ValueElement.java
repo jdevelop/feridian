@@ -46,7 +46,8 @@ public class ValueElement extends ElementBase implements IComponent
 {
     /** Enumeration of allowed attribute names */
     public static final StringArray s_allowedAttributes =
-        new StringArray(new String[] { "constant", "format", "ident", "style" },
+        new StringArray(new String[] { "constant", "format", "ident",
+        "nillable", "style" },
         new StringArray(new StringArray
         (NameAttributes.s_allowedAttributes, 
         PropertyAttributes.s_allowedAttributes),
@@ -84,6 +85,9 @@ public class ValueElement extends ElementBase implements IComponent
     
     /** Supplied identity name. */
     private String m_identName;
+    
+    /** Nillable object flag. */
+    private boolean m_isNillable;
     
     /** Actual selected identity. */
     private int m_identIndex;
@@ -446,6 +450,24 @@ public class ValueElement extends ElementBase implements IComponent
     }
     
     /**
+     * Check if nillable object.
+     * 
+     * @return nillable flag
+     */
+    public boolean isNillable() {
+        return m_isNillable;
+    }
+
+    /**
+     * Set nillable flag.
+     * 
+     * @param nillable flag
+     */
+    public void setNillable(boolean nillable) {
+        m_isNillable = nillable;
+    }
+    
+    /**
      * Check if this value implicitly uses the containing object. This call
      * is only meaningful after prevalidation.
      * 
@@ -637,10 +659,14 @@ public class ValueElement extends ElementBase implements IComponent
         }
         
         // validate basic attribute groups
+        m_propertyAttrs.prevalidate(vctx);
+        if (m_stringAttrs.getDefaultText() != null && !isOptional()) {
+            vctx.addWarning("default attribute ignored for required value");
+            m_stringAttrs.setDefaultText(null);
+        }
         m_nameAttrs.setIsAttribute
             (m_styleIndex == NestingAttributes.ATTRIBUTE_STYLE);
         m_nameAttrs.prevalidate(vctx);
-        m_propertyAttrs.prevalidate(vctx);
         if (m_styleIndex == CDATA_STYLE || m_styleIndex == TEXT_STYLE) {
             if (m_nameAttrs.getName() != null) {
                 vctx.addFatal("Values with \"text\" or \"cdata\" style " +
@@ -655,6 +681,13 @@ public class ValueElement extends ElementBase implements IComponent
         
         // make sure value is not constant
         if (m_constantValue == null) {
+            
+            // make sure nillable only for element with object
+            if (m_isNillable) {
+                if (m_styleIndex != NestingAttributes.ELEMENT_STYLE) {
+                    vctx.addFatal("nillable can only be used with element style");
+                }
+            }
             
             // process ID classification
             if (m_identIndex == DEF_IDENT/* || m_identIndex == AUTO_IDENT*/) {
@@ -671,9 +704,9 @@ public class ValueElement extends ElementBase implements IComponent
                     vctx.addError("ID property must supply a " +
                         "java.lang.String value");
                 }
-            } else if (!m_propertyAttrs.hasProperty() &&
+/*            } else if (!m_propertyAttrs.hasProperty() &&
                 !(vctx.getContextObject() instanceof CollectionElement)) {
-                vctx.addError("Need property definition", this);
+                vctx.addError("Need property definition", this);    */
             }
             
             // check string attributes only if valid to this point
@@ -715,6 +748,8 @@ public class ValueElement extends ElementBase implements IComponent
                 m_stringAttrs.getSerializerName() != null ||
                 m_stringAttrs.getFormatName() != null) {
                 vctx.addFatal("String attributes cannot be used with constant");
+            } else if (m_isNillable) {
+                vctx.addFatal("nillable cannot be used with constant");
             }
         }
     }

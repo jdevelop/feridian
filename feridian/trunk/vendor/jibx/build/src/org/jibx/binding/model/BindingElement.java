@@ -45,6 +45,7 @@ import org.jibx.binding.util.StringArray;
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.EnumSet;
 import org.jibx.runtime.IBindingFactory;
+import org.jibx.runtime.QName;
 //import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
@@ -60,8 +61,8 @@ public class BindingElement extends NestingElementBase
 {
     /** Enumeration of allowed attribute names */
     public static final StringArray s_allowedAttributes =
-        new StringArray(new String[] { "direction", "force-classes", "forwards",
-        "name", "package", "track-source" },
+        new StringArray(new String[] { "add-constructors", "direction",
+        "force-classes", "forwards", "name", "package", "track-source" },
         NestingElementBase.s_allowedAttributes);
     
     //
@@ -97,6 +98,9 @@ public class BindingElement extends NestingElementBase
 
     /** Generate souce tracking interface flag. */
     private boolean m_isForceClasses;
+    
+    /** Add default constructors where needed flag. */
+    private boolean m_isAddConstructors;
 
     /** Package for generated context factory. */
     private String m_targetPackage;
@@ -200,6 +204,16 @@ public class BindingElement extends NestingElementBase
      */
     public boolean isForceClasses() {
         return m_isForceClasses;
+    }
+    
+    /**
+     * Check if default constructor generation is enabled.
+     *
+     * @return <code>true</code> if default constructor generation enabled,
+     * <code>false</code> if not
+     */
+    public boolean isAddConstructors() {
+        return m_isAddConstructors;
     }
     
     /**
@@ -474,52 +488,54 @@ public class BindingElement extends NestingElementBase
         // create outer definition context
         DefinitionContext dctx = new DefinitionContext(null);
         vctx.setGlobalDefinitions(dctx);
-        defineBaseFormat(buildFormat("byte:default", "byte", true,
+        defineBaseFormat(buildFormat("byte.default", "byte", true,
             "org.jibx.runtime.Utility.serializeByte",
             "org.jibx.runtime.Utility.parseByte", "0"), dctx, vctx);
-        defineBaseFormat(buildFormat("char:default", "char", true,
+        defineBaseFormat(buildFormat("char.default", "char", true,
             "org.jibx.runtime.Utility.serializeChar",
             "org.jibx.runtime.Utility.parseChar", "0"), dctx, vctx);
-        defineBaseFormat(buildFormat("double:default", "double", true,
+        defineBaseFormat(buildFormat("double.default", "double", true,
             "org.jibx.runtime.Utility.serializeDouble",
             "org.jibx.runtime.Utility.parseDouble", "0.0"), dctx, vctx);
-        defineBaseFormat(buildFormat("float:default", "float", true,
+        defineBaseFormat(buildFormat("float.default", "float", true,
             "org.jibx.runtime.Utility.serializeFloat",
             "org.jibx.runtime.Utility.parseFloat", "0.0"), dctx, vctx);
-        defineBaseFormat(buildFormat("int:default", "int", true,
+        defineBaseFormat(buildFormat("int.default", "int", true,
             "org.jibx.runtime.Utility.serializeInt",
             "org.jibx.runtime.Utility.parseInt", "0"), dctx, vctx);
-        defineBaseFormat(buildFormat("long:default", "long", true,
+        defineBaseFormat(buildFormat("long.default", "long", true,
             "org.jibx.runtime.Utility.serializeLong",
             "org.jibx.runtime.Utility.parseLong", "0"), dctx, vctx);
-        defineBaseFormat(buildFormat("short:default", "short", true,
+        defineBaseFormat(buildFormat("short.default", "short", true,
             "org.jibx.runtime.Utility.serializeShort",
             "org.jibx.runtime.Utility.parseShort", "0"), dctx, vctx);
-        defineBaseFormat(buildFormat("boolean:default", "boolean", true,
+        defineBaseFormat(buildFormat("boolean.default", "boolean", true,
             "org.jibx.runtime.Utility.serializeBoolean",
             "org.jibx.runtime.Utility.parseBoolean", "false"), dctx, vctx);
-        defineBaseFormat(buildFormat("Date:default", "java.util.Date", true,
+        defineBaseFormat(buildFormat("Date.default", "java.util.Date", true,
             "org.jibx.runtime.Utility.serializeDateTime",
             "org.jibx.runtime.Utility.deserializeDateTime", null), dctx, vctx);
-        defineBaseFormat(buildFormat("SqlDate:default", "java.sql.Date",
+//#!j2me{
+        defineBaseFormat(buildFormat("SqlDate.default", "java.sql.Date",
             true, "org.jibx.runtime.Utility.serializeSqlDate",
             "org.jibx.runtime.Utility.deserializeSqlDate", null), dctx, vctx);
-        defineBaseFormat(buildFormat("SqlTime:default", "java.sql.Time",
+        defineBaseFormat(buildFormat("SqlTime.default", "java.sql.Time",
             true, "org.jibx.runtime.Utility.serializeSqlTime",
             "org.jibx.runtime.Utility.deserializeSqlTime", null), dctx, vctx);
-        defineBaseFormat(buildFormat("SqlTimestamp:default",
+        defineBaseFormat(buildFormat("SqlTimestamp.default",
             "java.sql.Timestamp", true,
             "org.jibx.runtime.Utility.serializeTimestamp",
             "org.jibx.runtime.Utility.deserializeTimestamp", null),
             dctx, vctx);
-        defineBaseFormat(buildFormat("byte[]:default", "byte[]", true,
+//#j2me}
+        defineBaseFormat(buildFormat("byte-array.default", "byte[]", true,
             "org.jibx.runtime.Utility.serializeBase64",
             "org.jibx.runtime.Utility.deserializeBase64", null), dctx, vctx);
-        defineBaseFormat(buildFormat("String:default", "java.lang.String",
+        defineBaseFormat(buildFormat("String.default", "java.lang.String",
             true, null, null, null), dctx, vctx);
-        defineBaseFormat(buildFormat("Object:default", "java.lang.Object",
+        defineBaseFormat(buildFormat("Object.default", "java.lang.Object",
             true, null, null, null), dctx, vctx);
-        FormatElement format = buildFormat("char:string", "char", false,
+        FormatElement format = buildFormat("char.string", "char", false,
             "org.jibx.runtime.Utility.serializeCharString",
             "org.jibx.runtime.Utility.deserializeCharString", "0");
         format.setDefaultFormat(false);

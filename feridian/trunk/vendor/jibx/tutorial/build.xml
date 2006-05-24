@@ -7,14 +7,11 @@
   <property name="lib" value="${basedir}/lib"/>
   <path id="example-classpath">
     <pathelement location="${root-dir}"/>
-    <pathelement location="${lib}/jibx-run.jar"/>
-    <pathelement location="${lib}/jibx-extras.jar"/>
-    <pathelement location="${lib}/xpp3.jar"/>
+    <fileset dir="${lib}" includes="*.jar"/>
   </path>
   <path id="binding-classpath">
     <pathelement location="${root-dir}"/>
-    <pathelement location="${lib}/xpp3.jar"/>
-    <pathelement location="${lib}/bcel.jar"/>
+    <fileset dir="${lib}" includes="*.jar"/>
   </path>
 
   <!-- Delete class files for a single example -->

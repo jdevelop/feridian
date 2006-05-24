@@ -112,9 +112,11 @@ public class SchemaGenerator
         s_objectTypeMap.put("java.lang.Short", "xsd:short");
         s_objectTypeMap.put("java.math.BigDecimal", "xsd:decimal");
         s_objectTypeMap.put("java.math.BigInteger", "xsd:integer");
+//#!j2me{
         s_objectTypeMap.put("java.sql.Date", "xsd:date");
         s_objectTypeMap.put("java.sql.Time", "xsd:time");
         s_objectTypeMap.put("java.sql.Timestamp", "xsd:dateTime");
+//#j2me}
         s_objectTypeMap.put("java.util.Date", "xsd:dateTime");
         s_objectTypeMap.put("byte[]", "xsd:base64");
     }

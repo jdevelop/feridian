@@ -11,6 +11,11 @@ class MyClass1 {
     private Dimension dimen;
     private Rectangle rect;
 	private ArrayList ints;
+    
+    // force generation of default constructor
+    public MyClass1(int a) {
+        this.a = a;
+    }
 
 	public int getA() { return a; }
 	public void setA(int a) { this.a = a; }

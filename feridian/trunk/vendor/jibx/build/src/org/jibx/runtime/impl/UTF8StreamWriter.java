@@ -244,6 +244,7 @@ public class UTF8StreamWriter extends StreamWriterBase
      * @throws IOException on error writing to document
      */
     public void writeTextContent(String text) throws IOException {
+        flagTextContent();
         int length = text.length();
         makeSpace(length * 5);
         int fill = m_fillOffset;
@@ -255,8 +256,6 @@ public class UTF8StreamWriter extends StreamWriterBase
                 fill = writeEntity(LT_ENTITY, fill);
             } else if (chr == '>' && i > 2 && text.charAt(i-1) == ']' &&
                 text.charAt(i-2) == ']') {
-                m_buffer[fill++] = (byte)']';
-                m_buffer[fill++] = (byte)']';
                 fill = writeEntity(GT_ENTITY, fill);
             } else if (chr < 0x20) {
                 if (chr != 0x9 && chr != 0xA && chr != 0xD) {
@@ -288,7 +287,6 @@ public class UTF8StreamWriter extends StreamWriterBase
             }
         }
         m_fillOffset = fill;
-        m_textSeen = m_contentSeen = true;
     }
     
     /**
@@ -298,6 +296,7 @@ public class UTF8StreamWriter extends StreamWriterBase
      * @throws IOException on error writing to document
      */
     public void writeCData(String text) throws IOException {
+        flagTextContent();
         int length = text.length();
         makeSpace(length * 3 + 12);
         int fill = m_fillOffset;
@@ -339,7 +338,6 @@ public class UTF8StreamWriter extends StreamWriterBase
             }
         }
         m_fillOffset = writeEntity(LT_CDATAEND, fill);
-        m_textSeen = m_contentSeen = true;
     }
     
     /**

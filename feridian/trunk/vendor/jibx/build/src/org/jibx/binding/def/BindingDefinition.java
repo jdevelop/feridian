@@ -45,6 +45,7 @@ import org.jibx.binding.classes.MungedClass;
 import org.jibx.binding.util.ArrayMap;
 import org.jibx.runtime.IBindingFactory;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Binding definition. This is the root of the object graph for a binding.
@@ -61,7 +62,7 @@ implements IContainer
     
     /** Current distribution file name. This is filled in by the Ant build
      process to match the current distribution. */
-    public static final String CURRENT_VERSION_NAME = "@distrib@";
+    public static final String CURRENT_VERSION_NAME = "jibx_1_1_beta3";
     
     /** Prefix used in all code generation for methods and classes. */
     public static final String GENERATE_PREFIX = "JiBX_";
@@ -110,6 +111,7 @@ implements IContainer
         new ObjectStringConversion(null,
         "org.jibx.runtime.Utility.serializeDateTime", 
         "org.jibx.runtime.Utility.deserializeDateTime", "java.util.Date");
+//#!j2me{
     private static StringConversion s_sqlDateConversion =
         new ObjectStringConversion(null,
         "org.jibx.runtime.Utility.serializeSqlDate", 
@@ -122,6 +124,7 @@ implements IContainer
         new ObjectStringConversion(null,
         "org.jibx.runtime.Utility.serializeTimestamp", 
         "org.jibx.runtime.Utility.deserializeTimestamp", "java.sql.Timestamp");
+//#j2me}
     public static StringConversion s_base64Conversion =
         new ObjectStringConversion(null,
         "org.jibx.runtime.Utility.serializeBase64", 
@@ -225,6 +228,9 @@ implements IContainer
     /** Generate marshaller/unmarshaller classes for top-level non-base abstract
      mappings flag. */
     private final boolean m_isForceClasses;
+    
+    /** Add default constructors where needed flag. */
+    private boolean m_isAddConstructors;
 
     /** Package for generated context factory. */
     private String m_targetPackage;
@@ -250,6 +256,9 @@ implements IContainer
     
     /** Flag for done assigning indexes to mapped classes. */
     private boolean m_isMappedDone;
+    
+    /** Flag for schema instance namespace used in binding. */
+    private boolean m_isSchemaInstanceUsed;
     
     /** Next index number for marshaller/unmarshaller slots used in-line. */
     private int m_mumIndex;
@@ -310,34 +319,45 @@ implements IContainer
         m_namespacePrefixes.add("");
         m_outerContext.addNamespace(NamespaceDefinition.buildNamespace
             ("http://www.w3.org/XML/1998/namespace", "xml"));
+        getNamespaceUriIndex
+            ("http://www.w3.org/2001/XMLSchema-instance", "xsi");
         
         // build the default converters in outer context
-        m_outerContext.setDefaultConversion("byte:default", s_byteConversion);
-        m_outerContext.setDefaultConversion("char:default", s_charConversion);
+        m_outerContext.setDefaultConversion(new QName("byte.default"),
+            s_byteConversion);
+        m_outerContext.setDefaultConversion(new QName("char.default"),
+            s_charConversion);
         StringConversion schar = s_charConversion.derive("char",
             "org.jibx.runtime.Utility.serializeCharString",
             "org.jibx.runtime.Utility.parseCharString", null);
-        m_outerContext.setNamedConversion("char:string", schar);
-        m_outerContext.setDefaultConversion("double:default",
+        m_outerContext.setNamedConversion(new QName("char.string"), schar);
+        m_outerContext.setDefaultConversion(new QName("double.default"),
             s_doubleConversion);
-        m_outerContext.setDefaultConversion("float:default", s_floatConversion);
-        m_outerContext.setDefaultConversion("int:default", s_intConversion);
-        m_outerContext.setDefaultConversion("long:default", s_longConversion);
-        m_outerContext.setDefaultConversion("short:default", s_shortConversion);
-        m_outerContext.setDefaultConversion("boolean:default",
+        m_outerContext.setDefaultConversion(new QName("float.default"),
+            s_floatConversion);
+        m_outerContext.setDefaultConversion(new QName("int.default"),
+            s_intConversion);
+        m_outerContext.setDefaultConversion(new QName("long.default"),
+            s_longConversion);
+        m_outerContext.setDefaultConversion(new QName("short.default"),
+            s_shortConversion);
+        m_outerContext.setDefaultConversion(new QName("boolean.default"),
             s_booleanConversion);
-        m_outerContext.setDefaultConversion("Date:default", s_dateConversion);
-        m_outerContext.setDefaultConversion("SqlDate:default",
+        m_outerContext.setDefaultConversion(new QName("Date.default"),
+            s_dateConversion);
+//#!j2me{
+        m_outerContext.setDefaultConversion(new QName("SqlDate.default"),
             s_sqlDateConversion);
-        m_outerContext.setDefaultConversion("SqlTime:default",
+        m_outerContext.setDefaultConversion(new QName("SqlTime.default"),
             s_sqlTimeConversion);
-        m_outerContext.setDefaultConversion("Timestamp:default",
+        m_outerContext.setDefaultConversion(new QName("Timestamp.default"),
             s_timestampConversion);
-        m_outerContext.setDefaultConversion("byte[]:default",
+//#j2me}
+        m_outerContext.setDefaultConversion(new QName("byte-array.default"),
             s_base64Conversion);
-        m_outerContext.setDefaultConversion("String:default",
+        m_outerContext.setDefaultConversion(new QName("String.default"),
             s_stringConversion);
-        m_outerContext.setDefaultConversion("Object:default",
+        m_outerContext.setDefaultConversion(new QName("Object.default"),
             s_objectConversion);
         
         // add this binding to list
@@ -472,6 +492,16 @@ implements IContainer
     public boolean isTrackSource() {
         return m_isTrackSource;
     }
+    
+    /**
+     * Check if default constructor generation is enabled.
+     *
+     * @return <code>true</code> if default constructor generation enabled,
+     * <code>false</code> if not
+     */
+    public boolean isAddConstructors() {
+        return m_isAddConstructors;
+    }
 
     /**
      * Get prefix for method or class generation.
@@ -591,6 +621,13 @@ implements IContainer
     }
 
     /**
+     * Set flag for schema instance namespace used in binding.
+     */
+    public void setSchemaInstanceUsed() {
+        m_isSchemaInstanceUsed = true;
+    }
+
+    /**
      * Generate code. First sets linkages and executes code generation for
      * each top-level mapping defined in this binding, which in turn propagates
      * the code generation all the way down. Then generates the actual binding
@@ -603,6 +640,19 @@ implements IContainer
      */
 
     public void generateCode(boolean verbose) throws JiBXException {
+        
+        // check schema instance namespace usage
+        if (m_isSchemaInstanceUsed) {
+            NamespaceDefinition xsins = NamespaceDefinition.buildNamespace
+                ("http://www.w3.org/2001/XMLSchema-instance", "xsi");
+            ArrayList mappings = m_activeContext.getMappings();
+            for (int i = 0; i < mappings.size(); i++) {
+                Object mapping = mappings.get(i);
+                if (mapping instanceof MappingDefinition) {
+                    ((MappingDefinition)mapping).addNamespace(xsins);
+                }
+            }
+        }
         
         // handle basic linkage and child code generation
         BoundClass.setModify(m_targetRoot, m_targetPackage);

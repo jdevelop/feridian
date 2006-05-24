@@ -19,7 +19,9 @@ class MyClass4 {
     private byte m;
     private char n;
     private String o;
+//#!j2me{
     private java.sql.Date p;
+//#j2me}
     private String q;
     private String r;
     private String s;

@@ -20,13 +20,17 @@ public class Conversion
     }
     
     public static int deserializeDollarsCents(String text) {
-        int split = text.indexOf('.');
-        int cents = 0;
-        if (split > 0) {
-            cents = Integer.parseInt(text.substring(0, split)) * 100;
-            text = text.substring(split+1);
+        if (text == null) {
+            return 0;
+        } else {
+            int split = text.indexOf('.');
+            int cents = 0;
+            if (split > 0) {
+                cents = Integer.parseInt(text.substring(0, split)) * 100;
+                text = text.substring(split+1);
+            }
+            return cents + Integer.parseInt(text);
         }
-        return cents + Integer.parseInt(text);
     }
     
     public static String serializeIntArray(int[] values) {
@@ -47,23 +51,27 @@ public class Conversion
     }
     
     public static int[] deserializeIntArray(String text) {
-        int split = 0;
-        text = text.trim();
-        int fill = 0;
-        int[] values = new int[10];
-        while (split < text.length()) {
-            int base = split;
-            split = text.indexOf(' ', split);
-            if (split < 0) {
-                split = text.length();
+        if (text == null) {
+            return new int[0];
+        } else {
+            int split = 0;
+            text = text.trim();
+            int fill = 0;
+            int[] values = new int[10];
+            while (split < text.length()) {
+                int base = split;
+                split = text.indexOf(' ', split);
+                if (split < 0) {
+                    split = text.length();
+                }
+                int value = Integer.parseInt(text.substring(base, split));
+                if (fill >= values.length) {
+                    values = resizeArray(values, values.length*2);
+                }
+                values[fill++] = value;
+                while (split < text.length() && text.charAt(++split) == ' ');
             }
-            int value = Integer.parseInt(text.substring(base, split));
-            if (fill >= values.length) {
-                values = resizeArray(values, values.length*2);
-            }
-            values[fill++] = value;
-            while (split < text.length() && text.charAt(++split) == ' ');
+            return resizeArray(values, fill);
         }
-        return resizeArray(values, fill);
     }
 }

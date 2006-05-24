@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -19,7 +20,7 @@ class MyClass2 {
     private Dimension dimen;
     private Rectangle rect;
 	private List ints;
-    private SortedSet orderedStrings;
+    private Set orderedStrings;
 
 	public int getA() { return a; }
 	public void setA(String a) { this.a = Integer.parseInt(a); }
@@ -28,6 +29,9 @@ class MyClass2 {
 	public String getB() { return b; }
 	public void setB(String b) { this.b = b; }
 	public void setB(int b) { this.b = Integer.toString(b); }
+    
+    public double getC() { return c; }
+    public void setC(double c) { this.c = c; }
 	
 	private Object getG() {
 		return g;

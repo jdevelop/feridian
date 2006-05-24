@@ -36,6 +36,7 @@ import org.jibx.binding.classes.MethodBuilder;
 import org.jibx.binding.util.ArrayMap;
 
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Nesting level for definitions in binding. This tracks namespace and mapping
@@ -78,7 +79,7 @@ public class DefinitionContext
     /** Map from signatures to <code>String</code> conversions. */
     private HashMap m_convertMap;
     
-    /** Map from format names to <code>String</code> conversions. */
+    /** Map from format qnames to <code>String</code> conversions. */
     private HashMap m_formatMap;
     
     /** Named binding components (only for root context of a binding). */
@@ -180,7 +181,7 @@ public class DefinitionContext
         // check for conflict on class name before adding to definitions
         String name = def.getTypeName();
         if (name == null) {
-            name = def.getBoundType();
+            name = def.getReferenceType();
         }
         int index = m_classMap.findOrAdd(name);
         if (index < m_mappings.size()) {
@@ -432,7 +433,7 @@ public class DefinitionContext
      * @return conversion definition for class
      */
 
-    public StringConversion getNamedConversion(String name) {
+    public StringConversion getNamedConversion(QName name) {
         StringConversion conv = (StringConversion)m_formatMap.get(name);
         if (conv == null && m_context != null) {
             conv = m_context.getNamedConversion(name);
@@ -449,7 +450,7 @@ public class DefinitionContext
      * @throws JiBXException if duplicate conversion definition
      */
 
-    public void addConversion(String name, StringConversion conv)
+    public void addConversion(QName name, StringConversion conv)
         throws JiBXException {
         if (m_formatMap.put(name, conv) != null) {
             throw new JiBXException("Duplicate conversion defined with name " +
@@ -482,7 +483,7 @@ public class DefinitionContext
      * @throws JiBXException if duplicate conversion definition
      */
 
-    public void setNamedConversion(String name, StringConversion conv)
+    public void setNamedConversion(QName name, StringConversion conv)
         throws JiBXException {
         addConversion(name, conv);
     }
@@ -496,7 +497,7 @@ public class DefinitionContext
      * @throws JiBXException if duplicate conversion definition
      */
 
-    public void setDefaultConversion(String name, StringConversion conv)
+    public void setDefaultConversion(QName name, StringConversion conv)
         throws JiBXException {
         addConversion(name, conv);
         setConversion(conv);
