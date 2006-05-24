@@ -29,9 +29,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.jibx.runtime;
 
 import java.lang.reflect.Array;
+//#!j2me{
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+//#j2me}
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * Utility class supplying static methods. Date serialization is based on the
@@ -707,6 +713,7 @@ public abstract class Utility
         return split;
     }
 
+//#!j2me{
     /**
      * Deserialize SQL date from text. Date values are expected to match W3C XML
      * Schema standard format as CCYY-MM-DD, with optional leading minus sign
@@ -759,6 +766,7 @@ public abstract class Utility
             return new java.sql.Date(cal.getTime().getTime());
         }
     }
+//#j2me}
 
     /**
      * Parse general time value from text. Time values are expected to be in W3C
@@ -874,6 +882,7 @@ public abstract class Utility
         }
     }
 
+//#!j2me{
     /**
      * Deserialize timestamp from general dateTime text. Timestamp values are
      * represented in the same way as regular dates, but allow more precision in
@@ -958,6 +967,7 @@ public abstract class Utility
             return new Time(parseTime(text, 0, text.length()));
         }
     }
+//#j2me}
 
     /**
      * Format year number consistent with W3C XML Schema definitions, using a
@@ -1200,6 +1210,7 @@ public abstract class Utility
         return serializeDate(date.getTime());
     }
 
+//#!j2me{
     /**
      * Serialize SQL date to general date text. Date values are formatted in
      * W3C XML Schema standard format as CCYY-MM-DD, with optional
@@ -1231,6 +1242,7 @@ public abstract class Utility
         formatTwoDigits(cal.get(Calendar.DAY_OF_MONTH), buff);
         return buff.toString();
     }
+//#j2me}
 
     /**
      * Serialize time to general time text in buffer. Time values are formatted
@@ -1324,6 +1336,7 @@ public abstract class Utility
         return serializeDateTime(date.getTime(), true);
     }
 
+//#!j2me{
     /**
      * Serialize timestamp to general dateTime text. Timestamp values are
      * represented in the same way as regular dates, but allow more precision in
@@ -1386,6 +1399,7 @@ public abstract class Utility
         serializeTime((int)time.getTime(), buff);
         return buff.toString();
     }
+//#j2me}
     
     /**
      * General object comparison method. Don't know why Sun hasn't seen fit to
@@ -1651,5 +1665,66 @@ public abstract class Utility
      */
     public static List arrayListFactory() {
         return new ArrayList();
+    }
+    
+    /**
+     * Convert token-type value with validation. This handles the actual
+     * conversion of a value with no leading or trailing spaces, no non-space
+     * whitespaces, . The first character to be dropped must have been found
+     * prior to this call.
+     * 
+     * @param text value to be converted
+     * @param ideser list item deserializer
+     * @return list of deserialized items (<code>null</code> if input
+     * <code>null</code>, or if nonrecoverable error)
+     * @throws JiBXException if error in deserializing text
+     */
+    public static ArrayList deserializeList(String text,
+        IListItemDeserializer ideser) throws JiBXException {
+        if (text == null) {
+            return null;
+        } else {
+            
+            // scan text to find whitespace breaks between items
+            ArrayList items = new ArrayList();
+            int length = text.length();
+            int base = 0;
+            boolean space = true;
+            for (int i = 0; i < length; i++) {
+                char chr = text.charAt(i);
+                switch (chr) {
+                    
+                    case 0x09:
+                    case 0x0A:
+                    case 0x0D:
+                    case ' ':
+                        // ignore if preceded by space
+                        if (!space) {
+                            String itext = text.substring(base, i);
+                            items.add(ideser.deserialize(itext));
+                            space = true;
+                        }
+                        base = i + 1;
+                        break;
+                        
+                    default:
+                        space = false;
+                        break;
+                }
+            }
+            
+            // finish last item
+            if (base < length) {
+                String itext = text.substring(base);
+                items.add(ideser.deserialize(itext));
+            }
+            
+            // check if any items found
+            if (items.size() > 0) {
+                return items;
+            } else {
+                return null;
+            }
+        }
     }
 }

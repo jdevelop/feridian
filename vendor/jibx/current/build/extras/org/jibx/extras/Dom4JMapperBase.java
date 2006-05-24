@@ -39,6 +39,7 @@ import org.dom4j.Namespace;
 import org.dom4j.Node;
 import org.dom4j.ProcessingInstruction;
 import org.dom4j.QName;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
@@ -268,20 +269,20 @@ public class Dom4JMapperBase extends DocumentModelMapperBase
             int cev = m_unmarshalContext.currentEvent();
             switch (cev) {
                 
-                case UnmarshallingContext.CDSECT:
+                case IXMLReader.CDSECT:
                     content.add(s_factory.
                         createCDATA(m_unmarshalContext.getText()));
                     break;
                 
-                case UnmarshallingContext.COMMENT:
+                case IXMLReader.COMMENT:
                     content.add(s_factory.
                         createComment(m_unmarshalContext.getText()));
                     break;
                 
-                case UnmarshallingContext.END_TAG:
+                case IXMLReader.END_TAG:
                     break loop;
                 
-                case UnmarshallingContext.ENTITY_REF:
+                case IXMLReader.ENTITY_REF:
                     if (m_unmarshalContext.getText() == null) {
                         content.add(s_factory.
                             createEntity(m_unmarshalContext.getName(), null));
@@ -291,7 +292,7 @@ public class Dom4JMapperBase extends DocumentModelMapperBase
                         continue loop;
                     }
                 
-                case UnmarshallingContext.PROCESSING_INSTRUCTION:
+                case IXMLReader.PROCESSING_INSTRUCTION:
                     {
                         String text = m_unmarshalContext.getText();
                         int index = 0;
@@ -311,11 +312,11 @@ public class Dom4JMapperBase extends DocumentModelMapperBase
                     }
                     break;
                 
-                case UnmarshallingContext.START_TAG:
+                case IXMLReader.START_TAG:
                     content.add(unmarshalElement());
                     continue loop;
                 
-                case UnmarshallingContext.TEXT:
+                case IXMLReader.TEXT:
                     content.add(s_factory.createText(accumulateText()));
                     continue loop;
                     
@@ -361,7 +362,7 @@ public class Dom4JMapperBase extends DocumentModelMapperBase
         
         // add all content to element
         int event = m_unmarshalContext.nextToken();
-        if (event != UnmarshallingContext.END_TAG) {
+        if (event != IXMLReader.END_TAG) {
             unmarshalContent(element.content());
         }
         m_unmarshalContext.nextToken();

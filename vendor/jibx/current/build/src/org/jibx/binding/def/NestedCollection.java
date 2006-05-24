@@ -42,7 +42,9 @@ import org.jibx.runtime.JiBXException;
  */
 public class NestedCollection extends NestedBase
 {
-    // definitions used in generating calls to user defined methods
+    //
+    // Method definitions used in code generation
+    
     private static final String GROWARRAY_METHOD =
         "org.jibx.runtime.Utility.growArray";
     private static final String GROWARRAY_SIGNATURE =
@@ -51,6 +53,12 @@ public class NestedCollection extends NestedBase
         "org.jibx.runtime.Utility.resizeArray";
     private static final String RESIZEARRAY_SIGNATURE =
         "(ILjava/lang/Object;)Ljava/lang/Object;";
+    private static final String CHECK_ISSTART_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.isStart";
+    private static final String CHECK_ISSTART_SIGNATURE = "()Z";
+    private static final String SKIP_ELEMENT_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.skipElement";
+    private static final String SKIP_ELEMENT_SIGNATURE = "()V";
 
     //
     // Actual instance data.
@@ -70,17 +78,27 @@ public class NestedCollection extends NestedBase
      * @param parent containing binding definition context
      * @param objc current object context
      * @param ord ordered content flag
+     * @param flex flexible element handling flag
      * @param type fully qualified class name of values from collection (may be
      * <code>null</code>, if child content present)
      * @param load collection load code generation strategy
      * @param store collection store code generation strategy
      */
     public NestedCollection(IContainer parent, IContextObj objc, boolean ord,
-        String type, CollectionLoad load, CollectionStore store) {
-        super(parent, objc, ord, false);
+        boolean flex, String type, CollectionLoad load, CollectionStore store) {
+        super(parent, objc, ord, flex, false);
         m_itemType = type;
         m_loadStrategy = load;
         m_storeStrategy = store;
+    }
+    
+    /**
+     * Get the collection item type.
+     * 
+     * @return item type
+     */
+    public String getItemType() {
+        return m_itemType;
     }
     
     //
@@ -168,6 +186,24 @@ public class NestedCollection extends NestedBase
                     m_storeStrategy.genStoreItem(mb);
                     mb.appendUnconditionalBranch(this).setTarget(first, mb);
                 }
+                
+                // handle fall through condition depending on flexible flag
+                if (m_isFlexible) {
+                    
+                    // exit loop if not positioned at element start
+                    mb.targetNext(link);
+                    mb.loadContext();
+                    mb.appendCallVirtual(CHECK_ISSTART_NAME,
+                        CHECK_ISSTART_SIGNATURE);
+                    link = mb.appendIFEQ(this);
+                    
+                    // ignore unknown element and loop back to start
+                    mb.loadContext();
+                    mb.appendCallVirtual(SKIP_ELEMENT_NAME,
+                        SKIP_ELEMENT_SIGNATURE);
+                    mb.appendUnconditionalBranch(this).setTarget(first, mb);
+                    
+                }
             }
             
             // patch final test failure branch to fall through loop
@@ -212,11 +248,13 @@ public class NestedCollection extends NestedBase
                     //  check if item type matches this component
                     IComponent child = (IComponent)m_contents.get(i);
                     String type = child.getType();
-                    if (count > 1 || (!"java.lang.Object".equals(type) &&
-                        !ClassItem.isPrimitive(type))) {
+                    if (count > 1) {
                         mb.appendDUP();
                         mb.appendInstanceOf(type);
                         link = mb.appendIFEQ(this);
+                    }
+                    if ((!"java.lang.Object".equals(type) &&
+                        !ClassItem.isPrimitive(type))) {
                         mb.appendCreateCast(type);
                     }
                     
@@ -228,7 +266,7 @@ public class NestedCollection extends NestedBase
                 
             } else {
             
-                // generate marshal loop code that unmarshals an item from the
+                // generate marshal loop code that loads an item from the
                 //  collection and then checks to see if it matches a component
                 //  type, branching to the next component until a match is found
                 //  (or generating an exception on no match)

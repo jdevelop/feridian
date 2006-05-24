@@ -106,6 +106,22 @@ public class ValueChild implements IComponent
         "org.jibx.runtime.impl.UnmarshallingContext.parseContentText";
     private static final String UNMARSHAL_TEXT_SIGNATURE =
         "()Ljava/lang/String;";
+    private static final String UNMARSHAL_ELEMENT_TEXT_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.parseElementText";
+    private static final String UNMARSHAL_ELEMENT_TEXT_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+    private static final String UNMARSHAL_PARSE_IF_START_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.parseIfStartTag";
+    private static final String UNMARSHAL_PARSE_IF_START_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;)Z";
+    private static final String UNMARSHAL_PARSE_TO_START_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.parseToStartTag";
+    private static final String UNMARSHAL_PARSE_TO_START_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;)V";
+    private static final String UNMARSHAL_PARSE_PAST_END_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.parsePastEndTag";
+    private static final String UNMARSHAL_PARSE_PAST_END_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;)V";
     private static final String MARSHAL_TEXT_NAME =
         "org.jibx.runtime.impl.MarshallingContext.writeContent";
     private static final String MARSHAL_CDATA_NAME =
@@ -123,6 +139,18 @@ public class ValueChild implements IComponent
     protected static final String MARSHAL_SIGNATURE =
         "(ILjava/lang/String;Ljava/lang/String;)" +
         "Lorg/jibx/runtime/impl/MarshallingContext;";
+    protected static final String MARSHAL_STARTTAG_ATTRIBUTES =
+        "org.jibx.runtime.impl.MarshallingContext.startTagAttributes";
+    protected static final String MARSHAL_STARTTAG_SIGNATURE =
+        "(ILjava/lang/String;)Lorg/jibx/runtime/impl/MarshallingContext;";
+    protected static final String MARSHAL_CLOSESTART_EMPTY =
+        "org.jibx.runtime.impl.MarshallingContext.closeStartEmpty";
+    protected static final String MARSHAL_CLOSESTART_EMPTY_SIGNATURE =
+        "()Lorg/jibx/runtime/impl/MarshallingContext;";
+    protected static final String UNMARSHAL_ATTRIBUTE_BOOLEAN_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.attributeBoolean";
+    protected static final String UNMARSHAL_ATTRIBUTE_BOOLEAN_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;Z)Z";
 
     //
     // Actual instance data
@@ -147,6 +175,9 @@ public class ValueChild implements IComponent
     
     /** Fully qualified name of type. */
     private final String m_type;
+    
+    /** Nillable element flag. */
+    private final boolean m_isNillable;
 
     /** Linked property information. */
     private final PropertyDefinition m_property;
@@ -169,11 +200,11 @@ public class ValueChild implements IComponent
      * @param style value style code
      * @param ident identifier type code
      * @param constant value for constant
+     * @param nillable nillable element flag
      */
-
     public ValueChild(IContainer contain, IContextObj objc, NameDefinition name,
         PropertyDefinition prop, StringConversion conv, int style, int ident,
-        String constant) {
+        String constant, boolean nillable) {
         m_container = contain;
         m_objContext = objc;
         m_name = name;
@@ -183,6 +214,7 @@ public class ValueChild implements IComponent
         m_valueStyle = style;
         m_identType = ident;
         m_constantValue = constant;
+        m_isNillable = nillable;
     }
 
     /**
@@ -378,6 +410,8 @@ public class ValueChild implements IComponent
         if (m_constantValue == null && !m_property.isImplicit()) {
             mb.loadObject();
         }
+        
+        // prepare for parsing the element name
         mb.loadContext();
         if (m_name != null) {
             m_name.genPushUriPair(mb);
@@ -420,7 +454,41 @@ public class ValueChild implements IComponent
         } else if (m_constantValue == null) {
             
             // unmarshal and convert value
-            if (m_valueStyle == ValueChild.TEXT_STYLE ||
+            if (m_isNillable) {
+                
+                // first check for element present at all
+                BranchWrapper ifmiss = null;
+                if (m_property.isOptional()) {
+                    mb.appendCallVirtual(UNMARSHAL_PARSE_IF_START_NAME,
+                        UNMARSHAL_PARSE_IF_START_SIGNATURE);
+                    ifmiss = mb.appendIFEQ(this);
+                } else {
+                    mb.appendCallVirtual(UNMARSHAL_PARSE_TO_START_NAME,
+                        UNMARSHAL_PARSE_TO_START_SIGNATURE);
+                }
+                mb.loadContext();
+                mb.appendLoadConstant("http://www.w3.org/2001/XMLSchema-instance");
+                mb.appendLoadConstant("nil");
+                mb.appendICONST_0();
+                mb.appendCallVirtual(UNMARSHAL_ATTRIBUTE_BOOLEAN_NAME,
+                    UNMARSHAL_ATTRIBUTE_BOOLEAN_SIGNATURE);
+                BranchWrapper notnil = mb.appendIFEQ(this);
+                mb.targetNext(ifmiss);
+                mb.appendACONST_NULL();
+                mb.loadContext();
+                m_name.genPushUriPair(mb);
+                mb.appendCallVirtual(UNMARSHAL_PARSE_PAST_END_NAME,
+                    UNMARSHAL_PARSE_PAST_END_SIGNATURE);
+                BranchWrapper ifnil = mb.appendUnconditionalBranch(this);
+                mb.targetNext(notnil);
+                mb.loadContext();
+                m_name.genPushUriPair(mb);
+                mb.appendCallVirtual(UNMARSHAL_ELEMENT_TEXT_NAME,
+                    UNMARSHAL_ELEMENT_TEXT_SIGNATURE);
+                m_conversion.genFromText(mb);
+                mb.targetNext(ifnil);
+                
+            } else if (m_valueStyle == ValueChild.TEXT_STYLE ||
                 m_valueStyle == ValueChild.CDATA_STYLE) {
                 
                 // unmarshal text value directly and let handler convert
@@ -532,6 +600,35 @@ public class ValueChild implements IComponent
             if (m_property.hasTest()) {
                 mb.loadObject();
                 ifmiss = m_property.genTest(mb);
+            } else if (m_isNillable) {
+                
+                // check for null object
+                BranchWrapper ifhit;
+                if (m_property.isImplicit()) {
+                    mb.appendDUP();
+                    ifhit = mb.appendIFNONNULL(this);
+                    mb.appendPOP();
+                } else {
+                    mb.loadObject();
+                    m_property.genLoad(mb);
+                    ifhit = mb.appendIFNONNULL(this);
+                }
+                
+                // generate empty element with xsi:nil="true"
+                mb.loadContext();
+                m_name.genPushIndexPair(mb);
+                mb.appendCallVirtual(MARSHAL_STARTTAG_ATTRIBUTES,
+                    MARSHAL_STARTTAG_SIGNATURE);
+                mb.appendLoadConstant(2);
+                mb.appendLoadConstant("nil");
+                mb.appendLoadConstant("true");
+                mb.appendCallVirtual(MARSHAL_ATTRIBUTE, MARSHAL_SIGNATURE);
+                mb.appendCallVirtual(MARSHAL_CLOSESTART_EMPTY,
+                    MARSHAL_CLOSESTART_EMPTY_SIGNATURE);
+                mb.appendPOP();
+                ifmiss = mb.appendUnconditionalBranch(this);
+                mb.targetNext(ifhit);
+                
             }
             String type = m_property.getTypeName();
             if (m_name != null) {
@@ -560,6 +657,11 @@ public class ValueChild implements IComponent
                 convert = BindingDefinition.s_stringConversion;
                 type = "java.lang.String";
             }
+            
+            // convert to expected type if object
+            if (!ClassItem.isPrimitive(type)) {
+                mb.appendCreateCast(type);
+            }
                 
             // convert and marshal value
             boolean isatt = m_valueStyle == ValueChild.ATTRIBUTE_STYLE;
@@ -576,9 +678,7 @@ public class ValueChild implements IComponent
             }
             
             // finish by setting target for missing optional property test
-            if (ifmiss != null) {
-                mb.targetNext(ifmiss);
-            }
+            mb.targetNext(ifmiss);
             
         } else {
             
@@ -619,6 +719,22 @@ public class ValueChild implements IComponent
         } else {
             return m_property.getName();
         }
+    }
+    
+    /**
+     * Check if implicit.
+     * 
+     * @return <code>true</code> if implicit, <code>false</code> if not
+     */
+    public boolean isImplicit() {
+        return m_property.isThis();
+    }
+    
+    /**
+     * Switch property from "this" to "implicit".
+     */
+    public void switchProperty() {
+        m_property.switchProperty();
     }
     
     //

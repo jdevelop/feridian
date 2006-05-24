@@ -217,8 +217,8 @@ public class GenericXMLWriter extends XMLWriterBase
      * @throws IOException on error writing to document
      */
     public void writeTextContent(String text) throws IOException {
+        flagTextContent();
         m_escaper.writeContent(text, m_writer);
-        m_textSeen = m_contentSeen = true;
     }
     
     /**
@@ -229,8 +229,8 @@ public class GenericXMLWriter extends XMLWriterBase
      * @throws IOException on error writing to document
      */
     public void writeCData(String text) throws IOException {
+        flagTextContent();
         m_escaper.writeCData(text, m_writer);
-        m_textSeen = m_contentSeen = true;
     }
     
     /**

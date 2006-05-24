@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
-import org.jibx.runtime.impl.UnmarshallingContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -312,24 +312,24 @@ public class DomMapperBase extends DocumentModelMapperBase
             int cev = m_unmarshalContext.currentEvent();
             switch (cev) {
                 
-                case UnmarshallingContext.CDSECT:
+                case IXMLReader.CDSECT:
                     {
                         String text = m_unmarshalContext.getText();
                         m_unmarshalContext.nextToken();
                         return m_document.createCDATASection(text);
                     }
                 
-                case UnmarshallingContext.COMMENT:
+                case IXMLReader.COMMENT:
                     {
                         String text = m_unmarshalContext.getText();
                         m_unmarshalContext.nextToken();
                         return m_document.createComment(text);
                     }
                 
-                case UnmarshallingContext.END_TAG:
+                case IXMLReader.END_TAG:
                     return null;
                 
-                case UnmarshallingContext.ENTITY_REF:
+                case IXMLReader.ENTITY_REF:
                     if (m_unmarshalContext.getText() == null) {
                         String name = m_unmarshalContext.getName();
                         m_unmarshalContext.nextToken();
@@ -339,7 +339,7 @@ public class DomMapperBase extends DocumentModelMapperBase
                         return m_document.createTextNode(text);
                     }
                 
-                case UnmarshallingContext.PROCESSING_INSTRUCTION:
+                case IXMLReader.PROCESSING_INSTRUCTION:
                     {
                         String text = m_unmarshalContext.getText();
                         m_unmarshalContext.nextToken();
@@ -359,10 +359,10 @@ public class DomMapperBase extends DocumentModelMapperBase
                         }
                     }
                 
-                case UnmarshallingContext.START_TAG:
+                case IXMLReader.START_TAG:
                     return unmarshalElement();
                 
-                case UnmarshallingContext.TEXT:
+                case IXMLReader.TEXT:
                     return m_document.createTextNode(accumulateText());
                     
                 default:
@@ -437,7 +437,7 @@ public class DomMapperBase extends DocumentModelMapperBase
         
         // add all content to element
         int event = m_unmarshalContext.nextToken();
-        if (event != UnmarshallingContext.END_TAG) {
+        if (event != IXMLReader.END_TAG) {
             unmarshalContent(element);
         }
         m_unmarshalContext.nextToken();

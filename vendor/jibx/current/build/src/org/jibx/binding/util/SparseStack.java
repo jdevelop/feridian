@@ -28,6 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.jibx.binding.util;
 
+import org.jibx.runtime.IntStack;
+
 
 /**
  * Stack for values that depend on the level of nesting, where only some of the

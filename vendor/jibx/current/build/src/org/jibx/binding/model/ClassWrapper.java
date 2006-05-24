@@ -116,6 +116,13 @@ public class ClassWrapper implements IClass
     }
 
     /* (non-Javadoc)
+     * @see org.jibx.binding.model.IClass#isModifiable()
+     */
+    public boolean isModifiable() {
+        return m_class.isModifiable();
+    }
+
+    /* (non-Javadoc)
      * @see org.jibx.binding.model.IClass#isSuperclass(org.jibx.binding.model.IClass)
      */
     public boolean isSuperclass(String name) {

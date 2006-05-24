@@ -39,9 +39,7 @@ import org.jibx.runtime.JiBXException;
  * operates as a simple pass-through wrapper for the top child component.
  *
  * @author Dennis M. Sosnoski
- * @version 1.0
  */
-
 public class MappingReference extends PassThroughComponent
 {
     /** Containing binding definition structure. */
@@ -50,8 +48,14 @@ public class MappingReference extends PassThroughComponent
     /** Property definition. */
     private final PropertyDefinition m_property;
     
-    /** Fully qualified name of mapped type, or type name for mapping. */
+    /** Fully qualified name of mapped type. */
     private String m_type;
+    
+    /** Ordinary name of type for abstract mapping. */
+    private String m_referenceText;
+    
+    /** Qualified name of type for abstract mapping. */
+    private String m_referenceQName;
     
     /** Context object. */
     private final IContextObj m_contextObject;
@@ -67,20 +71,25 @@ public class MappingReference extends PassThroughComponent
      *
      * @param contain containing binding definition structure
      * @param prop property definition
-     * @param type fully qualified name of mapped type (may also be type name
-     * for abstract mapping)
+     * @param type fully qualified name of mapped type
+     * @param reftext ordinary text name for abstract mapping reference
+     * (<code>null</code> if not specified)
+     * @param refqname qualified type name for abstract mapping reference
+     * (<code>null</code> if not specified)
      * @param objc current object context
      * @param name reference name definition (only allowed with abstract
      * mappings)
      * @param synth sythentic reference added to empty collection flag
      */
-
     public MappingReference(IContainer contain, PropertyDefinition prop,
-        String type, IContextObj objc, NameDefinition name, boolean synth) {
+        String type, String reftext, String refqname, IContextObj objc,
+        NameDefinition name, boolean synth) {
         super();
         m_container = contain;
         m_property = prop;
         m_type = type;
+        m_referenceText = reftext;
+        m_referenceQName = refqname;
         m_contextObject = objc;
         m_name = name;
         m_isSynthetic = synth;
@@ -97,7 +106,16 @@ public class MappingReference extends PassThroughComponent
         
         // find the mapping being used
         DefinitionContext defc = m_container.getDefinitionContext();
-        IMapping mdef = defc.getClassMapping(m_type);
+        IMapping mdef = null;
+        if (m_referenceText != null) {
+            mdef = defc.getClassMapping(m_referenceText);
+            if (mdef == null) {
+                mdef = defc.getClassMapping(m_referenceQName);
+            }
+        }
+        if (mdef == null) {
+            mdef = defc.getClassMapping(m_type);
+        }
         IComponent wrap = null;
         PropertyDefinition prop = m_property;
         if (mdef == null) {
@@ -165,7 +183,8 @@ public class MappingReference extends PassThroughComponent
     // DEBUG
     public void print(int depth) {
         BindingDefinition.indent(depth);
-        System.out.print("mapping reference to " + m_type);
+        System.out.print("mapping reference to " +
+            ((m_referenceText == null) ? m_type : m_referenceText));
         if (m_property != null) {
             System.out.print(" using " + m_property.toString());
         }

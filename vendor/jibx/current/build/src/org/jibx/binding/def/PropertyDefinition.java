@@ -51,13 +51,30 @@ import org.jibx.runtime.JiBXException;
 public class PropertyDefinition
 {
     //
+    // Constants and such related to code generation.
+    
+    // recognized test-method signatures.
+    private static final String[] TEST_METHOD_SIGNATURES =
+    {
+        "(Lorg/jibx/runtime/IMarshallingContext;)Z",
+        "()Z"
+    };
+    
+    // recognized get-method signatures.
+    private static final String[] GET_METHOD_SIGNATURES =
+    {
+        "(Lorg/jibx/runtime/IMarshallingContext;)",
+        "()"
+    };
+    
+    //
     // Actual instance data
     
     /** Reference to "this" property of object flag. */
-    private final boolean m_isThis;
+    private boolean m_isThis;
     
     /** Reference to implicit value from collection. */
-    private final boolean m_isImplicit;
+    private boolean m_isImplicit;
 
     /** Optional item flag. */
     private boolean m_isOptional;
@@ -133,7 +150,7 @@ public class PropertyDefinition
             m_testMethod = null;
         } else {
             if (opt) {
-                m_testMethod = cf.getMethod(test, "()Z");
+                m_testMethod = cf.getMethod(test, TEST_METHOD_SIGNATURES);
                 if (m_testMethod == null) {
                     throw new JiBXException("test-method " + test +
                         " not found in class " + cf.getName());
@@ -146,7 +163,7 @@ public class PropertyDefinition
         if (get == null) {
             m_getMethod = null;
         } else {
-            m_getMethod = cf.getMethod(get, "()");
+            m_getMethod = cf.getMethod(get, GET_METHOD_SIGNATURES);
             if (m_getMethod == null) {
                 throw new JiBXException("get-method " + get +
                     " not found in class " + cf.getName());
@@ -164,14 +181,25 @@ public class PropertyDefinition
             // need to handle overloads, so generate possible signatures
             ArrayList sigs = new ArrayList();
             if (m_getMethod != null) {
-                sigs.add("(" + ClassUtils.getSignature(gtype) + ")V");
+                String psig = ClassUtils.getSignature(gtype);
+                sigs.add("(" + psig +
+                    "Lorg/jibx/runtime/IUnmarshallingContext;" + ")V");
+                sigs.add("(" + psig + ")V");
             }
             if (type != null) {
-                sigs.add("(" + ClassUtils.getSignature(type) + ")V");
+                String psig = ClassUtils.getSignature(type);
+                sigs.add("(" + psig +
+                    "Lorg/jibx/runtime/IUnmarshallingContext;" + ")V");
+                sigs.add("(" + psig + ")V");
             }
             if (m_fieldItem != null) {
-                sigs.add("(" + m_fieldItem.getSignature() + ")V");
+                String psig = m_fieldItem.getSignature();
+                sigs.add("(" + psig +
+                    "Lorg/jibx/runtime/IUnmarshallingContext;" + ")V");
+                sigs.add("(" + psig + ")V");
             }
+            sigs.add
+                ("(Ljava/lang/Object;Lorg/jibx/runtime/IUnmarshallingContext;)V");
             sigs.add("(Ljava/lang/Object;)V");
             
             // set method needs verification of argument and return type
@@ -285,7 +313,6 @@ public class PropertyDefinition
      * @return <code>true</code> if reference to "this", <code>false</code> if
      * not
      */
-
     public boolean isThis() {
         return m_isThis;
     }
@@ -295,9 +322,16 @@ public class PropertyDefinition
      *
      * @return <code>true</code> if implicit, <code>false</code> if not
      */
-
     public boolean isImplicit() {
         return m_isImplicit;
+    }
+    
+    /**
+     * Switch property from "this" to "implicit".
+     */
+    public void switchProperty() {
+        m_isThis = false;
+        m_isImplicit = true;
     }
 
     /**
@@ -305,7 +339,6 @@ public class PropertyDefinition
      *
      * @return <code>true</code> if optional, <code>false</code> if required
      */
-
     public boolean isOptional() {
         return m_isOptional;
     }
@@ -422,6 +455,9 @@ public class PropertyDefinition
             if (m_testMethod.isStatic()) {
                 mb.appendPOP();
             }
+            if (m_testMethod.getArgumentCount() > 0) {
+                mb.loadContext();
+            }
             mb.appendCall(m_testMethod);
             return mb.appendIFEQ(this);
             
@@ -437,6 +473,9 @@ public class PropertyDefinition
             } else {
                 if (m_getMethod.isStatic()) {
                     mb.appendPOP();
+                }
+                if (m_getMethod.getArgumentCount() > 0) {
+                    mb.loadContext();
                 }
                 mb.addMethodExceptions(m_getMethod);
                 mb.appendCall(m_getMethod);
@@ -460,7 +499,7 @@ public class PropertyDefinition
      * @throws JiBXException if configuration error
      */
 
-    public void genLoad(MethodBuilder mb) throws JiBXException {
+    public void genLoad(ContextMethodBuilder mb) throws JiBXException {
         
         // nothing to be done if called on "this" or implicit reference
         if (!m_isThis && !m_isImplicit) {
@@ -491,6 +530,9 @@ public class PropertyDefinition
                     mb.appendPOP();
                 }
                 if (access.isMethod()) {
+                    if (access.getArgumentCount() > 0) {
+                        mb.loadContext();
+                    }
                     mb.addMethodExceptions(access);
                     mb.appendCall(access);
                 } else {
@@ -554,6 +596,16 @@ public class PropertyDefinition
             // generated instruction either stores a field value or calls a
             //  "set" method, as appropriate
             if (access.isMethod()) {
+                if (access.getArgumentCount() > 1) {
+                    
+                    // this test is ugly, needed because of backfill method
+                    //  calls from ValueChild
+                    if (mb instanceof ContextMethodBuilder) {
+                        ((ContextMethodBuilder)mb).loadContext();
+                    } else {
+                        mb.appendACONST_NULL();
+                    }
+                }
                 mb.addMethodExceptions(access);
                 mb.appendCall(access);
             } else {

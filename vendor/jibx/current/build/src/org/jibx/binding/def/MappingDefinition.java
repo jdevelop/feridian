@@ -150,9 +150,6 @@ public class MappingDefinition extends MappingBase
      by marshaller and unmarshaller, or if abstract mapping). */
     private final NameDefinition m_name;
     
-    /** Abstract mapping type name. */
-    private final String m_typeName;
-    
     /** Abstract mapping flag. */
     private final boolean m_isAbstract;
     
@@ -187,7 +184,8 @@ public class MappingDefinition extends MappingBase
      * @param type bound class name
      * @param name mapped element name information (<code>null</code> if defined
      * by marshaller and unmarshaller)
-     * @param tname type name for abstract mapping (<code>null</code> if none)
+     * @param tname qualified type name for abstract mapping (<code>null</code>
+     * if none)
      * @param abs abstract mapping flag
      * @param base abstract mapping extended by this one
      * @param bind binding definition component
@@ -196,7 +194,7 @@ public class MappingDefinition extends MappingBase
     public MappingDefinition(IContainer contain, DefinitionContext defc,
         String type, NameDefinition name, String tname, boolean abs,
         String base, ObjectBinding bind) throws JiBXException {
-        super(contain, type);
+        super(contain, type, tname);
         IComponent tref = new ObjectBinding(bind);
         if (name == null) {
             setWrappedComponent(bind);
@@ -210,7 +208,6 @@ public class MappingDefinition extends MappingBase
         m_class = BoundClass.getInstance(type, null);
         m_referenceType = type == null ? "java.lang.Object" : type;
         m_name = name;
-        m_typeName = tname;
         m_isAbstract = abs;
         m_baseType = base;
     }
@@ -226,9 +223,7 @@ public class MappingDefinition extends MappingBase
     }
 
     /**
-     * Generate code for loading namespace index and URI arrays. This default
-     * implementation assumes no namespaces are present and does nothing. It
-     * must be overridden by subclasses that support namespace declarations.
+     * Generate code for loading namespace index and URI arrays.
      *
      * @param mb method builder for generated code
      */
@@ -290,10 +285,6 @@ public class MappingDefinition extends MappingBase
     
     public NameDefinition getName() {
         return m_name;
-    }
-    
-    public String getTypeName() {
-        return m_typeName;
     }
 
     public void addNamespace(NamespaceDefinition ns) throws JiBXException {

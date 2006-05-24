@@ -44,13 +44,16 @@ public abstract class NestedBase extends BindingBuilder.ContainerBase
 implements IComponent, IContainer
 {
     /** Context object for this definition. */
-    private final IContextObj m_contextObject;
+    private IContextObj m_contextObject;
     
     /** Flag for context defined at level. */
     private final boolean m_hasContext;
 
     /** Flag for ordered child content (used by subclasses). */
     protected final boolean m_isOrdered;
+
+    /** Flag for flexible element handling (used by subclasses). */
+    protected final boolean m_isFlexible;
     
     /** Definition context for container (may be same as parent). */
     private final DefinitionContext m_defContext;
@@ -67,10 +70,11 @@ implements IComponent, IContainer
      * @param contain containing binding definition context
      * @param objc current object context
      * @param ord ordered content flag
+     * @param flex flexible element handling flag
      * @param defc define context for structure flag
      */
     public NestedBase(IContainer contain, IContextObj objc,
-        boolean ord, boolean defc) {
+        boolean ord, boolean flex, boolean defc) {
         
         // set base class defaults
         super(contain);
@@ -80,12 +84,22 @@ implements IComponent, IContainer
         m_contextObject = objc;
         m_contents = new ArrayList();
         m_isOrdered = ord;
+        m_isFlexible = flex;
         m_hasContext = defc;
         if (defc) {
             m_defContext = new DefinitionContext(contain);
         } else {
             m_defContext = contain.getDefinitionContext();
         }
+    }
+    
+    /**
+     * Set the object context.
+     * 
+     * @param objc object context
+     */
+    public void setObjectContext(IContextObj objc) {
+        m_contextObject = objc;
     }
     
     /**

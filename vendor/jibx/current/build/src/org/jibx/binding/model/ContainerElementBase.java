@@ -357,6 +357,35 @@ public abstract class ContainerElementBase extends NestingElementBase
         m_objectAttrs.setUnmarshallerName(name);
     }
     
+    /**
+     * Get type to be used for creating new instance.
+     * 
+     * @return class name for type to be created (or <code>null</code> if none)
+     */
+    public String getCreateType() {
+        return m_objectAttrs.getCreateType();
+    }
+    
+    /**
+     * Get new instance creation class information. This method is only usable
+     * after a call to {@link #validate}.
+     * 
+     * @return class information for type to be created (or <code>null</code> if
+     * none)
+     */
+    public IClass getCreateClass() {
+        return m_objectAttrs.getCreateClass();
+    }
+    
+    /**
+     * Set new instance type class name.
+     * 
+     * @param name class name to be used for creating new instance
+     */
+    public void setCreateType(String name) {
+        m_objectAttrs.setCreateType(name);
+    }
+    
     //
     // Structure attribute delegate methods
 
@@ -398,6 +427,47 @@ public abstract class ContainerElementBase extends NestingElementBase
     
     //
     // Validation methods.
+
+    /**
+     * Check that there's a way to construct an instance of an object class for
+     * input bindings. This can be a factory method, an unmarshaller, a
+     * no-argument constructor already defined in the class, or a modifiable
+     * class with constructor generation enabled. If a create-type is specified,
+     * this is used in place of the declared type. The call always succeeds if
+     * the binding is output-only.
+     * 
+     * @param vctx validation context
+     * @param type constructed object type
+     */
+    protected void verifyConstruction(ValidationContext vctx, IClass type) {
+        if (vctx.isInBinding() && getFactory() == null &&
+            getUnmarshaller() == null) {
+            IClass create = getCreateClass();
+            if (create != null) {
+                if (create.isAssignable(type)) {
+                    type = create;
+                } else {
+                    vctx.addError("Specified create-type '" + create.getName() +
+                        "' is not compatible with type '" +
+                        type.getName() + '\'');
+                }
+            }
+            if (!type.getName().endsWith("[]") &&
+                type.getInitializerMethod("()V") == null) {
+                BindingElement binding = vctx.getBindingRoot();
+                if (binding.isAddConstructors()) {
+                    if (!type.isModifiable()) {
+                        vctx.addError("Need no-argument constructor or " +
+                            "factory method for unmodifiable class " +
+                            type.getName());
+                    }
+                } else {
+                    vctx.addError("Need no-argument constructor or " +
+                        "factory method for class " + type.getName());
+                }
+            }
+        }
+    }
 
     /**
      * Check that child components are of types compatible with the container

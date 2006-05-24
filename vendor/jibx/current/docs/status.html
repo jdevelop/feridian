@@ -308,26 +308,36 @@
       <div class="h3">
       <h3><a name="intro">Release News</a></h3>
 
-<p>The current download code is the version 1.0.1 production release. This minor
-release includes two fixes to the 1.0 production release:</p>
+<p>The current production download code is the version 1.0.2 production release.
+This minor release includes several fixes to the 1.0 production release:</p>
 
 <ul>
 <li>Corrected an issue which prevented building and using JiBX with JDK 1.3.</li>
 <li>Updated the <i>binding.xsd</i> and <i>binding.dtd</i> grammars in the
 <i>/docs</i> directory of the distribution.</li>
+<li>Added checks for several possible errors in binding definition.</li>
 </ul>
+
+<p>The current development download code is the version 1.1 beta2 release. This
+release includes support for StAX parsers and writers as an alternative to the
+XMLPull parser support implemented in version 1.0.X. <!--See the added
+<a href="runtime.html#stax">StAX support</a> section of the runtime documentation
+for details on using StAX. -->The 1.1 beta2 release also features compatibility
+with the <a href="http://ws.apache.org/axis2">Apache Axis2</a> web services
+framework.</p>
 
 	    </div>
       <div class="h3">
       <h3><a name="status">Status</a></h3>
 
-<p>Work is now in progress on a 1.1 release of JiBX which will support more
-input and output options, including StAX parser and writer support. The 1.1
-release is also planned to integrate stable versions of the <a
-href="xsd2jibx/index.html">Xsd2Jibx</a> and <a href="%./jibxtools/index.html%">Generator Tools</a>
-subprojects into the JiBX distribution. An initial beta release of JiBX 1.1 will
-be available early in 2006, including the StAX support and an improved
-version of the binding generator.</p>
+<p>Work is now in progress on a 1.1 release of JiBX which supports more input
+and output options, along with a variety of other improvements. The 1.1 beta2
+development release implements full StAX pull parser input and output support.
+The upcoming 1.1 beta3 release will include an improved version of the binding
+generator, and the final 1.1 release will integrate stable versions of both the
+<a href="xsd2jibx/index.html">Xsd2Jibx</a> and
+<a href="%./jibxtools/index.html%">Generator Tools</a>
+subprojects into the JiBX distribution.</p>
 
 <p>Work is also starting on JiBX 2.0. The main focus of the 2.0 changes is an
 entirely new code generation model, which is designed to support both direct
@@ -335,7 +345,7 @@ bytecode generation (as in the 1.X code) and source code generation. Other
 changes will include so-called "flexible" unmarshalling support, where unknown
 elements are skipped and only those elements defined by the binding are handled,
 and some level of support for J2SE 5.0 generics and annotations. The first beta
-release of JiBX 2.0 is planned for April, 2006.</p>
+release of JiBX 2.0 is planned for August, 2006.</p>
 
 	    </div>
       <div class="h3">
@@ -376,7 +386,7 @@ about known issues and details of how to report problems.</p>
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

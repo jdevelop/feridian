@@ -42,10 +42,10 @@ import org.jibx.runtime.IXMLWriter;
 public abstract class XMLWriterBase extends XMLWriterNamespaceBase
 {
     /** Flag for current element has text content. */
-    protected boolean m_textSeen;
+    private boolean m_textSeen;
     
     /** Flag for current element has content. */
-    protected boolean m_contentSeen;
+    private boolean m_contentSeen;
     
     /**
      * Constructor.
@@ -57,6 +57,7 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      */
     public XMLWriterBase(String[] uris) {
         super(uris);
+        m_contentSeen = true;
     }
     
     /**
@@ -104,6 +105,31 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     protected abstract void indent(int bias) throws IOException;
+    
+    /**
+     * Set up for writing any content to element. If the start tag for the
+     * element has not been closed, this will close it.
+     *
+     * @throws IOException on error writing to document
+     */
+    protected final void flagContent() throws IOException {
+        if (!m_contentSeen) {
+            writeMarkup('>');
+            incrementNesting();
+            m_contentSeen = true;
+        }
+    }
+    
+    /**
+     * Set up for writing text content to element. If the start tag for the
+     * element has not been closed, this will close it.
+     *
+     * @throws IOException on error writing to document
+     */
+    protected final void flagTextContent() throws IOException {
+        flagContent();
+        m_textSeen = true;
+    }
         
     /**
      * Write XML declaration to document. This can only be called before any
@@ -140,6 +166,7 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void startTagOpen(int index, String name) throws IOException {
+        flagContent();
         indent();
         writeMarkup('<');
         writePrefix(index);
@@ -164,6 +191,7 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
         int[] nums, String[] prefs) throws IOException {
         
         // find the namespaces actually being declared
+        flagContent();
         int[] deltas = openNamespaces(nums, prefs);
         
         // create the start tag for element
@@ -197,7 +225,7 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      */
     public void addAttribute(int index, String name, String value)
         throws IOException {
-        writeMarkup(" ");
+        writeMarkup(' ');
         writePrefix(index);
         writeMarkup(name);
         writeMarkup("=\"");
@@ -212,8 +240,6 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void closeStartTag() throws IOException {
-        writeMarkup('>');
-        incrementNesting();
         m_textSeen = m_contentSeen = false;
     }
     
@@ -239,12 +265,11 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void startTagClosed(int index, String name) throws IOException {
+        flagContent();
         indent();
         writeMarkup('<');
         writePrefix(index);
         writeMarkup(name);
-        writeMarkup('>');
-        incrementNesting();
         m_textSeen = m_contentSeen = false;
     }
     
@@ -256,13 +281,29 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void endTag(int index, String name) throws IOException {
+        
+        // first adjust indentation
         if (m_contentSeen && !m_textSeen) {
             indent(-1);
         }
-        writeMarkup("</");
-        writePrefix(index);
-        writeMarkup(name);
-        writeMarkup('>');
+        
+        // check for content written to element
+        if (m_contentSeen) {
+            
+            // content was written, which means start tag closed and end needed
+            writeMarkup("</");
+            writePrefix(index);
+            writeMarkup(name);
+            writeMarkup('>');
+            
+        } else {
+            
+            // no content, just close start tag as empty tag
+            writeMarkup("/>");
+            incrementNesting();
+        }
+        
+        // adjust flags for containing element
         decrementNesting();
         m_textSeen = false;
         m_contentSeen = true;
@@ -275,6 +316,7 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void writeComment(String text) throws IOException {
+        flagContent();
         writeMarkup("<!--");
         writeMarkup(text);
         writeMarkup("-->");
@@ -287,10 +329,10 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void writeEntityRef(String name) throws IOException {
+        flagContent();
         writeMarkup('&');
         writeMarkup(name);
         writeMarkup(';');
-        m_contentSeen = true;
     }
     
     /**
@@ -337,13 +379,13 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * @throws IOException on error writing to document
      */
     public void writePI(String target, String data) throws IOException {
+        flagContent();
         indent();
         writeMarkup("<?");
         writeMarkup(target);
         writeMarkup(' ');
         writeMarkup(data);
         writeMarkup("?>");
-        m_contentSeen = true;
     }
     
     /**
@@ -367,7 +409,8 @@ public abstract class XMLWriterBase extends XMLWriterNamespaceBase
      * between uses. It is automatically called when output is set.
      */
     public void reset() {
-        m_textSeen = m_contentSeen = false;
+        m_textSeen = false;
+        m_contentSeen = true;
         super.reset();
     }
     

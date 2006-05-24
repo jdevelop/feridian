@@ -28,16 +28,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.jibx.binding.def;
 
-import org.jibx.binding.classes.*;
+import org.jibx.binding.classes.BoundClass;
+import org.jibx.binding.classes.ClassFile;
 import org.jibx.runtime.JiBXException;
 
 /**
  * Direct mapping using supplied marshaller and unmarshaller.
  *
  * @author Dennis M. Sosnoski
- * @version 1.0
  */
-
 public class MappingDirect extends MappingBase
 {
     /** Direct mapping implementation. */
@@ -45,6 +44,9 @@ public class MappingDirect extends MappingBase
     
     /** Class file to use for added code. */
     private final BoundClass m_boundClass;
+    
+    /** Flag for abstract mapping. */
+    private final boolean m_isAbstract;
     
     /** Flag for code added to class (if appropriate). */
     private boolean m_isGenerated;
@@ -54,15 +56,17 @@ public class MappingDirect extends MappingBase
      *
      * @param contain containing binding definition structure
      * @param type bound class name
+     * @param tname qualified type name (<code>null</code> if not specified)
      * @param dir direct object information
+     * @param abs abstract mapping flag
      * @throws JiBXException on mapping definition conflict
      */
-
-    public MappingDirect(IContainer contain, String type, DirectObject dir)
-        throws JiBXException {
-        super(contain, type, dir);
+    public MappingDirect(IContainer contain, String type, String tname,
+        DirectObject dir, boolean abs) throws JiBXException {
+        super(contain, type, tname, dir);
         m_mappingImpl = dir;
         m_boundClass = BoundClass.getInstance(type, null);
+        m_isAbstract = abs;
     }
 
     /**
@@ -71,7 +75,6 @@ public class MappingDirect extends MappingBase
      *
      * @return information for mapped class
      */
-    
     public BoundClass getBoundClass() {
         return m_boundClass;
     }
@@ -102,10 +105,6 @@ public class MappingDirect extends MappingBase
     public NameDefinition getName() {
         return m_mappingImpl.getName();
     }
-    
-    public String getTypeName() {
-        return null;
-    }
 
     public void addNamespace(NamespaceDefinition ns) {
         throw new IllegalStateException
@@ -113,7 +112,7 @@ public class MappingDirect extends MappingBase
     }
 
     public boolean isAbstract() {
-        return false;
+        return m_isAbstract;
     }
 
     public boolean isBase() {

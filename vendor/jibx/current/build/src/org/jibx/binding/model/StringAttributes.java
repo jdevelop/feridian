@@ -264,6 +264,13 @@ public class StringAttributes extends AttributeBase
                 m_baseFormat = dctx.getBestFormat(m_typeClass);
             } else {
                 m_baseFormat = dctx.getNamedFormat(m_formatName);
+                if (m_baseFormat == null) {
+                    String name = m_formatName;
+                    if (name.startsWith("{}")) {
+                        name = name.substring(2);
+                    }
+                    vctx.addError("Unknown format " + name);
+                }
             }
             
             // check specified serializer and deserializer
@@ -334,39 +341,55 @@ public class StringAttributes extends AttributeBase
                     
                 } else {
                     
-                    // try to find an inherited deserializer
-                    FormatElement ances = m_baseFormat;
-                    while (ances != null) {
-                        m_deserializerItem = ances.getDeserializer();
-                        if (m_deserializerItem == null) {
-                            ances = ances.getBaseFormat();
-                        } else {
+                    // check for a Java 5 enumeration
+                    boolean isenum = false;
+                    IClass sclas = m_typeClass;
+                    while ((sclas = sclas.getSuperClass()) != null) {
+                        if (sclas.getName().equals("java.lang.Enum")) {
+                            isenum = true;
                             break;
                         }
                     }
+                    if (isenum) {
+                        m_deserializerItem = m_typeClass.getMethod("valueOf",
+                            "(Ljava/lang/String;)");
+                    }
                     if (m_deserializerItem == null) {
                         
-                        // try to find a constructor from string as last resort
-                        m_deserializerItem = m_typeClass.
-                            getInitializerMethod(STRING_CONSTRUCTOR_SIGNATURE);
+                        // try to find an inherited deserializer
+                        FormatElement ances = m_baseFormat;
+                        while (ances != null) {
+                            m_deserializerItem = ances.getDeserializer();
+                            if (m_deserializerItem == null) {
+                                ances = ances.getBaseFormat();
+                            } else {
+                                break;
+                            }
+                        }
                         if (m_deserializerItem == null) {
                             
-                            // error unless predefined formats
-                            if (vctx.getNestingDepth() > 0) {
-                                StringBuffer buff = new StringBuffer();
-                                buff.append
-                                    ("Need deserializer or constructor ");
-                                buff.append("from string");
-                                if (!vctx.isInBinding()) {
-                                    buff.append(" for default value of type ");
-                                    buff.append(tname);
-                                } else {
-                                    buff.append(" for type ");
-                                    buff.append(tname);
+                            // try to find constructor from string as last resort
+                            m_deserializerItem = m_typeClass.
+                                getInitializerMethod(STRING_CONSTRUCTOR_SIGNATURE);
+                            if (m_deserializerItem == null) {
+                                
+                                // error unless predefined formats
+                                if (vctx.getNestingDepth() > 0) {
+                                    StringBuffer buff = new StringBuffer();
+                                    buff.append
+                                        ("Need deserializer or constructor ");
+                                    buff.append("from string");
+                                    if (!vctx.isInBinding()) {
+                                        buff.append(" for default value of type ");
+                                        buff.append(tname);
+                                    } else {
+                                        buff.append(" for type ");
+                                        buff.append(tname);
+                                    }
+                                    vctx.addError(buff.toString());
                                 }
-                                vctx.addError(buff.toString());
+                                
                             }
-                            
                         }
                     }
                 }

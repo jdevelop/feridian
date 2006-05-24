@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2002-2004, Dennis M. Sosnoski.
+Copyright (c) 2002-2006, Dennis M. Sosnoski.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -37,9 +37,7 @@ import java.io.Reader;
  * unmarshalling object stack while unmarshalling.
  *
  * @author Dennis M. Sosnoski
- * @version 1.0
  */
- 
 public interface IUnmarshallingContext {
 
     /**
@@ -50,7 +48,6 @@ public interface IUnmarshallingContext {
      * determined by parser
      * @throws JiBXException if error creating parser
      */
-    
     void setDocument(InputStream ins, String enc) throws JiBXException;
 
     /**
@@ -59,7 +56,6 @@ public interface IUnmarshallingContext {
      * @param rdr reader supplying document data
      * @throws JiBXException if error creating parser
      */
-
     void setDocument(Reader rdr) throws JiBXException;
 
     /**
@@ -71,7 +67,6 @@ public interface IUnmarshallingContext {
      * determined by parser
      * @throws JiBXException if error creating parser
      */
-    
     void setDocument(InputStream ins, String name, String enc)
         throws JiBXException;
 
@@ -82,7 +77,6 @@ public interface IUnmarshallingContext {
      * @param name document name
      * @throws JiBXException if error creating parser
      */
-
     void setDocument(Reader rdr, String name) throws JiBXException;
 
     /**
@@ -90,7 +84,6 @@ public interface IUnmarshallingContext {
      * unmarshalled objects and prepares the context for potential reuse.
      * It is automatically called when input is set.
      */
-
     void reset();
 
     /**
@@ -102,7 +95,6 @@ public interface IUnmarshallingContext {
      * @return unmarshalled object from element
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-    
     Object unmarshalElement() throws JiBXException;
 
     /**
@@ -116,7 +108,6 @@ public interface IUnmarshallingContext {
      * @return unmarshalled object
      * @throws JiBXException if error creating parser
      */
-
     Object unmarshalDocument(InputStream ins, String enc) throws JiBXException;
 
     /**
@@ -128,7 +119,6 @@ public interface IUnmarshallingContext {
      * @return unmarshalled object
      * @throws JiBXException if error creating parser
      */
-
     Object unmarshalDocument(Reader rdr) throws JiBXException;
 
     /**
@@ -143,7 +133,6 @@ public interface IUnmarshallingContext {
      * @return unmarshalled object
      * @throws JiBXException if error creating parser
      */
-
     Object unmarshalDocument(InputStream ins, String name, String enc)
         throws JiBXException;
 
@@ -157,7 +146,6 @@ public interface IUnmarshallingContext {
      * @return unmarshalled object
      * @throws JiBXException if error creating parser
      */
-
     Object unmarshalDocument(Reader rdr, String name) throws JiBXException;
 
     /**
@@ -165,7 +153,6 @@ public interface IUnmarshallingContext {
      *
      * @return supplied document name (<code>null</code> if none)
      */
-    
     public String getDocumentName();
 
     /**
@@ -180,8 +167,18 @@ public interface IUnmarshallingContext {
      * <code>false</code> if not
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     public boolean isAt(String ns, String name) throws JiBXException;
+
+    /**
+     * Check if next tag is a start tag. If not currently positioned at a
+     * start or end tag this first advances the parse to the next start or
+     * end tag.
+     *
+     * @return <code>true</code> if at start of element, <code>false</code> if
+     * at end
+     * @throws JiBXException on any error (possibly wrapping other exception)
+     */
+    public boolean isStart() throws JiBXException;
 
     /**
      * Check if next tag is an end tag. If not currently positioned at a
@@ -192,7 +189,6 @@ public interface IUnmarshallingContext {
      * at start
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     public boolean isEnd() throws JiBXException;
 
     /**
@@ -203,8 +199,30 @@ public interface IUnmarshallingContext {
      * @return unmarshalling handler for class
      * @throws JiBXException if unable to create unmarshaller
      */
-    
     public IUnmarshaller getUnmarshaller(int index) throws JiBXException;
+    
+    /**
+     * Set a user context object. This context object is not used directly by
+     * JiBX, but can be accessed by all types of user extension methods. The
+     * context object is automatically cleared by the {@link #reset()} method,
+     * so to make use of this you need to first call the appropriate version of
+     * the <code>setDocument()</code> method, then this method, and finally the
+     * {@link #unmarshalElement} method.
+     * 
+     * @param obj user context object, or <code>null</code> if clearing existing
+     * context object
+     * @see #getUserContext()
+     */
+    public void setUserContext(Object obj);
+    
+    /**
+     * Get the user context object.
+     * 
+     * @return user context object, or <code>null</code> if no context object
+     * set
+     * @see #setUserContext(Object)
+     */
+    public Object getUserContext();
 
     /**
      * Push created object to unmarshalling stack. This must be called before
@@ -213,7 +231,6 @@ public interface IUnmarshallingContext {
      *
      * @param obj object being unmarshalled
      */
-
     public void pushObject(Object obj);
 
     /**
@@ -221,7 +238,6 @@ public interface IUnmarshallingContext {
      *
      * @throws JiBXException if stack empty
      */
-
     public void popObject() throws JiBXException;
     
     /**
@@ -232,7 +248,6 @@ public interface IUnmarshallingContext {
      *
      * @return number of objects in unmarshalling stack
      */
-
     public int getStackDepth();
     
     /**
@@ -245,7 +260,6 @@ public interface IUnmarshallingContext {
      * of zero to the current depth minus one).
      * @return object from unmarshalling stack
      */
-
     public Object getStackObject(int depth);
     
     /**
@@ -254,6 +268,5 @@ public interface IUnmarshallingContext {
      *
      * @return object from unmarshalling stack, or <code>null</code> if none
      */
-
     public Object getStackTop();
 }

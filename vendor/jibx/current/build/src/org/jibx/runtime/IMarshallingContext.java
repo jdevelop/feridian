@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2002-2004, Dennis M. Sosnoski.
+Copyright (c) 2002-2006, Dennis M. Sosnoski.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -37,9 +37,7 @@ import java.io.Writer;
  * object stack while marshalling.
  *
  * @author Dennis M. Sosnoski
- * @version 1.0
  */
-
 public interface IMarshallingContext
 {
     /**
@@ -53,7 +51,6 @@ public interface IMarshallingContext
      * @param esc escaper for writing characters to stream
      * @throws JiBXException if error setting output
      */
-     
     void setOutput(OutputStream outs, String enc, ICharacterEscaper esc)
         throws JiBXException;
     
@@ -65,7 +62,6 @@ public interface IMarshallingContext
      * default
      * @throws JiBXException if error setting output
      */
-     
     void setOutput(OutputStream outs, String enc) throws JiBXException;
     
     /**
@@ -74,7 +70,6 @@ public interface IMarshallingContext
      * @param outw writer for document data output
      * @param esc escaper for writing characters
      */
-    
     void setOutput(Writer outw, ICharacterEscaper esc);
     
     /**
@@ -82,7 +77,6 @@ public interface IMarshallingContext
      *
      * @param outw writer for document data output
      */
-    
     void setOutput(Writer outw);
 
     /**
@@ -90,7 +84,6 @@ public interface IMarshallingContext
      *
      * @return XML writer used for output
      */
-
     IXMLWriter getXmlWriter();
 
     /**
@@ -98,7 +91,6 @@ public interface IMarshallingContext
      *
      * @param xwrite XML writer used for output
      */
-
     void setXmlWriter(IXMLWriter xwrite);
     
     /**
@@ -108,7 +100,6 @@ public interface IMarshallingContext
      * @return number of spaces indented per level, or negative if indentation
      * disabled
      */
-    
     int getIndent();
     
     /**
@@ -119,7 +110,6 @@ public interface IMarshallingContext
      * @param count number of spaces to indent per level, or disable
      * indentation if negative
      */
-    
     void setIndent(int count);
     
     /**
@@ -133,7 +123,6 @@ public interface IMarshallingContext
      * (<code>null</code> means use the single character '\n')
      * @param indent whitespace character used for indentation
      */
-    
     public void setIndent(int count, String newline, char indent);
         
     /**
@@ -141,7 +130,6 @@ public interface IMarshallingContext
      * as long as this method is called to clear any retained state information
      * between uses. It is automatically called when output is set.
      */
-    
     void reset();
     
     /**
@@ -154,7 +142,6 @@ public interface IMarshallingContext
      * specified
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     void startDocument(String enc, Boolean alone) throws JiBXException;
     
     /**
@@ -168,7 +155,6 @@ public interface IMarshallingContext
      * @param outs stream for document data output
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     void startDocument(String enc, Boolean alone, OutputStream outs)
         throws JiBXException;
     
@@ -182,7 +168,6 @@ public interface IMarshallingContext
      * @param outw writer for document data output
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     void startDocument(String enc, Boolean alone, Writer outw)
         throws JiBXException;
     
@@ -193,7 +178,6 @@ public interface IMarshallingContext
      *
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     void endDocument() throws JiBXException;
     
     /**
@@ -207,7 +191,6 @@ public interface IMarshallingContext
      * a top-level mapping in the binding
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     public void marshalDocument(Object root) throws JiBXException;
     
     /**
@@ -224,7 +207,6 @@ public interface IMarshallingContext
      * specified
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     public void marshalDocument(Object root, String enc, Boolean alone)
         throws JiBXException;
     
@@ -242,7 +224,6 @@ public interface IMarshallingContext
      * @param outs stream for document data output
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     public void marshalDocument(Object root, String enc, Boolean alone,
         OutputStream outs) throws JiBXException;
     
@@ -260,9 +241,33 @@ public interface IMarshallingContext
      * @param outw writer for document data output
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-
     public void marshalDocument(Object root, String enc, Boolean alone,
         Writer outw) throws JiBXException;
+    
+    /**
+     * Set a user context object. This context object is not used directly by
+     * JiBX, but can be accessed by all types of user extension methods. The
+     * context object is automatically cleared by the {@link #reset()} method,
+     * so to make use of this you need to first call the appropriate version of
+     * the <code>setOutput()</code> method, then this method, and finally one of
+     * the <code>marshalDocument</code> methods which uses the previously-set
+     * output (not the ones which take a stream or writer as parameter, since
+     * they call <code>setOutput()</code> themselves).
+     * 
+     * @param obj user context object, or <code>null</code> if clearing existing
+     * context object
+     * @see #getUserContext()
+     */
+    public void setUserContext(Object obj);
+    
+    /**
+     * Get the user context object.
+     * 
+     * @return user context object, or <code>null</code> if no context object
+     * set
+     * @see #setUserContext(Object)
+     */
+    public Object getUserContext();
 
     /**
      * Push created object to marshalling stack. This must be called before
@@ -271,7 +276,6 @@ public interface IMarshallingContext
      *
      * @param obj object being marshalled
      */
-
     public void pushObject(Object obj);
 
     /**
@@ -279,7 +283,6 @@ public interface IMarshallingContext
      *
      * @throws JiBXException if no object on stack
      */
-
     public void popObject() throws JiBXException;
     
     /**
@@ -290,7 +293,6 @@ public interface IMarshallingContext
      *
      * @return number of objects in marshalling stack
      */
-
     public int getStackDepth();
     
     /**
@@ -303,7 +305,6 @@ public interface IMarshallingContext
      * of zero to the current depth minus one).
      * @return object from marshalling stack
      */
-
     public Object getStackObject(int depth);
     
     /**
@@ -312,7 +313,6 @@ public interface IMarshallingContext
      *
      * @return object from marshalling stack, or <code>null</code> if none
      */
-
     public Object getStackTop();
     
     /**
@@ -325,7 +325,6 @@ public interface IMarshallingContext
      * @return marshalling handler for class
      * @throws JiBXException on any error (possibly wrapping other exception)
      */
-    
     public IMarshaller getMarshaller(int index, String name)
         throws JiBXException;
 }

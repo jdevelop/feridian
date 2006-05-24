@@ -110,6 +110,7 @@ public class ClassHierarchyContext
     /**
      * Add named component to set defined at this level. This associated the
      * component with the type for class hierarchy-based lookups.
+     * TODO: Make this use qname instead of text
      *
      * @param label name to be associated with component
      * @param comp definition component to be added
@@ -118,6 +119,9 @@ public class ClassHierarchyContext
     public void addNamedComponent(String label, ElementBase comp,
         ValidationContext vctx) {
         if (m_nameToComponentMap.put(label, comp) != null) {
+            if (label.startsWith("{}")) {
+                label = label.substring(2);
+            }
             vctx.addError("Duplicate label " + label, comp);
         }
     }

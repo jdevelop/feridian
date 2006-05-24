@@ -47,6 +47,20 @@ public class PropertyAttributes extends AttributeBase
         new StringArray(new String[] { "field", "get-method", "set-method",
         "test-method", "type", "usage" });
     
+    // recognized test-method signatures.
+    private static final String[] TEST_METHOD_SIGNATURES =
+    {
+        "(Lorg/jibx/runtime/IMarshallingContext;)Z",
+        "()Z"
+    };
+    
+    // recognized get-method signatures.
+    private static final String[] GET_METHOD_SIGNATURES =
+    {
+        "(Lorg/jibx/runtime/IMarshallingContext;)",
+        "()"
+    };
+    
     //
 	// Value set information
 	
@@ -359,7 +373,7 @@ public class PropertyAttributes extends AttributeBase
         if (m_testName != null) {
             
             // look up the method information
-            m_testItem = cobj.getMethod(m_testName, "()Z");
+            m_testItem = cobj.getMethod(m_testName, TEST_METHOD_SIGNATURES);
             if (m_testItem == null) {
                 vctx.addError("Nonstatic test-method " + m_testName +
                     " not found in class " + cobj.getName());
@@ -372,7 +386,7 @@ public class PropertyAttributes extends AttributeBase
             m_isImplicit = false;
             
             // look up the get method by name (no overload possible)
-            m_getItem = cobj.getMethod(m_getName, "()");
+            m_getItem = cobj.getMethod(m_getName, GET_METHOD_SIGNATURES);
             if (m_getItem == null) {
                 vctx.addFatal("Nonstatic get-method " + m_getName +
                     " not found in class " + cobj.getName());
@@ -398,14 +412,25 @@ public class PropertyAttributes extends AttributeBase
             // need to handle overloads, so generate possible signatures
             ArrayList sigs = new ArrayList();
             if (m_getItem != null) {
-                sigs.add("(" + ClassUtils.getSignature(gtype) + ")V");
+                String psig = ClassUtils.getSignature(gtype);
+                sigs.add("(" + psig +
+                    "Lorg/jibx/runtime/IUnmarshallingContext;" + ")V");
+                sigs.add("(" + psig + ")V");
             }
             if (m_declaredType != null) {
-                sigs.add("(" + ClassUtils.getSignature(m_declaredType) + ")V");
+                String psig = ClassUtils.getSignature(m_declaredType);
+                sigs.add("(" + psig +
+                    "Lorg/jibx/runtime/IUnmarshallingContext;" + ")V");
+                sigs.add("(" + psig + ")V");
             }
             if (m_fieldItem != null) {
-                sigs.add("(" + m_fieldItem.getSignature() + ")V");
+                String psig = m_fieldItem.getSignature();
+                sigs.add("(" + psig +
+                    "Lorg/jibx/runtime/IUnmarshallingContext;" + ")V");
+                sigs.add("(" + psig + ")V");
             }
+            sigs.add
+                ("(Ljava/lang/Object;Lorg/jibx/runtime/IUnmarshallingContext;)V");
             sigs.add("(Ljava/lang/Object;)V");
             
             // match any of the possible signatures

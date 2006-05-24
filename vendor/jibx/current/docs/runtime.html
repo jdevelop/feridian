@@ -410,7 +410,47 @@ part of the standard JiBX distribution. Until then, users with special
 requirements in this area can implement their own versions of this interface and
 use it directly.</p>
 
-      </div>
+	  </div>
+<!--      <div class="h3">
+      <h3><a name="stax">StAX support</a></h3>
+
+<p>The 1.1 release adds support for StAX parser input and StAX writer output. To
+select which parser you want to use dynamically, set the system property
+<i>org.jibx.runtime.impl.parser</i> to the value
+<i>org.jibx.runtime.impl.XMLPullReaderFactory</i> to select the XPP3 XMLPull
+parser, or the value <i>org.jibx.runtime.impl.StAXReaderFactory</i> to select
+the StAX parser. By default, JiBX uses whichever parser implementation it finds
+at runtime, with preference given to the XPP3 XMLPull parser if both XPP3 and a
+StAX parser are present. If you never want to use the XPP3 parser, simply remove
+the <i>/lib/xpp3.jar</i> file from your JiBX installation.</p>
+
+<p>Some StAX parsers support schema validation of input. If you wish to make use
+of this feature you'll need to substitute an appropriate StAX parser
+implementation for the <i>/lib/wstx-asl.jar</i> StAX parser included in the JiBX
+distribution, and take whatever action is needed to enable schema validation.</p>
+
+<p>JiBX 1.1 also includes support for StAX output (using the
+<code>javax.xml.stream.XMLStreamWriter</code> interface). This is mainly useful
+when fitting JiBX into other frameworks, including newer Web services
+frameworks. To use this form of output you'll need to set the XML writer
+directly on the JiBX marshalling context, using the special JiBX
+<code>org.jibx.runtime.impl.StAXWriter</code> class which wraps the target
+<code>javax.xml.stream.XMLStreamWriter</code> instance. Here's a sample of code
+for this purpose:</p>
+
+<div id="source"><pre>        // marshal root object back out to document in memory
+        IMarshallingContext mctx = bfact.createMarshallingContext();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            XMLOutputFactory ofact = XMLOutputFactory.newInstance();
+            XMLStreamWriter wrtr = ofact.createXMLStreamWriter(bos, enc);
+            mctx.setXmlWriter(new StAXWriter(bfact.getNamespaces(), wrtr));
+            mctx.marshalDocument(obj);
+        } catch (XMLStreamException e) {
+            throw new JiBXException("Error creating writer", e);
+        }</pre></div>
+
+      </div>  -->
       </div>
       </div>
 
@@ -423,7 +463,7 @@ use it directly.</p>
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

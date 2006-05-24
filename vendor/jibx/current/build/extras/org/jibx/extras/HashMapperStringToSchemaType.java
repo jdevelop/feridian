@@ -132,26 +132,35 @@ public class HashMapperStringToSchemaType
     public static final int LONG_TYPE = 5;
     public static final int SHORT_TYPE = 6;
     public static final int DATETIME_TYPE = 7;
-    public static final int DATE_TYPE = 8;
-    public static final int TIME_TYPE = 9;
-    public static final int DECIMAL_TYPE = 10;
-    public static final int INTEGER_TYPE = 11;
-    public static final int BYTERRAY_TYPE = 12;
-    public static final int STRING_TYPE = 13;
+    public static final int DECIMAL_TYPE = 8;
+    public static final int INTEGER_TYPE = 9;
+    public static final int BYTERRAY_TYPE = 10;
+    public static final int STRING_TYPE = 11;
+//#!j2me{
+    public static final int DATE_TYPE = 12;
+    public static final int TIME_TYPE = 13;
+//#j2me}
     
     // enumeration definition (string order must match numeric list, above)
     private static final EnumSet s_javaTypesEnum = new EnumSet(BOOLEAN_TYPE,
         new String[] { "java.lang.Boolean", "java.lang.Byte",
         "java.lang.Double", "java.lang.Float", "java.lang.Integer",
-        "java.lang.Long", "java.lang.Short", "java.util.Date", "java.sql.Date",
-        "java.sql.Time", "java.math.BigDecimal", "java.math.BigInteger",
-        "byte[]", "java.lang.String"} );
+        "java.lang.Long", "java.lang.Short", "java.util.Date",
+        "java.math.BigDecimal", "java.math.BigInteger", "byte[]",
+        "java.lang.String",
+//#!j2me{
+        "java.sql.Date", "java.sql.Time",
+//#j2me}
+        } );
     
     // corresponding schema types (string order must match numeric list, above)
     private static final EnumSet s_schemaTypesEnum = new EnumSet(BOOLEAN_TYPE,
         new String[] { "boolean", "byte", "double", "float", "int", "long",
-        "short", "dateTime", "date", "time", "decimal", "integer",
-        "base64Binary", "string"} );
+        "short", "dateTime", "decimal", "integer", "base64Binary", "string",
+//#!j2me{
+        "date", "time",
+//#j2me}
+        } );
     
     //
     // Member fields
@@ -301,6 +310,7 @@ public class HashMapperStringToSchemaType
                             ctx.content(Utility.serializeDateTime((Date)value));
                             break;
                             
+//#!j2me{
                         case DATE_TYPE:
                             ctx.content(Utility.
                                 serializeSqlDate((java.sql.Date)value));
@@ -310,6 +320,7 @@ public class HashMapperStringToSchemaType
                             ctx.content(Utility.
                                 serializeSqlTime((java.sql.Time)value));
                             break;
+//#j2me}
                             
                         case BYTERRAY_TYPE:
                             ctx.content(Utility.serializeBase64((byte[])value));
@@ -439,6 +450,7 @@ public class HashMapperStringToSchemaType
                     value = Utility.deserializeDateTime(text);
                     break;
                     
+//#!j2me{
                 case DATE_TYPE:
                     value = Utility.deserializeSqlDate(text);
                     break;
@@ -446,6 +458,7 @@ public class HashMapperStringToSchemaType
                 case TIME_TYPE:
                     value = Utility.deserializeSqlTime(text);
                     break;
+//#j2me}
                     
                 case BYTERRAY_TYPE:
                     value = Utility.deserializeBase64(text);

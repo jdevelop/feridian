@@ -31,8 +31,10 @@ package org.jibx.binding.model;
 import java.util.ArrayList;
 
 import org.jibx.binding.util.StringArray;
+import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Model component for <b>structure</b> element of binding definition.
@@ -48,8 +50,11 @@ public class StructureElement extends StructureElementBase
         new StringArray(new String[] { "map-as" },
         StructureElementBase.s_allowedAttributes);
     
-    /** Mapped type name to use for this object. */
+    /** Mapping type name to use for this object. */
     private String m_mapAsName;
+    
+    /** Mapping qualified type name to use for this object. */
+    private QName m_mapAsQName;
     
     /** Flag for structure has a concrete mapping, possibly indeterminant. */
     private boolean m_hasMappingName;
@@ -65,21 +70,43 @@ public class StructureElement extends StructureElementBase
     }
     
     /**
-     * Get name of specified type.
+     * Get name of mapping type.
      * 
-     * @return specified type name (or <code>null</code> if none)
+     * @return mapping type name (or <code>null</code> if none)
      */
     public String getMapAsName() {
         return m_mapAsName;
     }
     
     /**
-     * Set name of specified type.
+     * Set name of mapping type. This method changes the qualified name to
+     * match the mapping type.
      * 
-     * @param name specified type name (or <code>null</code> if none)
+     * @param name mapping type name (or <code>null</code> if none)
      */
     public void setMapAsName(String name) {
         m_mapAsName = name;
+        m_mapAsQName = (name == null) ? null : new QName(name);
+    }
+    
+    /**
+     * Get qualified name of mapping type.
+     * 
+     * @return mapping qualified type name (or <code>null</code> if none)
+     */
+    public QName getMapAsQName() {
+        return m_mapAsQName;
+    }
+    
+    /**
+     * Set qualified name of mapping type. This method changes the mapping name
+     * to match the qualified name.
+     * 
+     * @param name mapping qualified type name (or <code>null</code> if none)
+     */
+    public void setMapAsQName(QName name) {
+        m_mapAsQName = name;
+        m_mapAsName = (name == null) ? null : name.toString();
     }
     
     /**
@@ -174,6 +201,31 @@ public class StructureElement extends StructureElementBase
     // Validation methods
     
     /**
+     * JiBX access method to set mapping type name as qualified name.
+     * 
+     * @param text mapping name text (<code>null</code> if none)
+     * @param ictx unmarshalling context
+     * @throws JiBXException on deserialization error
+     */
+    private void setQualifiedMapAs(String text, IUnmarshallingContext ictx)
+        throws JiBXException {
+        m_mapAsName = text;
+        m_mapAsQName = QName.deserialize(text, ictx);
+    }
+    
+    /**
+     * JiBX access method to get mapping type name as qualified name.
+     * 
+     * @param ictx marshalling context
+     * @return mapping type name text (<code>null</code> if none)
+     * @throws JiBXException on deserialization error
+     */
+    private String getQualifiedMapAs(IMarshallingContext ictx)
+        throws JiBXException {
+        return QName.serialize(m_mapAsQName, ictx);
+    }
+    
+    /**
      * Make sure all attributes are defined.
      *
      * @param uctx unmarshalling context
@@ -191,7 +243,7 @@ public class StructureElement extends StructureElementBase
         // check if there's a mapping if used without children
         DefinitionContext dctx = vctx.getDefinitions();
         if (children().size() == 0) {
-            if (m_mapAsName == null) {
+            if (m_mapAsQName == null) {
                 
                 // make sure not just a name, allowed for skipped element
                 if (hasProperty() || getDeclaredType() != null) {
@@ -216,12 +268,13 @@ public class StructureElement extends StructureElementBase
             } else {
                 
                 // find mapping by type name or class name
-                TemplateElementBase base = dctx.getNamedTemplate(m_mapAsName);
+                TemplateElementBase base =
+                    dctx.getNamedTemplate(m_mapAsQName.toString());
                 if (base == null) {
                     base = dctx.getSpecificTemplate(m_mapAsName);
                     if (base == null) {
                         vctx.addFatal("No mapping with type name " +
-                            m_mapAsName);
+                            m_mapAsQName.toString());
                     }
                 }
                 if (base != null) {

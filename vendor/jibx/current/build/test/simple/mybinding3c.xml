@@ -7,7 +7,7 @@
       <value name="c" field="c" usage="optional"/>
       <value name="d" field="d" usage="optional"/>
     </structure>
-    <value name="e" field="e" usage="optional" format="char:string"/>
+    <value name="e" field="e" usage="optional" format="char.string"/>
     <structure name="dimension" field="dimen" value-style="attribute">
       <value name="width" field="width"/>
       <value name="height" field="height"/>

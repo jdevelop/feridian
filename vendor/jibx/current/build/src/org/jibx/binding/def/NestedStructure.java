@@ -42,6 +42,19 @@ import org.jibx.runtime.JiBXException;
  */
 public class NestedStructure extends NestedBase
 {
+    //
+    // Method definitions used in code generation
+    
+    private static final String CHECK_ISSTART_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.isStart";
+    private static final String CHECK_ISSTART_SIGNATURE = "()Z";
+    private static final String SKIP_ELEMENT_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.skipElement";
+    private static final String SKIP_ELEMENT_SIGNATURE = "()V";
+    
+    //
+    // Instance data
+    
     /** Child supplying ID for bound class. */
     private IComponent m_idChild;
 
@@ -49,7 +62,7 @@ public class NestedStructure extends NestedBase
     protected final boolean m_isChoice;
     
     /** Flag for structure has associated object. */
-    private final boolean m_hasObject;
+    private boolean m_hasObject;
     
     /** Flag for already linked (to avoid multiple passes). */
     private boolean m_isLinked;
@@ -61,13 +74,24 @@ public class NestedStructure extends NestedBase
      * @param objc current object context
      * @param ord ordered content flag
      * @param choice choice content flag
+     * @param flex flexible element handling flag
      * @param ctx define context for structure flag
+     * @param hasobj has associated object flag
      */
     public NestedStructure(IContainer parent, IContextObj objc,
-        boolean ord, boolean choice, boolean ctx, boolean hasobj) {
-        super(parent, objc, ord, ctx);
+        boolean ord, boolean choice, boolean flex, boolean ctx, boolean hasobj) {
+        super(parent, objc, ord, flex, ctx);
         m_isChoice = choice;
         m_hasObject = hasobj;
+    }
+    
+    /**
+     * Set the object context.
+     * 
+     * @param objc object context
+     */
+    public void setObjectContext(IContextObj objc) {
+        m_hasObject = false;
     }
     
     //
@@ -160,7 +184,9 @@ public class NestedStructure extends NestedBase
             
                 // generate unmarshal loop code that checks for each component,
                 //  branching to the next component until one is found and
-                //  exiting the loop only when no component is matched
+                //  exiting the loop only when no component is matched (or in
+                //  the case of flexible unmarshalling, only exiting the loop
+                //  when the enclosing end tag is seen)
                 BranchWrapper link = null;
                 // TODO: initialize default values
                 BranchTarget first = mb.appendTargetNOP();
@@ -186,9 +212,32 @@ public class NestedStructure extends NestedBase
                         next.setTarget(first, mb);
                     }
                 }
-            
-                // patch final test failure branch to fall through loop
-                toends[0] = link;
+                
+                // handle comparison fall through depending on flexible flag 
+                if (m_isFlexible) {
+                    if (link != null) {
+                        
+                        // exit loop if not positioned at element start
+                        mb.targetNext(link);
+                        mb.loadContext();
+                        mb.appendCallVirtual(CHECK_ISSTART_NAME,
+                            CHECK_ISSTART_SIGNATURE);
+                        toends[0] = mb.appendIFEQ(this);
+                        
+                        // ignore unknown element and loop back to start
+                        mb.loadContext();
+                        mb.appendCallVirtual(SKIP_ELEMENT_NAME,
+                            SKIP_ELEMENT_SIGNATURE);
+                        mb.appendUnconditionalBranch(this).setTarget(first, mb);
+                        
+                    }
+                } else {
+                    
+                    // set final test failure branch to fall through loop
+                    toends[0] = link;
+                }
+                
+                // patch all branches that exit loop
                 mb.targetNext(toends);
             
             }

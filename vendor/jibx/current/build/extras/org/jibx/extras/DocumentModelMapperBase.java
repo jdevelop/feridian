@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.jibx.extras;
 
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
@@ -115,8 +116,8 @@ public class DocumentModelMapperBase
         StringBuffer buff = null;
         while (true) {
             int cev = m_unmarshalContext.nextToken();
-            if (cev == UnmarshallingContext.TEXT ||
-                (cev == UnmarshallingContext.ENTITY_REF &&
+            if (cev == IXMLReader.TEXT ||
+                (cev == IXMLReader.ENTITY_REF &&
                 m_unmarshalContext.getText() != null)) {
                 if (buff == null) {
                     buff = new StringBuffer(text);

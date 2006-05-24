@@ -181,6 +181,9 @@ public class ClassFile
     
     /** Suffix number for making method names unique (lazy computation). */
     private int m_uniqueIndex;
+    
+    /** Added default constructor for class. */
+    private ClassItem m_defaultConstructor;
 
     /**
      * Constructor for class file loaded from a stream. Loads the class data
@@ -1453,19 +1456,23 @@ public class ClassFile
      */
 
     public ClassItem addDefaultConstructor() throws JiBXException {
-    
-        // add the public constructor method
-        ExceptionMethodBuilder mb = new ExceptionMethodBuilder("<init>",
-            Type.VOID, new Type[0], this, Constants.ACC_PUBLIC);
-    
-        // call the superclass constructor
-        mb.appendLoadLocal(0);
-        mb.appendCallInit(m_superClass.getName(), "()V");
+        if (m_defaultConstructor == null) {
+            
+            // add the public constructor method
+            ExceptionMethodBuilder mb = new ExceptionMethodBuilder("<init>",
+                Type.VOID, new Type[0], this, Constants.ACC_PUBLIC);
         
-        // finish with return
-        mb.appendReturn();
-        mb.codeComplete(false);
-        return mb.addMethod();
+            // call the superclass constructor
+            mb.appendLoadLocal(0);
+            mb.appendCallInit(m_superClass.getName(), "()V");
+            
+            // finish with return
+            mb.appendReturn();
+            mb.codeComplete(false);
+            m_defaultConstructor = mb.addMethod();
+            
+        }
+        return m_defaultConstructor;
     }
 
     /**

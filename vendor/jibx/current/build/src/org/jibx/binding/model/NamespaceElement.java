@@ -124,6 +124,15 @@ public class NamespaceElement extends ElementBase
     public void setDefaultName(String name) {
         m_defaultName = name;
     }
+    
+    /**
+     * Get namespace default type name.
+     * 
+     * @return namespace default type name
+     */
+    public String getDefaultName() {
+        return m_defaultName;
+    }
 
     /**
      * Check if default namespace for attributes. This method is only meaningful

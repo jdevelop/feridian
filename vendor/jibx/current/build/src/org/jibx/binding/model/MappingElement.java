@@ -31,8 +31,10 @@ package org.jibx.binding.model;
 import java.util.ArrayList;
 
 import org.jibx.binding.util.StringArray;
+import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Model component for <b>mapping</b> element of binding definition.
@@ -60,8 +62,9 @@ public class MappingElement extends TemplateElementBase
 	/** Name of mapped class extended by this mapping. */
     private String m_extendsName;
     
-    /** Type name (defaults to fully-qualified class name). */
-    private String m_typeName;
+    /** Type qualified name (defaults to fully-qualified class name in
+     no-namespace namespace). */
+    private QName m_typeQName;
 
     /** Mapping extended by this mapping. */
     private MappingElement m_extendsMapping;
@@ -99,7 +102,7 @@ public class MappingElement extends TemplateElementBase
      * @return type name
      */
     public String getTypeName() {
-        return m_typeName;
+        return (m_typeQName == null) ? null : m_typeQName.toString();
     }
     
     /**
@@ -108,7 +111,25 @@ public class MappingElement extends TemplateElementBase
      * @param name type name
      */
     public void setTypeName(String name) {
-        m_typeName = name;
+        m_typeQName = new QName(name);
+    }
+    
+    /**
+     * Get type qualified name.
+     * 
+     * @return type qualified name
+     */
+    public QName getTypeQName() {
+        return m_typeQName;
+    }
+    
+    /**
+     * Set type qualified name.
+     * 
+     * @param qname type qualified name
+     */
+    public void setTypeQName(QName qname) {
+        m_typeQName = qname;
     }
     
     /**
@@ -142,7 +163,7 @@ public class MappingElement extends TemplateElementBase
      * @see org.jibx.binding.model.TemplateElementBase#isDefaultTemplate()
      */
     public boolean isDefaultTemplate() {
-        return m_typeName == null;
+        return m_typeQName == null;
     }
     
     //
@@ -216,6 +237,30 @@ public class MappingElement extends TemplateElementBase
     // Validation methods
     
     /**
+     * JiBX access method to set mapping type name as qualified name.
+     * 
+     * @param text mapping name text (<code>null</code> if none)
+     * @param ictx unmarshalling context
+     * @throws JiBXException on deserialization error
+     */
+    private void setQualifiedTypeName(String text, IUnmarshallingContext ictx)
+        throws JiBXException {
+        m_typeQName = QName.deserialize(text, ictx);
+    }
+    
+    /**
+     * JiBX access method to get mapping type name as qualified name.
+     * 
+     * @param ictx marshalling context
+     * @return mapping type name text (<code>null</code> if none)
+     * @throws JiBXException on deserialization error
+     */
+    private String getQualifiedTypeName(IMarshallingContext ictx)
+        throws JiBXException {
+        return QName.serialize(m_typeQName, ictx);
+    }
+    
+    /**
      * Make sure all attributes are defined.
      *
      * @param uctx unmarshalling context
@@ -231,7 +276,7 @@ public class MappingElement extends TemplateElementBase
     public void prevalidate(ValidationContext vctx) {
         m_nameAttrs.prevalidate(vctx);
         if (m_isAbstract) {
-            if (m_typeName != null && m_nameAttrs.getName() != null) {
+            if (m_typeQName != null && m_nameAttrs.getName() != null) {
                 vctx.addError("Type name cannot be used with an element name");
             }
             if (m_nameAttrs.getName() != null) {
@@ -245,7 +290,7 @@ public class MappingElement extends TemplateElementBase
                 vctx.addError
                     ("Non-abstract mapping must define an element name");
             }
-            if (m_typeName != null) {
+            if (m_typeQName != null) {
                 vctx.addError
                     ("Type name can only be used with an abstract mapping");
             }
@@ -263,6 +308,11 @@ public class MappingElement extends TemplateElementBase
         SequenceVisitor visitor = new SequenceVisitor(null, vctx);
         TreeContext tctx = vctx.getChildContext();
         tctx.tourTree(this, visitor);
+        
+        // make sure we can construct instances of concrete mapped class
+        if (!m_isAbstract) {
+            verifyConstruction(vctx, getHandledClass());
+        }
         
         // check for class that probably should extend another mapped class
         if (m_extendsName == null && !m_isAbstract) {

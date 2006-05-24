@@ -389,6 +389,19 @@ like this:</p>
   &lt;/bind&gt; 
 </pre></div>
 
+<p>One issue to note with the Ant task is that if you're using default values
+you'll need to include the <i>jibx-run.jar</i> from the distribution in the
+classpath passed when you invoke the task:</p>
+
+<div id="source"><pre>  &lt;!-- Run JiBX binding compiler --&gt;
+  &lt;bind verbose=&quot;true&quot; load="true" binding=&quot;binding.xml&quot;&gt;
+    &lt;classpath>
+      &lt;pathelement path="classes"/>
+      &lt;pathelement location="${jibx-lib}/jibx-run.jar"/>
+    &lt;/classpath>
+  &lt;/bind&gt; 
+</pre></div>
+
 <p>Here's the full description of the attributes and nested elements supported
 by the JiBX Ant task:</p>
       <table cellpadding="3" cellspacing="2" border="1" width="100%">
@@ -538,7 +551,7 @@ approach to apply the binding on clean builds of the project.</p>
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

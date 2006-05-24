@@ -1,3 +1,4 @@
+<!-- Test user extension methods -->
 <binding value-style="attribute" track-source="true">
   <mapping name="top" class="simple.MyClass5" post-set="unmarshalDone">
     <collection field="childs1" item-type="simple.MyClass5a"/>

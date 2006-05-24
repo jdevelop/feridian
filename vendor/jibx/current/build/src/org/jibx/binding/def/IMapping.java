@@ -91,7 +91,7 @@ public interface IMapping extends IComponent
     /**
      * Get type name.
      * 
-     * @return type name (<code>null</code> if unnamed)
+     * @return qualified type name, in text form (<code>null</code> if unnamed)
      */
     public String getTypeName();
 

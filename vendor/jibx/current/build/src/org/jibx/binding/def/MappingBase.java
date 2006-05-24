@@ -40,7 +40,6 @@ import org.jibx.runtime.JiBXException;
  * mappings. It handles adding the appropriate marshalling and/or unmarshalling
  * interfaces and methods to the classes.
  */
- 
 public abstract class MappingBase extends LinkableBase implements IMapping
 {
     //
@@ -98,6 +97,9 @@ public abstract class MappingBase extends LinkableBase implements IMapping
     
     /** Index number for this particular binding definition. */
     private final int m_indexNumber;
+    
+    /** Qualified type name, in text form. */
+    private final String m_typeName;
 
     /**
      * Constructor. This version requires the component to be set later,
@@ -105,23 +107,26 @@ public abstract class MappingBase extends LinkableBase implements IMapping
      * org.jibx.binding.def.PassThroughComponent#setWrappedComponent} method.
      *
      * @param contain containing binding definition structure
-     * @param type bound class name
+     * @param type class name handled by mapping
+     * @param tname qualified type name, in text form
      */
-
-    public MappingBase(IContainer contain, String type) {
-        m_indexNumber = contain.getBindingRoot().getMappedClassIndex(type);
+    public MappingBase(IContainer contain, String type, String tname) {
+        String name = (tname == null) ? type : tname;
+        m_indexNumber = contain.getBindingRoot().getMappedClassIndex(name);
+        m_typeName = tname;
     }
 
     /**
      * Constructor with wrapped component supplied.
      *
      * @param contain containing binding definition structure
-     * @param type bound class name
+     * @param type class name handled by mapping
+     * @param tname qualified type name, in text form
      * @param wrap wrapped binding component
      */
-
-    public MappingBase(IContainer contain, String type, IComponent wrap) {
-        this(contain, type);
+    public MappingBase(IContainer contain, String type, String tname,
+        IComponent wrap) {
+        this(contain, type, tname);
         setWrappedComponent(wrap);
     }
 
@@ -131,7 +136,6 @@ public abstract class MappingBase extends LinkableBase implements IMapping
      *
      * @return information for mapped class
      */
-    
     public abstract BoundClass getBoundClass();
 
 	/**
@@ -141,11 +145,10 @@ public abstract class MappingBase extends LinkableBase implements IMapping
      *
      * @throws JiBXException if error in generating code
      */
-     
 	protected void addIMarshallableMethod() throws JiBXException {
 	    
 	    // set up for constructing actual marshal method
-       BoundClass clas = getBoundClass();
+        BoundClass clas = getBoundClass();
 	    ClassFile cf = clas.getMungedFile();
 	    ContextMethodBuilder mb = new ContextMethodBuilder
 	        (MARSHALLABLE_METHODNAME, MARSHALLABLE_SIGNATURE, cf,
@@ -190,7 +193,6 @@ public abstract class MappingBase extends LinkableBase implements IMapping
      *
      * @throws JiBXException if error in generating code
      */
-     
 	protected void addIUnmarshallableMethod() throws JiBXException {
 	    
 	    // set up for constructing new method
@@ -222,8 +224,18 @@ public abstract class MappingBase extends LinkableBase implements IMapping
     
     //
     // IMapping interface method definitions
-    
+
+    /* (non-Javadoc)
+     * @see org.jibx.binding.def.IMapping#getIndex()
+     */
     public int getIndex() {
         return m_indexNumber;
+    }
+
+    /* (non-Javadoc)
+     * @see org.jibx.binding.def.IMapping#getTypeName()
+     */
+    public String getTypeName() {
+        return m_typeName;
     }
 }
