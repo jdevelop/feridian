@@ -48,6 +48,9 @@ public class MappingReference extends PassThroughComponent
     /** Property definition. */
     private final PropertyDefinition m_property;
     
+    /** Flag for nillable element. */
+    private final boolean m_isNillable;
+    
     /** Fully qualified name of mapped type. */
     private String m_type;
     
@@ -80,10 +83,11 @@ public class MappingReference extends PassThroughComponent
      * @param name reference name definition (only allowed with abstract
      * mappings)
      * @param synth sythentic reference added to empty collection flag
+     * @param nillable flag for nillable element
      */
     public MappingReference(IContainer contain, PropertyDefinition prop,
         String type, String reftext, String refqname, IContextObj objc,
-        NameDefinition name, boolean synth) {
+        NameDefinition name, boolean synth, boolean nillable) {
         super();
         m_container = contain;
         m_property = prop;
@@ -93,6 +97,7 @@ public class MappingReference extends PassThroughComponent
         m_contextObject = objc;
         m_name = name;
         m_isSynthetic = synth;
+        m_isNillable = nillable;
     }
     
     //
@@ -150,7 +155,7 @@ public class MappingReference extends PassThroughComponent
             if (m_name != null) {
                 if (mdef.getName() == null) {
                     IComponent icomp = wrap;
-                    wrap = new ElementWrapper(defc, m_name, icomp);
+                    wrap = new ElementWrapper(defc, m_name, icomp, m_isNillable);
                     if (prop.isImplicit()) {
                         ((ElementWrapper)wrap).setDirect(true);
                     }
@@ -160,6 +165,7 @@ public class MappingReference extends PassThroughComponent
                         }
                         ((ElementWrapper)wrap).setOptionalNormal(true);
                         ((ElementWrapper)wrap).setStructureObject(true);
+                        ((ElementWrapper)wrap).setDirect(true);
                         wrap = new OptionalStructureWrapper(wrap, prop,
                             true);
                         m_property.setOptional(false);

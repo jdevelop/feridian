@@ -1238,7 +1238,7 @@ public abstract class MethodBuilder extends BindingMethod
     }
     
     /**
-     * Append the appropriate array load to the instruction list.
+     * Append the appropriate array store to the instruction list.
      * 
      * @param type array item type expected
      */

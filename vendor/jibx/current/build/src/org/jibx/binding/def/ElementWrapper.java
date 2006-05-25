@@ -38,7 +38,6 @@ import org.jibx.runtime.JiBXException;
  * @author Dennis M. Sosnoski
  * @version 1.0
  */
-
 public class ElementWrapper implements IComponent
 {
     //
@@ -85,6 +84,30 @@ public class ElementWrapper implements IComponent
         "org.jibx.runtime.impl.MarshallingContext.endTag";
     private static final String MARSHAL_WRITEENDSIGNATURE =
         "(ILjava/lang/String;)Lorg/jibx/runtime/impl/MarshallingContext;";
+    private static final String UNMARSHAL_PARSE_TO_START_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.parseToStartTag";
+    private static final String UNMARSHAL_PARSE_TO_START_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;)V";
+    protected static final String UNMARSHAL_ATTRIBUTE_BOOLEAN_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.attributeBoolean";
+    protected static final String UNMARSHAL_ATTRIBUTE_BOOLEAN_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;Z)Z";
+    private static final String UNMARSHAL_SKIP_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.skipElement";
+    private static final String UNMARSHAL_SKIP_SIGNATURE = "()V";
+    protected static final String MARSHAL_STARTTAG_ATTRIBUTES =
+        "org.jibx.runtime.impl.MarshallingContext.startTagAttributes";
+    protected static final String MARSHAL_STARTTAG_SIGNATURE =
+        "(ILjava/lang/String;)Lorg/jibx/runtime/impl/MarshallingContext;";
+    protected static final String MARSHAL_CLOSESTART_EMPTY =
+        "org.jibx.runtime.impl.MarshallingContext.closeStartEmpty";
+    protected static final String MARSHAL_CLOSESTART_EMPTY_SIGNATURE =
+        "()Lorg/jibx/runtime/impl/MarshallingContext;";
+    protected static final String MARSHAL_ATTRIBUTE =
+        "org.jibx.runtime.impl.MarshallingContext.attribute";
+    protected static final String MARSHAL_SIGNATURE =
+        "(ILjava/lang/String;Ljava/lang/String;)" +
+        "Lorg/jibx/runtime/impl/MarshallingContext;";
     private static final String MARSHALLING_CONTEXT =
         "org.jibx.runtime.impl.MarshallingContext";
     private static final String UNMARSHALLING_CONTEXT =
@@ -101,6 +124,9 @@ public class ElementWrapper implements IComponent
 
     /** Element name information. */
     private final NameDefinition m_name;
+    
+    /** Flag for nillable element. */
+    private final boolean m_isNillable;
     
     /** Flag for value from collection (TODO: fix this in update). */
     private boolean m_directAccess;
@@ -121,13 +147,14 @@ public class ElementWrapper implements IComponent
      * @param name element name definition
      * @param wrap wrapped binding component (may be <code>null</code>, in the
      * case of a throwaway component)
+     * @param nillable flag for nillable element
      */
-
     public ElementWrapper(DefinitionContext defc, NameDefinition name,
-        IComponent wrap) {
+        IComponent wrap, boolean nillable) {
         m_defContext = defc;
         m_name = name;
         m_component = wrap;
+        m_isNillable = nillable;
     }
 
     /**
@@ -137,7 +164,6 @@ public class ElementWrapper implements IComponent
      * @param direct <code>true</code> if direct access from collection,
      * <code>false</code> if not
      */
-    
     public void setDirect(boolean direct) {
         m_directAccess = direct;
     }
@@ -148,7 +174,6 @@ public class ElementWrapper implements IComponent
      * @param opt <code>true</code> if optional ignored element,
      * <code>false</code> if not
      */
-    
     public void setOptionalIgnored(boolean opt) {
         m_optionalIgnored = opt;
     }
@@ -159,7 +184,6 @@ public class ElementWrapper implements IComponent
      * @param opt <code>true</code> if optional structure object,
      * <code>false</code> if not
      */
-    
     public void setStructureObject(boolean opt) {
         m_structureObject = opt;
     }
@@ -170,7 +194,6 @@ public class ElementWrapper implements IComponent
      * @param opt <code>true</code> if optional normal element,
      * <code>false</code> if not
      */
-    
     public void setOptionalNormal(boolean opt) {
         m_optionalNormal = opt;
     }
@@ -224,6 +247,31 @@ public class ElementWrapper implements IComponent
             genContentPresentTest(mb);
             ifmiss = mb.appendIFEQ(this);
         }
+        BranchWrapper ifnil = null;
+        if (m_isNillable) {
+            
+            // make sure we're at the element
+            mb.loadContext(UNMARSHALLING_CONTEXT);
+            m_name.genPushUriPair(mb);
+            mb.appendCallVirtual(UNMARSHAL_PARSE_TO_START_NAME,
+                UNMARSHAL_PARSE_TO_START_SIGNATURE);
+            
+            // check for xsi:nil="true"
+            mb.loadContext(UNMARSHALLING_CONTEXT);
+            mb.appendLoadConstant("http://www.w3.org/2001/XMLSchema-instance");
+            mb.appendLoadConstant("nil");
+            mb.appendICONST_0();
+            mb.appendCallVirtual(UNMARSHAL_ATTRIBUTE_BOOLEAN_NAME,
+                UNMARSHAL_ATTRIBUTE_BOOLEAN_SIGNATURE);
+            BranchWrapper notnil = mb.appendIFEQ(this);
+            
+            // skip past the element before jumping to end
+            mb.loadContext(UNMARSHALLING_CONTEXT);
+            mb.appendCallVirtual(UNMARSHAL_SKIP_NAME,
+                UNMARSHAL_SKIP_SIGNATURE);
+            ifnil = mb.appendUnconditionalBranch(this);
+            mb.targetNext(notnil);
+        }
     
         // set up flags for controlling code generation paths
         boolean attr = m_component != null && m_component.hasAttribute();
@@ -275,7 +323,33 @@ public class ElementWrapper implements IComponent
             mb.appendCallVirtual(UNMARSHAL_PARSEENDMETHOD,
                 UNMARSHAL_PARSEENDSIGNATURE);
         }
-        mb.targetNext(ifmiss);
+        
+        // check if need code to handle missing or nil element
+        if (ifmiss != null || ifnil != null) {
+            
+            // handle branch conditions, jumping around code to set null
+            BranchWrapper toend = mb.appendUnconditionalBranch(this);
+            mb.targetNext(ifmiss);
+            mb.targetNext(ifnil);
+            
+            // generate code to store null to property
+            if (m_component instanceof ComponentProperty) {
+                PropertyDefinition prop =
+                    ((ComponentProperty)m_component).getProperty();
+                if (!prop.isImplicit()) {
+                    mb.loadObject();
+                    mb.appendACONST_NULL();
+                    prop.genStore(mb);
+                } else {
+                    mb.appendPOP();
+                    mb.appendACONST_NULL();
+                }
+            } else {
+                mb.appendPOP();
+                mb.appendACONST_NULL();
+            }
+            mb.targetNext(toend);
+        }
     }
 
     public void genContentMarshal(ContextMethodBuilder mb)
@@ -283,6 +357,38 @@ public class ElementWrapper implements IComponent
         
         // nothing to be done if optional ignored element
         if (!m_optionalIgnored) {
+            BranchWrapper ifmiss = null;
+            if (m_isNillable) {
+                
+                // check for null object
+                BranchWrapper ifhit;
+                if (m_directAccess || !(m_component instanceof ComponentProperty)) {
+                    mb.appendDUP();
+                    ifhit = mb.appendIFNONNULL(this);
+                    mb.appendPOP();
+                } else {
+                    PropertyDefinition prop =
+                        ((ComponentProperty)m_component).getProperty();
+                    mb.loadObject();
+                    prop.genLoad(mb);
+                    ifhit = mb.appendIFNONNULL(this);
+                }
+                
+                // generate empty element with xsi:nil="true"
+                mb.loadContext(MARSHALLING_CONTEXT);
+                m_name.genPushIndexPair(mb);
+                mb.appendCallVirtual(MARSHAL_STARTTAG_ATTRIBUTES,
+                    MARSHAL_STARTTAG_SIGNATURE);
+                mb.appendLoadConstant(2);
+                mb.appendLoadConstant("nil");
+                mb.appendLoadConstant("true");
+                mb.appendCallVirtual(MARSHAL_ATTRIBUTE, MARSHAL_SIGNATURE);
+                mb.appendCallVirtual(MARSHAL_CLOSESTART_EMPTY,
+                    MARSHAL_CLOSESTART_EMPTY_SIGNATURE);
+                mb.appendPOP();
+                ifmiss = mb.appendUnconditionalBranch(this);
+                mb.targetNext(ifhit);
+            }
         
             // set up flags for controlling code generation paths
             boolean attr = m_component != null && m_component.hasAttribute();
@@ -363,6 +469,7 @@ public class ElementWrapper implements IComponent
                     MARSHAL_WRITEENDSIGNATURE);
             }
             mb.appendPOP();
+            mb.targetNext(ifmiss);
         }
     }
     
@@ -400,9 +507,9 @@ public class ElementWrapper implements IComponent
             m_component.genLoadId(mb);
         }
     }
-
-    public boolean checkContentSequence(boolean text) throws JiBXException {
-        return true;
+    
+    public NameDefinition getWrapperName() {
+        return m_name;
     }
 
     public void setLinkages() throws JiBXException {

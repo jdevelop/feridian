@@ -72,12 +72,16 @@ public class NestedCollection extends NestedBase
     /** Strategy for generating code to store item to collection. */
     private final CollectionStore m_storeStrategy;
     
+    /** Optional component flag. */
+    private final boolean m_isOptional;
+    
     /**
      * Constructor.
      *
      * @param parent containing binding definition context
      * @param objc current object context
      * @param ord ordered content flag
+     * @param opt optional component flag
      * @param flex flexible element handling flag
      * @param type fully qualified class name of values from collection (may be
      * <code>null</code>, if child content present)
@@ -85,11 +89,13 @@ public class NestedCollection extends NestedBase
      * @param store collection store code generation strategy
      */
     public NestedCollection(IContainer parent, IContextObj objc, boolean ord,
-        boolean flex, String type, CollectionLoad load, CollectionStore store) {
+        boolean opt, boolean flex, String type, CollectionLoad load,
+        CollectionStore store) {
         super(parent, objc, ord, flex, false);
         m_itemType = type;
         m_loadStrategy = load;
         m_storeStrategy = store;
+        m_isOptional = opt;
     }
     
     /**
@@ -356,15 +362,13 @@ public class NestedCollection extends NestedBase
     public void genLoadId(ContextMethodBuilder mb) throws JiBXException {
         throw new IllegalStateException("No ID child");
     }
-
-    public boolean checkContentSequence(boolean text) throws JiBXException {
-        
-        // text not allowed as direct component of collection
-        for (int i = 0; i < m_contents.size(); i++) {
-            IComponent content = (IComponent)m_contents.get(i);
-            content.checkContentSequence(false);
-        }
-        return false;
+    
+    public NameDefinition getWrapperName() {
+        return null;
+    }
+    
+    public boolean isOptional() {
+        return m_isOptional;
     }
 
     public void setLinkages() throws JiBXException {

@@ -1,6 +1,6 @@
 <binding>
-  <mapping name="customer" class="simple.Customer1">
-    <structure name="name">
+  <mapping name="customer" class="simple.Customer0">
+    <structure name="name" field="name" usage="optional">
       <value name="first-name" field="firstName"/>
       <value name="last-name" field="lastName"/>
     </structure>

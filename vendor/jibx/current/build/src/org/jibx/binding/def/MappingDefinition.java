@@ -189,18 +189,19 @@ public class MappingDefinition extends MappingBase
      * @param abs abstract mapping flag
      * @param base abstract mapping extended by this one
      * @param bind binding definition component
+     * @param nillable flag for nillable element
      * @throws JiBXException if class definition not found
      */
     public MappingDefinition(IContainer contain, DefinitionContext defc,
         String type, NameDefinition name, String tname, boolean abs,
-        String base, ObjectBinding bind) throws JiBXException {
+        String base, ObjectBinding bind, boolean nillable) throws JiBXException {
         super(contain, type, tname);
         IComponent tref = new ObjectBinding(bind);
         if (name == null) {
             setWrappedComponent(bind);
         } else {
-            setWrappedComponent(new ElementWrapper(defc, name, bind));
-            tref = new ElementWrapper(defc, name, tref);
+            setWrappedComponent(new ElementWrapper(defc, name, bind, nillable));
+            tref = new ElementWrapper(defc, name, tref, nillable);
         }
         m_thisBinding = tref;
         m_container = contain;
@@ -547,6 +548,7 @@ public class MappingDefinition extends MappingBase
             }
             
             // define unmarshallings for child mappings of this mapping
+            mb.targetNext(ifnnull);
             ArrayList maps = m_defContext.getMappings();
             if (maps != null && maps.size() > 0) {
                 for (int i = 0; i < maps.size(); i++) {
@@ -569,17 +571,14 @@ public class MappingDefinition extends MappingBase
             }
             
             // load object and cast to type
-            mb.targetNext(ifnnull);
             mb.loadObject();
             mb.appendCreateCast(type);
             
             // handle the actual unmarshalling
             if (hasattr) {
-                mb.appendDUP();
                 m_component.genAttributeUnmarshal(mb);
             }
             if (hascont) {
-                mb.appendDUP();
                 m_component.genContentUnmarshal(mb);
             }
             
@@ -776,12 +775,13 @@ public class MappingDefinition extends MappingBase
     
     //
     // IComponent interface method definitions
+    
+    public NameDefinition getWrapperName() {
+        return m_name;
+    }
 
     public void setLinkages() throws JiBXException {
         m_component.setLinkages();
-        if (!m_isAbstract) {
-            m_component.checkContentSequence(true);
-        }
         m_defContext.setLinkages();
     }
     

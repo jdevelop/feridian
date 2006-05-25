@@ -659,6 +659,7 @@ implements IContainer
         m_activeContext.linkMappings();
         m_activeContext.setLinkages();
         m_activeContext.generateCode(verbose, m_isForceClasses);
+        // disabled because of potential recursion issues
         if (verbose) {
             System.out.println("After linking view of binding " + m_name + ':');
             print();

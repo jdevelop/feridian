@@ -358,6 +358,24 @@ public abstract class ContainerElementBase extends NestingElementBase
     }
     
     /**
+     * Check if nillable object.
+     * 
+     * @return nillable flag
+     */
+    public boolean isNillable() {
+        return m_objectAttrs.isNillable();
+    }
+
+    /**
+     * Set nillable flag.
+     * 
+     * @param nillable flag
+     */
+    public void setNillable(boolean nillable) {
+        m_objectAttrs.setNillable(nillable);
+    }
+    
+    /**
      * Get type to be used for creating new instance.
      * 
      * @return class name for type to be created (or <code>null</code> if none)

@@ -249,9 +249,9 @@ public class DirectGeneric implements IComponent
     public void genLoadId(ContextMethodBuilder mb) {
         throw new IllegalStateException("Internal error - no ID allowed");
     }
-
-    public boolean checkContentSequence(boolean text) {
-        return false;
+    
+    public NameDefinition getWrapperName() {
+        return null;
     }
 
     public void setLinkages() {}

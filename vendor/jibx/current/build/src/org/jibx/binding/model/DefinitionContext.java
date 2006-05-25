@@ -283,9 +283,9 @@ public class DefinitionContext
             IClass clas = def.getType();
             m_formatContext.addTypedComponent(clas, def, vctx);
         }
-        if (def.getQName() != null) {
-            m_formatContext.addNamedComponent(def.getQName().toString(),
-                def, vctx);
+        String label = def.getLabel();
+        if (label != null) {
+            m_formatContext.addNamedComponent(label, def, vctx);
         }
     }
 

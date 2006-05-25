@@ -39,7 +39,6 @@ import org.jibx.runtime.JiBXException;
  * @author Dennis M. Sosnoski
  * @version 1.0
  */
-
 public class DirectProperty implements IComponent
 {
     /** Property definition. */
@@ -54,7 +53,6 @@ public class DirectProperty implements IComponent
      * @param prop property definition
      * @param direct object direct binding information
      */
-
     public DirectProperty(PropertyDefinition prop, DirectObject direct) {
         m_property = prop;
         m_direct = direct;
@@ -201,9 +199,9 @@ public class DirectProperty implements IComponent
     public void genLoadId(ContextMethodBuilder mb) throws JiBXException {
         throw new IllegalStateException("Internal error - no id defined");
     }
-
-    public boolean checkContentSequence(boolean text) throws JiBXException {
-        return !m_property.isOptional();
+    
+    public NameDefinition getWrapperName() {
+        return m_direct.getWrapperName();
     }
 
     public void setLinkages() throws JiBXException {

@@ -272,8 +272,7 @@ public class FormatElement extends ElementBase
      */
     private void setQualifiedLabel(String label, IUnmarshallingContext ictx)
         throws JiBXException {
-        m_label = label;
-        m_qname = QName.deserialize(label, ictx);
+        setQName(QName.deserialize(label, ictx));
     }
     
     /**
@@ -285,7 +284,7 @@ public class FormatElement extends ElementBase
      */
     private String getQualifiedLabel(IMarshallingContext ictx)
         throws JiBXException {
-        return QName.serialize(m_qname, ictx);
+        return QName.serialize(getQName(), ictx);
     }
     
     /**

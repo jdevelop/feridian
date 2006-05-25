@@ -466,6 +466,8 @@ public class ValueChild implements IComponent
                     mb.appendCallVirtual(UNMARSHAL_PARSE_TO_START_NAME,
                         UNMARSHAL_PARSE_TO_START_SIGNATURE);
                 }
+                
+                // check for xsi:nil="true"
                 mb.loadContext();
                 mb.appendLoadConstant("http://www.w3.org/2001/XMLSchema-instance");
                 mb.appendLoadConstant("nil");
@@ -473,13 +475,19 @@ public class ValueChild implements IComponent
                 mb.appendCallVirtual(UNMARSHAL_ATTRIBUTE_BOOLEAN_NAME,
                     UNMARSHAL_ATTRIBUTE_BOOLEAN_SIGNATURE);
                 BranchWrapper notnil = mb.appendIFEQ(this);
-                mb.targetNext(ifmiss);
-                mb.appendACONST_NULL();
+                
+                // code to handle nil case just parses past end
                 mb.loadContext();
                 m_name.genPushUriPair(mb);
                 mb.appendCallVirtual(UNMARSHAL_PARSE_PAST_END_NAME,
                     UNMARSHAL_PARSE_PAST_END_SIGNATURE);
+                
+                // merge path with element not present, which just loads null
+                mb.targetNext(ifmiss);
+                mb.appendACONST_NULL();
                 BranchWrapper ifnil = mb.appendUnconditionalBranch(this);
+                
+                // read element text and process for not-nil case
                 mb.targetNext(notnil);
                 mb.loadContext();
                 m_name.genPushUriPair(mb);
@@ -827,17 +835,9 @@ public class ValueChild implements IComponent
     public void genLoadId(ContextMethodBuilder mub) throws JiBXException {
         m_property.genLoad(mub);
     }
-
-    public boolean checkContentSequence(boolean text) throws JiBXException {
-        if (m_valueStyle == ELEMENT_STYLE) {
-            return true;
-        } else if (m_valueStyle == ATTRIBUTE_STYLE) {
-            return text;
-        } else if (text) {
-            return false;
-        } else {
-            throw new JiBXException("Text value must follow required element");
-        }
+    
+    public NameDefinition getWrapperName() {
+        return (m_valueStyle == ELEMENT_STYLE) ? m_name : null;
     }
 
     public void setLinkages() throws JiBXException {

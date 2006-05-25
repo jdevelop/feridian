@@ -102,6 +102,7 @@ public abstract class BindingBuilder
     private static final String COMMON_ORDERED = "ordered";
     private static final String COMMON_CHOICE = "choice";
     private static final String COMMON_FLEXIBLE = "flexible";
+    private static final String COMMON_DUPLICATES = "ignore-repeats";
     
     /* Common nillable attribute. */
     private static final String COMMON_NILLABLE = "nillable";
@@ -751,7 +752,6 @@ public abstract class BindingBuilder
      * @return constructed mapping reference component
      * @throws JiBXException if error in unmarshalling
      */
-    
     private static IComponent unmarshalMappingRef(UnmarshallingContext ctx,
         IContainer parent, IContextObj objc, PropertyDefinition prop,
         NameDefinition name) throws JiBXException {
@@ -769,8 +769,13 @@ public abstract class BindingBuilder
         String type = (prop == null) ? null : prop.getTypeName();
         String text = ctx.attributeText(URI_ATTRIBUTES, STRUCTURE_MAPAS, type);
         QName qname = QName.deserialize(text, ctx);
+        boolean nillable = ctx.attributeBoolean(URI_ATTRIBUTES,
+            COMMON_NILLABLE, false);
+        if (nillable) {
+            parent.getBindingRoot().setSchemaInstanceUsed();
+        }
         return new MappingReference(parent, prop, type, text, qname.toString(),
-            objc, name, false);
+            objc, name, false, nillable);
     }
 
     /**
@@ -788,7 +793,6 @@ public abstract class BindingBuilder
      * @return constructed structure reference component
      * @throws JiBXException if error in unmarshalling
      */
-    
     private static IComponent unmarshalStructureRef(UnmarshallingContext ctx,
         IContainer contain, NameDefinition name, PropertyDefinition prop,
         IContextObj cobj) throws JiBXException {
@@ -804,8 +808,13 @@ public abstract class BindingBuilder
         IComponent comp = new StructureReference(contain, ident, prop,
             name != null, cobj);
         if (name != null) {
+            boolean nillable = ctx.attributeBoolean(URI_ATTRIBUTES,
+                COMMON_NILLABLE, false);
+            if (nillable) {
+                contain.getBindingRoot().setSchemaInstanceUsed();
+            }
             comp = new ElementWrapper(contain.getDefinitionContext(),
-                name, comp);
+                name, comp, nillable);
             if (prop != null && prop.isOptional()) {
                 ((ElementWrapper)comp).setOptionalNormal(true);
                 ((ElementWrapper)comp).setStructureObject(true);
@@ -1264,11 +1273,16 @@ public abstract class BindingBuilder
                         COMMON_ORDERED, true);
                     boolean flex = ctx.attributeBoolean(URI_ATTRIBUTES,
                         COMMON_FLEXIBLE, false);
+                    boolean nillable = ctx.attributeBoolean(URI_ATTRIBUTES,
+                        COMMON_NILLABLE, false);
+                    if (nillable) {
+                        contain.getBindingRoot().setSchemaInstanceUsed();
+                    }
                     if (coll) {
                         
                         // create collection definition
                         nest = new NestedCollection(contain, icobj,
-                            ordered, flex, itype, load, store);
+                            ordered, opt, flex, itype, load, store);
                         nest.unmarshal(ctx);
                         ctx.parsePastStartTag(URI_ELEMENTS,
                             COLLECTION_ELEMENT);
@@ -1278,8 +1292,10 @@ public abstract class BindingBuilder
                         // create structure definition
                         boolean choice = ctx.attributeBoolean(URI_ATTRIBUTES,
                             COMMON_CHOICE, false);
+                        boolean dupl = ctx.attributeBoolean(URI_ATTRIBUTES,
+                            COMMON_DUPLICATES, false);
                         nest = new NestedStructure(contain, icobj,
-                            ordered, choice, flex, false, hasobj);
+                            ordered, choice, flex, false, hasobj, dupl);
                         nest.unmarshal(ctx);
                         ctx.parsePastStartTag(URI_ELEMENTS,
                             STRUCTURE_ELEMENT);
@@ -1318,7 +1334,7 @@ public abstract class BindingBuilder
                         comp = nest;
                         nest.setObjectContext(cobj);
                         if (name != null) {
-                            comp = new ElementWrapper(defc, name, comp);
+                            comp = new ElementWrapper(defc, name, comp, nillable);
                             if (bind != null && implic) {
                                 if (!hasprop) {
                                     ArrayList contents = nest.getContents();
@@ -1347,7 +1363,7 @@ public abstract class BindingBuilder
                                 } else {
                                     nest.addComponent(new MappingReference(contain, 
                                         new PropertyDefinition(ctype, cobj, false),
-                                        ctype, null, null, icobj, null, true));
+                                        ctype, null, null, icobj, null, true, false));
                                 }
                                 childs = true;
                                 
@@ -1379,10 +1395,11 @@ public abstract class BindingBuilder
                                     new PropertyDefinition(bind, false);
                                 nest.addComponent(new MappingReference
                                     (nest, thisprop, comp.getType(), null, null,
-                                    icobj, null, false));
+                                    icobj, null, false, false));
                             }
                             if (name != null) {
-                                comp = new ElementWrapper(defc, name, comp);
+                                comp = new ElementWrapper(defc, name, comp,
+                                    nillable);
                                 if (bind != null && implic) {
                                     if (!hasprop) {
                                         ((ElementWrapper)comp).setDirect(true);
@@ -1394,6 +1411,7 @@ public abstract class BindingBuilder
                                     boolean isobj = bind != null;
                                     ((ElementWrapper)comp).
                                         setStructureObject(isobj);
+                                    ((ElementWrapper)comp).setDirect(isobj);
                                     comp = new OptionalStructureWrapper(comp, prop,
                                         isobj);
                                     prop.setOptional(false);
@@ -1414,7 +1432,7 @@ public abstract class BindingBuilder
                                     DirectGeneric(contain, null), false);
                             } else {
                                 comp = new MappingReference(contain, prop, type,
-                                    null, null, icobj, name, false);
+                                    null, null, icobj, name, false, false);
                             }
                         }
                     }
@@ -1467,8 +1485,10 @@ public abstract class BindingBuilder
                     COMMON_CHOICE, false);
                 boolean flex = ctx.attributeBoolean(URI_ATTRIBUTES,
                     COMMON_FLEXIBLE, false);
+                boolean dupl = ctx.attributeBoolean(URI_ATTRIBUTES,
+                    COMMON_DUPLICATES, false);
                 NestedStructure nest = new NestedStructure(contain, cobj,
-                    ordered, choice, flex, false, hasprop);
+                    ordered, choice, flex, false, hasprop, dupl);
                 nest.unmarshal(ctx);
         
                 // unmarshal child bindings with optional label
@@ -1488,7 +1508,7 @@ public abstract class BindingBuilder
                     if (name == null) {
                         comp = nest;
                     } else {
-                        comp = new ElementWrapper(defc, name, nest);
+                        comp = new ElementWrapper(defc, name, nest, false);
                         if (opt) {
                             ((ElementWrapper)comp).setOptionalNormal(true);
                             ((ElementWrapper)comp).setStructureObject(true);
@@ -1507,7 +1527,7 @@ public abstract class BindingBuilder
                     }
                         
                     // treat as throwaway portion of document
-                    comp = new ElementWrapper(defc, name, null);
+                    comp = new ElementWrapper(defc, name, null, false);
                     if (opt) {
                         ((ElementWrapper)comp).setOptionalIgnored(true);
                     }
@@ -1604,8 +1624,15 @@ public abstract class BindingBuilder
                 COMMON_CHOICE, false);
             boolean flex = ctx.attributeBoolean(URI_ATTRIBUTES,
                 COMMON_FLEXIBLE, false);
+            boolean nillable = ctx.attributeBoolean(URI_ATTRIBUTES,
+                COMMON_NILLABLE, false);
+            if (nillable) {
+                parent.getBindingRoot().setSchemaInstanceUsed();
+            }
+            boolean dupl = ctx.attributeBoolean(URI_ATTRIBUTES,
+                COMMON_DUPLICATES, false);
             NestedStructure nest = new NestedStructure(parent, bind,
-                ordered, choice, flex, true, true);
+                ordered, choice, flex, true, true, dupl);
             nest.unmarshal(ctx);
             
             // add all outer namespaces to context
@@ -1627,7 +1654,7 @@ public abstract class BindingBuilder
             // validate and configure actual binding definition
             bind.setWrappedComponent(nest);
             mapping = new MappingDefinition(parent, nest.getDefinitionContext(),
-                type, name, tname, abs, base, bind);
+                type, name, tname, abs, base, bind, nillable);
         
             // set label if defined
             if (label != null) {
