@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+<stream:stream from='example.com' id="someid" version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<stream:error>
+	  <unsupported-version xmlns='urn:ietf:params:xml:ns:xmpp-streams'/>
+	</stream:error>       
+</stream:stream>

@@ -1,0 +1,6 @@
+Echomine Feridian Changelog
+============================================================
+NOTE: The changelog will only contains changes that are within major version
+releases (ie. 1.0, 1.1, etc).  Previous major version changelogs will be with
+its respective release archive.
+

@@ -1,0 +1,21 @@
+Fixes since 1.0.1:
+
+1. Added "synthetic" flag for classes, fields, and methods added by JiBX to fix
+problems in using JiBX with the Agitator testing tool.
+2. Corrected an IllegalStateException case during binding validation when a
+referenced class was not found in the classpath.
+3. Added validation check for name attribute used with reference to either a
+non-abstract mapping or an abstract mapping with extensions. (document this).
+4. Added validation check for compatible type on structure element with no
+property (which uses the same object as the container, but perhaps with a
+downcast type).
+5. Added warning for non-extension mapping when some sibling classes have
+mappings extending the mapping for a parent class.
+6. Added error on non-abstract input mapping with no default constructor or
+factory method.
+
+Fixes since 1.0:
+
+1. Fixed the org.jibx.runtime.Utility class usage of a JDK 1.4 method to restore
+compatibility with JDK 1.3.
+2. Updated binding.xsd and binding.dtd in docs directory.

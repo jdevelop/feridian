@@ -1,0 +1,5 @@
+<presence xmlns="jabber:client" xml:lang='en-ca'>
+  <show>away</show>
+  <status>dinner</status>
+  <status xml:lang='it-it'>cenare</status>
+</presence>

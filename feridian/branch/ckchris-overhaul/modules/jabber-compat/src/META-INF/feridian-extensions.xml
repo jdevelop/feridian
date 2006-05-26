@@ -1,0 +1,9 @@
+<feridian>
+  <authenticators>
+  	<authenticator class="com.echomine.jabber.auth.NonSASLAuthenticator"/>
+  </authenticators>
+  <packets>
+    <packet ns="jabber:iq:auth" class="com.echomine.jabber.packet.AuthIQPacket"/>
+    <packet ns="jabber:iq:version" class="com.echomine.jabber.packet.VersionIQPacket"/>
+  </packets>
+</feridian>

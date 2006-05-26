@@ -1,0 +1,42 @@
+<!-- 
+	binding file for working with the Jabbber Data Forms (jabber:x:data)
+-->
+<binding>
+	<namespace uri="jabber:x:data" default="elements"/>
+
+	<mapping name="x" ns="jabber:x:data"
+		class="com.echomine.jabber.packet.DataXPacket" ordered='false'>
+		<value name='type' field='formType' style='attribute' usage='optional'/>
+		<value name='title' field='title' usage='optional'/>
+		<collection field="instructions" type="java.util.ArrayList"
+			item-type="java.lang.String" usage="optional"/>
+		<collection field="fields" type="java.util.ArrayList"
+			item-type="com.echomine.jabber.packet.DataXField" usage="optional"/>
+		<collection name='reported' field='reportedFields' type='java.util.ArrayList'
+			item-type='com.echomine.jabber.packet.DataXField' usage='optional'/>
+		<collection field='itemFields' type='java.util.ArrayList'
+			item-type='com.echomine.jabber.packet.DataXItemList' usage='optional'/>
+	</mapping>
+
+	<mapping name='item' ns='jabber:x:data' class='com.echomine.jabber.packet.DataXItemList'>
+		<collection field="fields" type="java.util.ArrayList"
+			item-type="com.echomine.jabber.packet.DataXField"/>
+	</mapping>
+	
+	<mapping name='field' ns='jabber:x:data' class='com.echomine.jabber.packet.DataXField'>
+		<value name='label' field='label' style='attribute' usage='optional'/>
+		<value name='type' field='fieldType' style='attribute' usage='optional'/>
+		<value name='var' field='variableName' style='attribute' usage='optional'/>
+		<value name='desc' field='description' usage='optional'/>
+		<value name='required' field='required' usage='optional'/>
+		<collection field='values' type='java.util.ArrayList'
+			item-type='java.lang.String'/>
+		<collection field='options' type='java.util.ArrayList'
+			item-type='com.echomine.jabber.packet.DataXOption'/>
+	</mapping>
+	
+	<mapping name='option' ns='jabber:x:data' class='com.echomine.jabber.packet.DataXOption'>
+		<value name='label' field='label' style='attribute' usage='optional'/>
+		<value name='value' field='value'/>
+	</mapping>
+</binding>

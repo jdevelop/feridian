@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+<stream:stream from='example.com' id="someid" version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<stream:features>
+	    <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
+	        <mechanism>PLAIN</mechanism>
+	    </mechanisms>
+  	</stream:features>
+	<iq type='get' id='iq_0001' to='romeo@example.com' from='juliet@example.com'>
+		<x xmlns='test:unknown:ns'>
+		   <yoyo/>
+		</x>
+	</iq>
+</stream:stream>

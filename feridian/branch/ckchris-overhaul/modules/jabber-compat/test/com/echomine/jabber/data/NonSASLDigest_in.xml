@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+<stream:stream from='example.com' version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<iq type='result'>
+      <query xmlns='jabber:iq:auth'>
+    	    <username/>
+        <password/>
+        <digest/>
+        <resource/>
+      </query>
+    </iq>
+    <iq type='result'/>
+</stream:stream>
