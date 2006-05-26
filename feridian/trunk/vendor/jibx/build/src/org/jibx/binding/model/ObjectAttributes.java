@@ -400,8 +400,8 @@ public class ObjectAttributes extends AttributeBase
                     m_createType = null;
                 }
                 if (m_isNillable) {
-                    vctx.addWarning
-                        ("No object for structure; nillable attribute ignored");
+                    vctx.addError
+                        ("No object for structure; nillable attribute forbidden");
                     m_isNillable = false;
                 }
                 return;

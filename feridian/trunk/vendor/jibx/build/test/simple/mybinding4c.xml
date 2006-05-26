@@ -1,12 +1,15 @@
-<!-- Mixed elements and text values in a collection. -->
-<binding>
-  <format type="char" serializer="org.jibx.runtime.Utility.serializeCharString"
-    deserializer="org.jibx.runtime.Utility.deserializeCharString"/>
-  <format type="char" label="alt-char"
+<!-- Testing formats with different label namespaces but same local names. -->
+<binding xmlns:ns1="urn:a" xmlns:ns3="urn:c">
+  <format type="char" label="ns1:char"
     serializer="org.jibx.runtime.Utility.serializeChar"
     deserializer="org.jibx.runtime.Utility.parseChar"/>
-  <format type="java.lang.Integer" serializer="simple.MyClass4.serializeNumber"
-      deserializer="simple.MyClass4.deserializeNumber"/>
+  <format type="char" serializer="org.jibx.runtime.Utility.serializeCharString"
+    deserializer="org.jibx.runtime.Utility.deserializeCharString"
+    label="ns2:char" xmlns:ns2="urn:b"/>
+  <format type="java.lang.Number" serializer="simple.MyClass4.serializeNumber"
+      deserializer="simple.MyClass4.deserializeNumber" label="ns1:number"/>
+  <format type="java.lang.Number" serializer="simple.MyClass4.serializeReverse"
+      deserializer="simple.MyClass4.deserializeReverse" label="ns3:number"/>
   <mapping name="myelement" class="simple.MyClass4" post-set="postSet">
     <value style="text" field="a" usage="optional"/>
     <value name="b" field="b"/>
@@ -29,7 +32,7 @@
     <value name="k" field="k" usage="optional"/>
     <value name="l" field="l"/>
     <value name="m" field="m" default="-128"/>
-    <value name="n" field="n"/>
+    <value name="n" field="n" format="nsx:char" xmlns:nsx="urn:b"/>
     <structure name="o" usage="optional" test-method="testO">
       <value style="attribute" field="o" set-method="setO" name="value"/>
     </structure>
@@ -44,10 +47,9 @@
       <value style="text" field="s" usage="optional"/>
     </structure>  -->
     <collection field="intsAndStrings" usage="optional" ordered="false">
-      <structure name="int" type="simple.MyClass4$IntWrapper" usage="optional">
-        <value style="text" field="ivalue"/>
-      </structure>
-      <value style="text" type="java.lang.String" usage="optional"/>
+      <value name="int" type="java.lang.Number" usage="optional"
+          format="ns3:number"/>
+      <value name="string" type="java.lang.String" usage="optional"/>
     </collection>
   </mapping>
 </binding>

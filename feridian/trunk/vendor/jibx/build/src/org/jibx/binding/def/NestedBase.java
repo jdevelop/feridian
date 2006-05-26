@@ -221,4 +221,12 @@ implements IComponent, IContainer
     public String getType() {
         return m_contextObject.getBoundClass().getClassName();
     }
+    
+    public NameDefinition getWrapperName() {
+        if (m_contents.size() == 1) {
+            return ((IComponent)m_contents.get(0)).getWrapperName();
+        } else {
+            return null;
+        }
+    }
 }

@@ -30,8 +30,10 @@ package org.jibx.binding.model;
 
 import org.jibx.binding.util.StringArray;
 import org.jibx.runtime.EnumSet;
+import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Model component for <b>value</b> element. This element defines a value that
@@ -524,6 +526,25 @@ public class ValueElement extends ElementBase implements IComponent
      */
     public void setFormatName(String name) {
         m_stringAttrs.setFormatName(name);
+    }
+    
+    /**
+     * Get format qualified name.
+     * 
+     * @return format qualified name (<code>null</code> if none)
+     */
+    public QName getFormatQName() {
+        return m_stringAttrs.getFormatQName();
+    }
+    
+    /**
+     * Set format qualified name. This method changes the label value to match
+     * the qualified name.
+     * 
+     * @return format qualified name (<code>null</code> if none)
+     */
+    public void setFormatQName(QName qname) {
+        m_stringAttrs.setFormatQName(qname);
     }
     
     /**

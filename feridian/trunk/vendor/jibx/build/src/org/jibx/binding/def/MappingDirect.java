@@ -103,7 +103,7 @@ public class MappingDirect extends MappingBase
     }
     
     public NameDefinition getName() {
-        return m_mappingImpl.getName();
+        return m_mappingImpl.getWrapperName();
     }
 
     public void addNamespace(NamespaceDefinition ns) {
@@ -137,6 +137,10 @@ public class MappingDirect extends MappingBase
             }
             m_isGenerated = true;
         }
+    }
+    
+    public NameDefinition getWrapperName() {
+        return null;
     }
 
     public void setLinkages() throws JiBXException {

@@ -54,7 +54,8 @@
     <value name="serializer" field="m_serializerName" usage="optional"/>
     <value name="deserializer" field="m_deserializerName" usage="optional"/>
     <value name="default" field="m_defaultText" usage="optional"/>
-    <value name="format" field="m_formatName" usage="optional"/>
+    <value name="format" get-method="getQualifiedFormat"
+        set-method="setQualifiedFormat" usage="optional"/>
   </mapping>
   
   <mapping class="org.jibx.binding.model.StructureAttributes" abstract="true">

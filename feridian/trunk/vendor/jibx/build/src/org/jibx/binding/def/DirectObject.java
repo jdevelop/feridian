@@ -41,7 +41,6 @@ import org.jibx.runtime.JiBXException;
  * @author Dennis M. Sosnoski
  * @version 1.0
  */
-
 public class DirectObject implements IComponent
 {
     //
@@ -510,17 +509,6 @@ public class DirectObject implements IComponent
     }
 
     /**
-     * Get mapped element name.
-     *
-     * @return mapped element name information (may be <code>null</code> if no
-     * element name defined for mapping)
-     */
-
-    public NameDefinition getName() {
-        return m_name;
-    }
-
-    /**
      * Get marshaller class used for mapping. If a name has been supplied the
      * actual marshaller class is created by extending the base class the first
      * time this method is called.
@@ -613,9 +601,9 @@ public class DirectObject implements IComponent
     public void genLoadId(ContextMethodBuilder mb) {
         throw new IllegalStateException("Internal error - no ID allowed");
     }
-
-    public boolean checkContentSequence(boolean text) {
-        return true;
+    
+    public NameDefinition getWrapperName() {
+        return m_name;
     }
 
     public void setLinkages() throws JiBXException {

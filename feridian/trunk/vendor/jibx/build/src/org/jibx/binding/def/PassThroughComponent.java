@@ -131,9 +131,9 @@ public class PassThroughComponent implements IComponent
     public void genLoadId(ContextMethodBuilder mb) throws JiBXException {
         m_component.genLoadId(mb);
     }
-
-    public boolean checkContentSequence(boolean text) throws JiBXException {
-        return m_component.checkContentSequence(text);
+    
+    public NameDefinition getWrapperName() {
+        return m_component.getWrapperName();
     }
 
     public void setLinkages() throws JiBXException {

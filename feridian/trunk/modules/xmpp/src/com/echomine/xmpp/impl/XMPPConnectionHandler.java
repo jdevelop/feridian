@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
@@ -195,7 +196,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
                     try {
                         pauseLock.acquire();
                     } catch (InterruptedException ex) {
-                        //intentionally left empty
+                        // intentionally left empty
                     } finally {
                         pauseLock.release();
                     }
@@ -210,7 +211,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
                 IStanzaPacket packet = null;
                 if (state == RunningState.RUNNING) {
                     // parse incoming data
-                    if (uctx.currentEvent() == UnmarshallingContext.END_DOCUMENT) {
+                    if (uctx.currentEvent() == IXMLReader.END_DOCUMENT) {
                         break;
                     } else if (uctx.isEnd()) {
                         continue;

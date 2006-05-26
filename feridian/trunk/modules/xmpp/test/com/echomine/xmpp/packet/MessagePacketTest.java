@@ -13,7 +13,6 @@ import com.echomine.xmpp.XMPPTestCase;
  * Tests the message packet
  */
 public class MessagePacketTest extends XMPPTestCase {
-
     public void testUnmarshallNormalPacket() throws Exception {
         String inRes = "com/echomine/xmpp/data/MessageNormal_in.xml";
         Reader rdr = getResourceAsReader(inRes);

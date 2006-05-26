@@ -72,6 +72,17 @@ public class ComponentProperty extends PassThroughComponent
         m_skipMarshal = skip;
     }
     
+    /**
+     * Get the property information. This is a kludge used by the ElementWrapper
+     * code to store a <code>null</code> value directly to the property when
+     * unmarshalling a missing or xsi:nil element.
+     * 
+     * @return property information
+     */
+    public PropertyDefinition getProperty() {
+        return m_property;
+    }
+    
     //
     // IComponent interface method definitions (overrides of defaults)
 

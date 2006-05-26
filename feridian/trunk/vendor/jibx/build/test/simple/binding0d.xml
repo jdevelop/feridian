@@ -1,6 +1,7 @@
+<!-- Uses optional and nillable name element. -->
 <binding>
-  <mapping name="customer" class="simple.Customer1">
-    <structure name="name">
+  <mapping name="customer" class="simple.Customer0">
+    <structure name="name" usage="optional" nillable="true" field="name">
       <value name="first-name" field="firstName"/>
       <value name="last-name" field="lastName"/>
     </structure>

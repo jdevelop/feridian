@@ -36,6 +36,13 @@ public class Customer0
 	public String state;
 	public String zip;
 	public String phone;
+    
+    public Customer0() {
+        name = new Name();
+        name.firstName = "first";
+        name.lastName = "last";
+    }
+    
     public void setName(Name name) {
         this.name = name;
     }

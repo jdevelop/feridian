@@ -51,6 +51,13 @@ public class NestedStructure extends NestedBase
     private static final String SKIP_ELEMENT_NAME =
         "org.jibx.runtime.impl.UnmarshallingContext.skipElement";
     private static final String SKIP_ELEMENT_SIGNATURE = "()V";
+    private static final String THROW_EXCEPTION_NAME =
+        "org.jibx.runtime.impl.UnmarshallingContext.throwNameException";
+    private static final String THROW_EXCEPTION_SIGNATURE =
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V";
+    
+    // object used for flags array local
+    private static final String FLAG_ARRAY_SLOT = "flags";
     
     //
     // Instance data
@@ -60,6 +67,9 @@ public class NestedStructure extends NestedBase
 
     /** Flag for choice of child content (used by subclasses). */
     protected final boolean m_isChoice;
+    
+    /** Flag for duplicate values allowed when unmarshalling unordered group. */
+    private final boolean m_allowDuplicates;
     
     /** Flag for structure has associated object. */
     private boolean m_hasObject;
@@ -77,12 +87,15 @@ public class NestedStructure extends NestedBase
      * @param flex flexible element handling flag
      * @param ctx define context for structure flag
      * @param hasobj has associated object flag
+     * @param dupl allow duplicates in unordered group flag
      */
     public NestedStructure(IContainer parent, IContextObj objc,
-        boolean ord, boolean choice, boolean flex, boolean ctx, boolean hasobj) {
+        boolean ord, boolean choice, boolean flex, boolean ctx,
+        boolean hasobj, boolean dupl) {
         super(parent, objc, ord, flex, ctx);
         m_isChoice = choice;
         m_hasObject = hasobj;
+        m_allowDuplicates = dupl;
     }
     
     /**
@@ -181,29 +194,66 @@ public class NestedStructure extends NestedBase
                 }
                 
             } else {
+                
+                // start by finding the number of required elements
+                int count = m_contents.size();
+                int nreq = 0;
+                for (int i = 0; i < count; i++) {
+                    if (!((IComponent)m_contents.get(i)).isOptional()) {
+                        nreq++;
+                    }
+                }
+                
+                // create array for tracking elements seen
+                boolean useflag = nreq > 0 || !m_allowDuplicates;
+                if (useflag) {
+                    mb.appendLoadConstant(count);
+                    mb.appendCreateArray("boolean");
+                    mb.defineSlot(FLAG_ARRAY_SLOT,
+                        ClassItem.typeFromName("boolean[]"));
+                }
             
                 // generate unmarshal loop code that checks for each component,
                 //  branching to the next component until one is found and
                 //  exiting the loop only when no component is matched (or in
                 //  the case of flexible unmarshalling, only exiting the loop
-                //  when the enclosing end tag is seen)
+                //  when the enclosing end tag is seen). this uses the array(s)
+                //  of booleans to track elements seen and detect duplicates.
                 BranchWrapper link = null;
                 // TODO: initialize default values
                 BranchTarget first = mb.appendTargetNOP();
                 BranchWrapper[] toends;
-                int count = m_contents.size();
                 if (m_isChoice) {
                     toends = new BranchWrapper[count+1];
                 } else {
                     toends = new BranchWrapper[1];
                 }
+                int ireq = 0;
                 for (int i = 0; i < count; i++) {
+                    
+                    // start with basic test code
                     if (link != null) {
                         mb.targetNext(link);
                     }
                     IComponent child = (IComponent)m_contents.get(i);
                     child.genContentPresentTest(mb);
                     link = mb.appendIFEQ(this);
+                    
+                    // check for duplicate (if enforced)
+                    if (!m_allowDuplicates) {
+                        genFlagTest(true, i, "Duplicate element ",
+                            child.getWrapperName(), mb);
+                    }
+                    
+                    // set flag for element seen
+                    if (useflag || !(child.isOptional() && m_allowDuplicates)) {
+                        mb.appendLoadLocal(mb.getSlot(FLAG_ARRAY_SLOT));
+                        mb.appendLoadConstant(i);
+                        mb.appendLoadConstant(1);
+                        mb.appendASTORE("boolean");
+                    }
+                    
+                    // generate actual unmarshalling code
                     child.genContentUnmarshal(mb);
                     BranchWrapper next = mb.appendUnconditionalBranch(this);
                     if (m_isChoice) {
@@ -239,12 +289,67 @@ public class NestedStructure extends NestedBase
                 
                 // patch all branches that exit loop
                 mb.targetNext(toends);
+                
+                // handle required element present tests
+                if (nreq > 0) {
+                    for (int i = 0; i < count; i++) {
+                        IComponent child = (IComponent)m_contents.get(i);
+                        if (!child.isOptional()) {
+                            genFlagTest(true, i, "Missing required element ",
+                                child.getWrapperName(), mb);
+                        }
+                    }
+                }
+                mb.freeSlot(FLAG_ARRAY_SLOT);
             
             }
         } else {
             throw new IllegalStateException
                 ("Internal error - no content present");
         }
+    }
+
+    /**
+     * Helper method to generate test code for value in boolean array. If the
+     * test fails, the generated code throws an exception with the appropriate
+     * error message.
+     * 
+     * @param cond flag setting resulting in exception
+     * @param pos position of element in list of child components
+     * @param msg basic error message when test fails
+     * @param name
+     * @param mb
+     */
+    private void genFlagTest(boolean cond, int pos, String msg,
+        NameDefinition name, ContextMethodBuilder mb) {
+        
+        // generate code to load array item value
+        mb.appendLoadLocal(mb.getSlot(FLAG_ARRAY_SLOT));
+        mb.appendLoadConstant(pos);
+        mb.appendALOAD("boolean");
+        
+        // append branch for case where test is passed
+        BranchWrapper ifgood;
+        if (cond) {
+            ifgood = mb.appendIFEQ(this);
+        } else {
+            ifgood = mb.appendIFNE(this);
+        }
+        
+        // generate exception for test failed
+        mb.loadContext();
+        mb.appendLoadConstant(msg);
+        if (name == null) {
+            mb.appendACONST_NULL();
+            mb.appendLoadConstant("(unknown name, position " + pos +
+                " in binding structure)");
+        } else {
+            name.genPushUriPair(mb);
+        }
+        mb.appendCallVirtual(THROW_EXCEPTION_NAME, THROW_EXCEPTION_SIGNATURE);
+        
+        // set target for success branch on test
+        mb.targetNext(ifgood);
     }
 
     public void genContentMarshal(ContextMethodBuilder mb)
@@ -283,14 +388,6 @@ public class NestedStructure extends NestedBase
         } else {
             m_idChild.genLoadId(mb);
         }
-    }
-
-    public boolean checkContentSequence(boolean text) throws JiBXException {
-        for (int i = 0; i < m_contents.size(); i++) {
-            IComponent content = (IComponent)m_contents.get(i);
-            text = content.checkContentSequence(text);
-        }
-        return text;
     }
 
     public void setLinkages() throws JiBXException {

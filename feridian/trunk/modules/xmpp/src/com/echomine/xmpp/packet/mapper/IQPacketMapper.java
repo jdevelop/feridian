@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
@@ -70,6 +71,8 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
                     // marshall the packet's real contents
                     StringWriter strWriter = new StringWriter(256);
                     JiBXUtil.marshallObject(strWriter, packet);
+                    //write out empty text to work around jibx issue
+                    ctx.writeContent("");
                     writer.writeMarkup(strWriter.toString());
                 }
                 if (packet.getError() != null)
@@ -97,8 +100,12 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
         IQPacket tpkt = (IQPacket) obj;
         IQPacket packet = null;
         unmarshallStanzaAttributes(tpkt, ctx);
-        ctx.next();
-        while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
+        do {
+            ctx.next();
+        } while (ctx.currentEvent() == IXMLReader.TEXT);
+        while (ctx.currentEvent() != IXMLReader.END_DOCUMENT
+                && ctx.currentEvent() != IXMLReader.END_TAG
+                && !name.equals(ctx.getName())) {
             if (ctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "error")) {
                 tpkt.setError((StanzaErrorPacket) JiBXUtil.unmarshallObject(ctx, StanzaErrorPacket.class));
             } else {
@@ -113,7 +120,8 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
                     // ignore unknown stanza
                     ctx.skipElement();
                 }
-                if (ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName()))
+                while (ctx.currentEvent() == IXMLReader.TEXT
+                        || (ctx.currentEvent() != IXMLReader.END_TAG && !name.equals(ctx.getName())))
                     ctx.next();
             }
         }

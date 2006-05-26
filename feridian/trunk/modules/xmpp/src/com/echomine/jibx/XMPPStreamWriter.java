@@ -15,11 +15,14 @@ import com.echomine.xmpp.XMPPLogger;
  * methods to work with streaming xml.
  */
 public class XMPPStreamWriter extends UTF8StreamWriter {
-    public static final int IDX_JABBER_STREAM = 2;
-    public static final int IDX_XMPP_CLIENT = 3;
+    public static final int IDX_JABBER_STREAM = 3;
+    public static final int IDX_XMPP_CLIENT = 4;
     private static final String STREAM_PREFIX = "stream";
     private static final String CLIENT_PREFIX = "";
-    private static final String[] STREAM_URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", XMPPConstants.NS_JABBER_STREAM, XMPPConstants.NS_XMPP_CLIENT };
+    private static final String[] STREAM_URIS = new String[] { "",
+            "http://www.w3.org/XML/1998/namespace",
+            "http://www.w3.org/2001/XMLSchema-instance",
+            XMPPConstants.NS_JABBER_STREAM, XMPPConstants.NS_XMPP_CLIENT };
 
     /**
      * This constructor will setup a default set of URIs specifically for XMPP

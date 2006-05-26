@@ -501,6 +501,11 @@ file has been tested with ant version 1.6.1.
         failonerror="true">
       <classpath refid="tests-classpath"/>
       <arg line="simple/binding0.xml simple.Customer0 simple.xml"/>
+      <arg line="simple/binding0b.xml simple.Customer0 simple.xml"/>
+      <arg line="simple/binding0b.xml simple.Customer0 simple0c.xml"/>
+      <arg line="simple/binding0c.xml simple.Customer0 simple0b.xml"/>
+      <arg line="simple/binding0d.xml simple.Customer0 simple0c.xml"/>
+      <arg line="simple/binding0d.xml simple.Customer0 simple0c.xml"/>
       <arg line="simple/binding1.xml simple.Customer1 simple.xml"/>
       <arg line="simple/binding1a.xml simple.Customer1 simple.xml"/>
       <arg line="simple/binding1a.xml simple.Customer1 simple1a.xml"/>
@@ -523,6 +528,8 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/binding4b.xml simple.Customer4 simple4b.xml"/>
       <arg line="simple/binding4c.xml simple.Customer4 simple4b.xml"/>
       <arg line="simple/binding4c.xml simple.Customer4 simple4c.xml"/>
+      <arg line="simple/binding4e.xml simple.Customer4 simple4.xml"/>
+      <arg line="simple/binding4e.xml simple.Customer4 simple4e.xml"/>
       <arg line="simple/binding5.xml simple.Customer5 simple5.xml"/>
       <arg line="simple/binding5a.xml simple.Customer5 simple5.xml"/>
       <arg line="simple/binding5b.xml simple.Customer5 simple5.xml"/>
@@ -602,6 +609,11 @@ file has been tested with ant version 1.6.1.
         failonerror="true">
       <classpath refid="tests-classpath"/>
       <arg line="simple/binding0.xml simple.Customer0 simple.xml"/>
+      <arg line="simple/binding0b.xml simple.Customer0 simple.xml"/>
+      <arg line="simple/binding0b.xml simple.Customer0 simple0c.xml"/>
+      <arg line="simple/binding0c.xml simple.Customer0 simple0b.xml"/>
+      <arg line="simple/binding0d.xml simple.Customer0 simple0c.xml"/>
+      <arg line="simple/binding0d.xml simple.Customer0 simple0c.xml"/>
       <arg line="simple/binding2.xml simple.Customer2 simple2.xml"/>
       <arg line="simple/binding3.xml simple.Customer3 simple3.xml"/>
       <arg line="simple/binding3a.xml simple.Customer3 simple3.xml"/>
@@ -613,6 +625,8 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/binding4b.xml simple.Customer4 simple4b.xml"/>
       <arg line="simple/binding4c.xml simple.Customer4 simple4b.xml"/>
       <arg line="simple/binding4c.xml simple.Customer4 simple4c.xml"/>
+      <arg line="simple/binding4e.xml simple.Customer4 simple4.xml"/>
+      <arg line="simple/binding4e.xml simple.Customer4 simple4e.xml"/>
       <arg line="simple/binding5.xml simple.Customer5 simple5.xml"/>
       <arg line="simple/binding5a.xml simple.Customer5 simple5.xml"/>
       <arg line="simple/binding5b.xml simple.Customer5 simple5.xml"/>
@@ -717,6 +731,8 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/mybinding4b.xml simple.MyClass4 mytest4a.xml"/>
       <arg line="simple/mybinding4b.xml simple.MyClass4 mytest4b.xml"/>
       <arg line="simple/mybinding4b.xml simple.MyClass4 mytest4c.xml"/>
+      <arg line="simple/mybinding4c.xml simple.MyClass4 mytest4.xml"/>
+      <arg line="simple/mybinding4c.xml simple.MyClass4 mytest4d.xml"/>
     </java>
   </target>
 

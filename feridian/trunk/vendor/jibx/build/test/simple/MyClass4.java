@@ -77,15 +77,31 @@ class MyClass4 {
         private int ivalue;
     }
     
-    private static String serializeNumber(Number num) {
+    protected static String serializeNumber(Number num) {
         return num.toString();
     }
     
-    private static Number deserializeNumber(String value) {
+    protected static Number deserializeNumber(String value) {
         if (value.indexOf('.') >= 0) {
             return new Float(value);
         } else {
             return new Integer(value);
         }
+    }
+    
+    private static String reverse(String string) {
+        StringBuffer buff = new StringBuffer(string.length());
+        for (int i = string.length() - 1; i >= 0 ; i--) {
+            buff.append(string.charAt(i));
+        }
+        return buff.toString();
+    }
+    
+    protected static String serializeReverse(Number num) {
+        return reverse(serializeNumber(num));
+    }
+    
+    protected static Number deserializeReverse(String value) {
+        return deserializeNumber(reverse(value));
     }
 }

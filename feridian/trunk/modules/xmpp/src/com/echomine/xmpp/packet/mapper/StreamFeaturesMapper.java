@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
@@ -34,7 +35,8 @@ import com.echomine.xmpp.packet.StreamFeatures;
  * located in the manual). Afterwards, the system will pick up the new class and
  * namespace, and use it here to unmarshall the custom features.
  */
-public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPConstants {
+public class StreamFeaturesMapper extends AbstractPacketMapper implements
+        XMPPConstants {
     protected static final String FEATURES_ELEMENT_NAME = "features";
     protected static final String STARTTLS_ELEMENT_NAME = "starttls";
     protected static final String REQUIRED_ELEMENT_NAME = "required";
@@ -46,6 +48,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
 
     public StreamFeaturesMapper(String uri, int index, String name) {
         super(uri, XMPPStreamWriter.IDX_JABBER_STREAM, name);
+        System.out.println("uri: " + uri + ", index=" + index + "name: " + name);
     }
 
     /*
@@ -215,7 +218,8 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements XMPPCo
         packet.addFeature(NS_STREAM_TLS, STARTTLS_ELEMENT_NAME, null);
         // find optional required element text
         int eventType = ctx.toTag();
-        if (eventType == UnmarshallingContext.START_TAG && REQUIRED_ELEMENT_NAME.equals(ctx.getName())) {
+        if (eventType == IXMLReader.START_TAG
+                && REQUIRED_ELEMENT_NAME.equals(ctx.getName())) {
             packet.setTLSRequired(true);
             ctx.parsePastEndTag(NS_STREAM_TLS, REQUIRED_ELEMENT_NAME);
         }

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
@@ -18,7 +19,8 @@ import com.echomine.xmpp.packet.MessagePacket;
  * Mapper for the message stanza. This mapper supports xml:lang and arbitrary
  * extension children.
  */
-public class MessagePacketMapper extends AbstractIMPacketMapper implements XMPPConstants {
+public class MessagePacketMapper extends AbstractIMPacketMapper implements
+        XMPPConstants {
     protected static final String TYPE_ATTRIBUTE_NAME = "type";
     protected static final String SUBJECT_ELEMENT_NAME = "subject";
     protected static final String BODY_ELEMENT_NAME = "body";
@@ -86,10 +88,14 @@ public class MessagePacketMapper extends AbstractIMPacketMapper implements XMPPC
             packet = new MessagePacket();
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
-        ctx.next();
+        do {
+            ctx.next();
+        } while (ctx.currentEvent() == IXMLReader.TEXT);
         String value;
         Locale locale;
-        while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
+        while (ctx.currentEvent() != IXMLReader.END_DOCUMENT
+                && ctx.currentEvent() != IXMLReader.END_TAG
+                && !name.equals(ctx.getName())) {
             if (ctx.isAt(uri, SUBJECT_ELEMENT_NAME)) {
                 locale = null;
                 if (ctx.hasAttribute(NS_XML, LANG_ATTRIBUTE_NAME))
@@ -109,6 +115,8 @@ public class MessagePacketMapper extends AbstractIMPacketMapper implements XMPPC
             } else {
                 unmarshallExtension(ctx, packet);
             }
+            while (ctx.currentEvent() == IXMLReader.TEXT)
+                ctx.next();
         }
         return packet;
     }

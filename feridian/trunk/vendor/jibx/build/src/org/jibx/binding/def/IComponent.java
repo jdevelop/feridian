@@ -46,7 +46,6 @@ public interface IComponent
      *
      * @return <code>true</code> if optional, <code>false</code> if required
      */
-
     public boolean isOptional();
     
     /**
@@ -56,7 +55,6 @@ public interface IComponent
      * @return <code>true</code> if one or more attribute values defined for
      * containing element, <code>false</code> if not
      */
-
     public boolean hasAttribute();
     
     /**
@@ -69,7 +67,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if configuration error
      */
-
     public void genAttrPresentTest(ContextMethodBuilder mb)
         throws JiBXException;
     
@@ -83,7 +80,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if error in configuration
      */
-
     public void genAttributeUnmarshal(ContextMethodBuilder mb)
         throws JiBXException;
 
@@ -97,7 +93,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if error in configuration
      */
-
     public void genAttributeMarshal(ContextMethodBuilder mb)
         throws JiBXException;
 
@@ -109,7 +104,6 @@ public interface IComponent
      * @return <code>true</code> if one or more content values defined
      * for containing element, <code>false</code> if not
      */
-
     public boolean hasContent();
     
     /**
@@ -122,7 +116,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if configuration error
      */
-
     public void genContentPresentTest(ContextMethodBuilder mb)
         throws JiBXException;
 
@@ -136,7 +129,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if error in configuration
      */
-
     public void genContentUnmarshal(ContextMethodBuilder mb)
         throws JiBXException;
 
@@ -150,7 +142,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if error in configuration
      */
-
     public void genContentMarshal(ContextMethodBuilder mb) throws JiBXException;
 
     /**
@@ -163,7 +154,6 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if error in configuration
      */
-
     public void genNewInstance(ContextMethodBuilder mb) throws JiBXException;
     
     /**
@@ -171,7 +161,6 @@ public interface IComponent
      *
      * @return fully qualified class name of expected type
      */
-
     public String getType();
     
     /**
@@ -180,7 +169,6 @@ public interface IComponent
      * @return <code>true</code> if ID value defined for instances,
      * <code>false</code> if not
      */
-
     public boolean hasId();
 
     /**
@@ -192,20 +180,16 @@ public interface IComponent
      * @param mb method builder
      * @throws JiBXException if configuration error
      */
-
     public void genLoadId(ContextMethodBuilder mb) throws JiBXException;
     
     /**
-     * Check sequence of content values. Validates the sequence of content
-     * items, ensuring that text values only occur immediately following a
-     * required element value (or the start tag for the enclosing element).
+     * Get element wrapper name. If the component defines an element as the
+     * container for content, this returns the name information for that
+     * element.
      *
-     * @param text allow text value flag from last component
-     * @return allow text value as next content component flag
-     * @throws JiBXException if error in configuration
+     * @return component element name, <code>null</code> if no wrapper element
      */
-
-    public boolean checkContentSequence(boolean text) throws JiBXException;
+    public NameDefinition getWrapperName();
     
     /**
      * Establish and validate linkages between binding components. This is
@@ -218,7 +202,6 @@ public interface IComponent
      *
      * @throws JiBXException if error in configuration
      */
-
     public void setLinkages() throws JiBXException;
     
     // DEBUG

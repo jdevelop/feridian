@@ -33,6 +33,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.jibx.binding.util.StringArray;
+import org.jibx.runtime.IMarshallingContext;
+import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.QName;
 
 /**
  * Model component for <i>string</i> attribute group in binding definition.
@@ -83,6 +87,9 @@ public class StringAttributes extends AttributeBase
     
     /** Referenced format name. */
     private String m_formatName;
+    
+    /** Format qualified name. */
+    private QName m_formatQName;
     
     /** Default value text. */
     private String m_defaultText;
@@ -150,6 +157,27 @@ public class StringAttributes extends AttributeBase
      */
     public void setFormatName(String name) {
         m_formatName = name;
+        m_formatQName = (name == null) ? null : new QName(name);
+    }
+    
+    /**
+     * Get format qualified name.
+     * 
+     * @return format qualified name (<code>null</code> if none)
+     */
+    public QName getFormatQName() {
+        return m_formatQName;
+    }
+    
+    /**
+     * Set format qualified name. This method changes the label value to match
+     * the qualified name.
+     * 
+     * @return format qualified name (<code>null</code> if none)
+     */
+    public void setFormatQName(QName qname) {
+        m_formatQName = qname;
+        m_formatName = (qname == null) ? null : qname.toString();
     }
     
     /**
@@ -246,6 +274,30 @@ public class StringAttributes extends AttributeBase
      */
     public FormatElement getBaseFormat() {
         return m_baseFormat;
+    }
+    
+    /**
+     * JiBX access method to set format label as qualified name.
+     * 
+     * @param label format label text (<code>null</code> if none)
+     * @param ictx unmarshalling context
+     * @throws JiBXException on deserialization error
+     */
+    private void setQualifiedFormat(String label, IUnmarshallingContext ictx)
+        throws JiBXException {
+        setFormatQName(QName.deserialize(label, ictx));
+    }
+    
+    /**
+     * JiBX access method to get format label as qualified name.
+     * 
+     * @param ictx marshalling context
+     * @return format label text (<code>null</code> if none)
+     * @throws JiBXException on deserialization error
+     */
+    private String getQualifiedFormat(IMarshallingContext ictx)
+        throws JiBXException {
+        return QName.serialize(getFormatQName(), ictx);
     }
     
     /* (non-Javadoc)

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
@@ -19,7 +20,8 @@ import com.echomine.xmpp.packet.PresencePacket;
  * (un)marshalling of extensions and xml:lang attributes. The only elements that
  * can contain xml:lang attributes is the status.
  */
-public class PresencePacketMapper extends AbstractIMPacketMapper implements XMPPConstants {
+public class PresencePacketMapper extends AbstractIMPacketMapper implements
+        XMPPConstants {
     protected static final String SHOW_ELEMENT_NAME = "show";
     protected static final String STATUS_ELEMENT_NAME = "status";
     protected static final String PRIORITY_ELEMENT_NAME = "priority";
@@ -31,6 +33,7 @@ public class PresencePacketMapper extends AbstractIMPacketMapper implements XMPP
      */
     public PresencePacketMapper(String uri, int index, String name) {
         super(uri, index, name);
+        System.out.println("uri: " + uri + ", index=" + index + "name: " + name);
     }
 
     /*
@@ -90,10 +93,14 @@ public class PresencePacketMapper extends AbstractIMPacketMapper implements XMPP
             packet = new PresencePacket();
         // unmarshall base packet attributes
         unmarshallStanzaAttributes(packet, ctx);
-        ctx.next();
+        do {
+            ctx.next();
+        } while (ctx.currentEvent() == IXMLReader.TEXT);
         String value;
         Locale locale;
-        while (ctx.currentEvent() != UnmarshallingContext.END_DOCUMENT && ctx.currentEvent() != UnmarshallingContext.END_TAG && !name.equals(ctx.getName())) {
+        while (ctx.currentEvent() != IXMLReader.END_DOCUMENT
+                && ctx.currentEvent() != IXMLReader.END_TAG
+                && !name.equals(ctx.getName())) {
             if (ctx.isAt(uri, SHOW_ELEMENT_NAME)) {
                 packet.setShow(ctx.parseElementText(uri, SHOW_ELEMENT_NAME));
             } else if (ctx.isAt(uri, STATUS_ELEMENT_NAME)) {
@@ -109,6 +116,8 @@ public class PresencePacketMapper extends AbstractIMPacketMapper implements XMPP
             } else {
                 unmarshallExtension(ctx, packet);
             }
+            while (ctx.currentEvent() == IXMLReader.TEXT)
+                ctx.next();
         }
         return packet;
     }

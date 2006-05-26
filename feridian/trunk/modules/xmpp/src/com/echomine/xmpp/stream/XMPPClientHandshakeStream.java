@@ -44,6 +44,8 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
             if (sessCtx.getLocale() != null)
                 writer.addAttribute(XMPPConstants.IDX_XML, "lang", LocaleUtil.format(sessCtx.getLocale()));
             writer.closeStartTag();
+            //work around a jibx bug where '>' is not being written until next operation
+            writer.writeTextContent("");
             writer.flush();
             // start logging
             streamCtx.getReader().startLogging();

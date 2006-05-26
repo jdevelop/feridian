@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
@@ -15,11 +16,12 @@ import com.echomine.xmpp.NSI;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.ErrorPacket;
 
-public class StreamErrorPacketMapper extends AbstractPacketMapper implements XMPPConstants {
+public class StreamErrorPacketMapper extends AbstractPacketMapper implements
+        XMPPConstants {
     protected static final String TEXT_ELEMENT_NAME = "text";
     protected static final String ERROR_ELEMENT_NAME = "error";
     protected static final String ERROR_LANG_ATTRIBUTE_NAME = "lang";
-    
+
     public StreamErrorPacketMapper(String uri, int index, String name) {
         super(uri, index, name);
         if (index == 0)
@@ -27,8 +29,9 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper implements XMP
     }
 
     /**
-     * Override to return the namespace index number to obtain if the index passed
-     * into this mapper is 0.
+     * Override to return the namespace index number to obtain if the index
+     * passed into this mapper is 0.
+     * 
      * @return the namespace index number
      */
     protected int getNamespaceIndex() {
@@ -55,7 +58,8 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper implements XMP
             if (packet.getApplicationCondition() == null)
                 extns = new String[] { NS_STREAMS_ERROR };
             else
-                extns = new String[] { NS_STREAMS_ERROR, packet.getApplicationCondition().getNamespaceURI() };
+                extns = new String[] { NS_STREAMS_ERROR,
+                        packet.getApplicationCondition().getNamespaceURI() };
             writer.pushExtensionNamespaces(extns);
             ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
             marshallErrorCondition(ctx, idx, idx + 1, packet);
@@ -133,13 +137,14 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper implements XMP
         // find optional error text
         ctx.parsePastEndTag(ctx.getNamespace(), ctx.getName());
         int eventType = ctx.toTag();
-        if (eventType == UnmarshallingContext.START_TAG && TEXT_ELEMENT_NAME.equals(ctx.getName())) {
+        if (eventType == IXMLReader.START_TAG
+                && TEXT_ELEMENT_NAME.equals(ctx.getName())) {
             if (ctx.hasAttribute(NS_XML, ERROR_LANG_ATTRIBUTE_NAME))
                 packet.setTextLocale(LocaleUtil.parseLocale(ctx.attributeText(NS_XML, ERROR_LANG_ATTRIBUTE_NAME)));
             packet.setText(ctx.parseElementText(errorNs, TEXT_ELEMENT_NAME));
             eventType = ctx.toTag();
         }
-        if (eventType == UnmarshallingContext.START_TAG) {
+        if (eventType == IXMLReader.START_TAG) {
             // optional application specific condition
             packet.setApplicationCondition(new NSI(ctx.getName(), ctx.getNamespace()));
             // parse to end of the error element

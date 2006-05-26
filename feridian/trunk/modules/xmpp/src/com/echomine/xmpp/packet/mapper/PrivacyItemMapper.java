@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
@@ -111,7 +112,7 @@ public abstract class PrivacyItemMapper extends AbstractPacketMapper {
         if (ctx.hasAttribute(null, VALUE_NAME))
             item.setValue(ctx.attributeText(null, VALUE_NAME));
         int eventType = ctx.next();
-        if (eventType != UnmarshallingContext.END_TAG) {
+        if (eventType != IXMLReader.END_TAG) {
             do {
                 if (ctx.isAt(uri, BLOCK_IQ)) {
                     item.setDenyIQ(true);
