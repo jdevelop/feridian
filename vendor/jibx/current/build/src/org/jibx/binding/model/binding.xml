@@ -62,6 +62,7 @@
     <value name="ordered" field="m_isOrdered" usage="optional" default="true"/>
     <value name="choice" field="m_isChoice" usage="optional"/>
     <value name="flexible" field="m_isFlexible" usage="optional"/>
+    <value name="allow-repeats" field="m_isAllowRepeats" usage="optional"/>
     <value name="label" field="m_labelName" usage="optional"/>
     <value name="using" field="m_usingName" usage="optional"/>
   </mapping>

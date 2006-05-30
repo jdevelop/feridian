@@ -286,15 +286,15 @@ public class CollectionElement extends StructureElementBase
     }
     
     /* (non-Javadoc)
-     * @see org.jibx.binding.model.ContainerElementBase#getType()
+     * @see org.jibx.binding.model.ContainerElementBase#getChildObjectType()
      */
-    public IClass getObjectType() {
-        return m_itemTypeClass;
+    public IClass getChildObjectType() {
+        return getItemTypeClass();
     }
     
     //
     // Validation methods
-    
+
     /**
      * Make sure all attributes are defined.
      *
@@ -313,6 +313,14 @@ public class CollectionElement extends StructureElementBase
         // first process attributes and check for errors
         super.prevalidate(vctx);
         if (!vctx.isSkipped(this)) {
+            
+            // check for ignored attributes
+            if (isAllowRepeats()) {
+                vctx.addWarning("'allow-repeats' attribute ignored on collection");
+            }
+            if (isChoice()) {
+                vctx.addWarning("'choice' attribute ignored on collection");
+            }
             
             // get the actual collection type and item type
             IClass clas = getType();

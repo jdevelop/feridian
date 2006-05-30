@@ -295,7 +295,7 @@ public class NestedStructure extends NestedBase
                     for (int i = 0; i < count; i++) {
                         IComponent child = (IComponent)m_contents.get(i);
                         if (!child.isOptional()) {
-                            genFlagTest(true, i, "Missing required element ",
+                            genFlagTest(false, i, "Missing required element ",
                                 child.getWrapperName(), mb);
                         }
                     }
@@ -421,6 +421,12 @@ public class NestedStructure extends NestedBase
         BindingDefinition.indent(depth);
         System.out.print("structure " +
             (m_isChoice ? "choice" : (m_isOrdered ? "ordered" : "unordered")));
+        if (m_allowDuplicates) {
+            System.out.print(", duplicates allowed");
+        }
+        if (isFlexible()) {
+            System.out.print(", flexible");
+        }
         if (m_idChild != null) {
             System.out.print(" (ID)");
         }

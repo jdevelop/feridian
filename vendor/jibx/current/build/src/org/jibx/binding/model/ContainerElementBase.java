@@ -156,6 +156,16 @@ public abstract class ContainerElementBase extends NestingElementBase
      * @return information for class linked by binding
      */
     public abstract IClass getObjectType();
+    
+    /**
+     * Get class passed to child components. This call is only meaningful after
+     * validation.
+     *
+     * @return information for class linked by binding
+     */
+    public IClass getChildObjectType() {
+        return getObjectType();
+    }
 
     /**
      * Set ID property child. Used to set the ID property associated with a
@@ -406,6 +416,24 @@ public abstract class ContainerElementBase extends NestingElementBase
     
     //
     // Structure attribute delegate methods
+    
+    /**
+     * Get flexible flag.
+     * 
+     * @return flexible flag
+     */
+    public boolean isFlexible() {
+        return m_structureAttrs.isFlexible();
+    }
+
+    /**
+     * Set flexible flag.
+     * 
+     * @param flexible
+     */
+    public void setFlexible(boolean flexible) {
+        m_structureAttrs.setFlexible(flexible);
+    }
 
     /**
      * Check if child components are ordered.
@@ -441,6 +469,25 @@ public abstract class ContainerElementBase extends NestingElementBase
      */
     public void setChoice(boolean choice) {
         m_structureAttrs.setChoice(choice);
+    }
+
+    /**
+     * Check if repeated child elements are allowed.
+     *
+     * @return <code>true</code> if repeats allowed, <code>false</code> if not
+     */
+    public boolean isAllowRepeats() {
+        return m_structureAttrs.isAllowRepeats();
+    }
+    
+    /**
+     * Set repeated child elements allowed flag.
+     * 
+     * @param ignore <code>true</code> if repeated child elements to be allowed,
+     * <code>false</code> if not
+     */
+    public void setAllowRepeats(boolean ignore) {
+        m_structureAttrs.setAllowRepeats(ignore);
     }
     
     //
@@ -560,6 +607,10 @@ public abstract class ContainerElementBase extends NestingElementBase
                     }
                     if (comp.hasContent()) {
                         m_contentComponents.add(child);
+                        if (!comp.hasName() && isFlexible()) {
+                            vctx.addError
+                                ("All child components must define element names for flexible='true'", comp);
+                        }
                     }
                 }
             }

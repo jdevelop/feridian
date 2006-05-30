@@ -133,6 +133,15 @@ implements IComponent, IContainer
         m_contents.add(comp);
     }
     
+    /**
+     * Check if flexible unmarshalling.
+     * 
+     * @return flexible flag
+     */
+    public boolean isFlexible() {
+        return m_isFlexible;
+    }
+    
     //
     // IContainer interface method definitions
 

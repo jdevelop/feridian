@@ -980,6 +980,9 @@ implements IComponent, IContextObj
         if (m_isThisBinding) {
             System.out.print(" (\"this\" reference)");
         }
+        if (m_createClass != null) {
+            System.out.print(" create class " + m_createClass.getName());
+        }
         System.out.println();
         m_component.print(depth+1);
     }

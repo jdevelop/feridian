@@ -44,7 +44,7 @@ public interface IBindingFactory
     
     /** Current distribution file name. This is filled in by the Ant build
      process to match the current distribution. */
-    public static final String CURRENT_VERSION_NAME = "jibx_1_1_beta3";
+    public static final String CURRENT_VERSION_NAME = "@distrib@";
     
     /** Mask for portions of version number that effect compatibility. */
     public static final int COMPATIBLE_VERSION_MASK = 0xFFFF0000;

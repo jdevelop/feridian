@@ -102,7 +102,7 @@ public abstract class BindingBuilder
     private static final String COMMON_ORDERED = "ordered";
     private static final String COMMON_CHOICE = "choice";
     private static final String COMMON_FLEXIBLE = "flexible";
-    private static final String COMMON_DUPLICATES = "ignore-repeats";
+    private static final String COMMON_DUPLICATES = "allow-repeats";
     
     /* Common nillable attribute. */
     private static final String COMMON_NILLABLE = "nillable";

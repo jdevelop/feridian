@@ -419,7 +419,7 @@ handling.</p>
 
 <p>The <b>choice</b> variation is the second most common content model. A choice
 element in a schema definition allows one and only one of the nested element
-definitions to be present at that point in an instance document. JiBX 1.0
+definitions to be present at that point in an instance document. JiBX 1.1
 binding definitions provide the loose equivalent of a <b>choice</b> model group
 by using the <b>choice="true"</b> attribute of a <b>mapping</b> or
 <b>structure</b> definition. This properly accepts only one of the alternative
@@ -448,14 +448,12 @@ limits).</p>
 at most one occurrance of each contained element, which can be in any order. The
 <b>all</b> model group can only contain element definitions, and cannot be used as a
 child component of the other types of model groups. Because of these
-restrictions it's probably the most uncommon model group variation. As with the
-<b>choice</b> model group, there is no direct JiBX binding definition equivalent to an
-<b>all</b> model group, but an unordered grouping of optional elements (in other words,
-a group of element definitions nested within a <b>structure</b> with
-<i>ordered="false"</i>) serves the same purpose. The differences are that the
-<b>all</b> model group can require one or more of the contained elements to be
-present, while the JiBX binding both treats them all as optional and allows
-multiple occurrences of the elements.</p>
+restrictions it's probably the most uncommon model group variation. JiBX supports
+this model directly as a group of element definitions nested within a
+<b>structure</b> with <i>ordered="false"</i>. Note that versions of JiBX prior
+to 1.1 did not fully support this model, because they required all components of
+an unordered grouping to be optional; this restriction has been removed in
+1.1.</p>
 
 <p>Schema definitions permit <b>any</b> components as part of a content model,
 meaning that any element (potentially restricted by namespace) will be allowed
@@ -518,7 +516,9 @@ access to <i>ID</i> definitions). These are not commonly used types in general
 XML, but are often used for special purposes. With JiBX 1.0 the only way to
 handle these types is with a custom marshaller/unmarshaller for the containing
 element. See <a href="tutorial/binding-custom.html#marunmar">Custom marshallers and
-unmarshallers</a> for an introduction to extending JiBX in this manner.</p>
+unmarshallers</a> for an introduction to extending JiBX in this manner. JiBX 1.1
+includes a QName implementation as part of the standard runtime (the
+<code>org.jibx.runtime.QName</code> class).</p>
 
       </div>
       <div class="h3">
@@ -546,13 +546,18 @@ the current Xsd2Jibx code may add this functionality.</p>
       <h3><a name="unsupport">Unsupported schema features</a></h3>
 
 <p>There are a few aspects of schema usage which are not supported at all in the
-current JiBX 1.0 code. Probably the most important missing features are support
-for <b>xsi:nil</b> and <b>xsi:type</b> attributes in instance
-documents. These attributes effectively embed schema metadata directly into the
-instance document, which seems a questionable practice from the standpoint of
-structuring. However, their use has become so widespread (especially in the
-context of web services) that support is probably necessary in a general XML
-framework. JiBX 2.0 will fully support these attributes.</p>
+current JiBX 1.0 code. Probably the most important missing feature is support
+for <b>xsi:type</b> attributes in instance documents. This attribute effectively
+embeds schema metadata directly into the instance document, which seems a
+questionable practice from the standpoint of structuring. However, its use has
+become so widespread (especially in the context of web services) that support is
+probably necessary in a general XML framework. JiBX 2.0 will fully support this
+attributes.</p>
+
+<p>The <b>xsi:nil</b> attribute, also used in instance documents, was not
+supported by JiBX 1.0. JiBX 1.1 added support for this feature using the
+<b>nillable</b> attribute in the
+<a href="details/binding-attributes.html#object">object attribute</a> group.</p>
 
 <p>Another part of schema which is not supported by JiBX is the use of identity
 constraints in the form of <b>keyref</b>, <b>keydef</b>, and <b>unique</b> elements.
@@ -590,7 +595,7 @@ element.</p>
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

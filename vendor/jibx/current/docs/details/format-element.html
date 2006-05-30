@@ -333,18 +333,19 @@ one common attribute group, listed below.</p>
 <h4><a name="Attributes">Attributes</a></h4>
 <table cellpadding="3" cellspacing="2" border="1" width="100%">
 <tr class="b">
+<td>label</td>
+<td><p>The label for this format. If supplied, the format can only be used when
+referenced by label. If not supplied, this format automatically becomes the
+default for handling the specified type within the context. As of JiBX 1.1, the
+value of this attribute is interpreted as namespace qualified.</p></td>
+</tr>
+<tr class="a">
 <td>type</td>
 <td><p>This required attribute gives the fully qualified class name or the
 primitive type for the values handled by this format. For instance, for a
 format handling instances of the <code>java.util.Date</code> class this would
 be &apos;java.util.Date&apos;, and for one handling <code>int</code> primitive
 values it would be &apos;int&apos;.</p></td>
-</tr>
-<tr class="a">
-<td>label</td>
-<td><p>The label for this format. If supplied, the format can only be used when
-referenced by label. If not supplied, this format automatically becomes the
-default for handling the specified type within the context.</p></td>
 </tr>
 <tr class="b">
 <td><a href="binding-attributes.html#string">string</a></td>
@@ -372,7 +373,7 @@ same type cannot be defined in the same context.</p>
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

@@ -1,4 +1,4 @@
-<!-- Collections with nillable elements -->
+<!-- Collections with nillable elements, and multidimensional aray -->
 <binding>
   <mapping name="myelement" class="simple.MyClass7">
     <structure field="list" usage="optional"/>
@@ -10,6 +10,11 @@
       <value name="string" nillable="true" type="java.lang.String"/>
     </collection>
     <structure field="list2"/>
+    <collection field="array3" name="intsints" usage="optional">
+      <collection name="ints">
+        <value name="int"/>
+      </collection>
+    </collection>
   </mapping>
   <mapping name="ints" class="java.util.List" create-type="java.util.ArrayList">
     <collection>

@@ -1,6 +1,6 @@
 <!-- Second layer include (which references the first layer include). -->
 <binding>
-  <include path="../binding5b-include1.xml"/>
+  <include path="binding5c-include1.xml"/>
   <mapping name="flight" ns="http://www.jibx.org/ns5"
       class="multiple.SplitFlightBean">
     <namespace uri="http://www.jibx.org/ns4" prefix="ns4"/>

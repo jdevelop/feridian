@@ -947,6 +947,17 @@ public abstract class MethodBuilder extends BindingMethod
         if (ClassItem.isPrimitive(type)) {
             String sig = Utility.getSignature(type);
             append(new NEWARRAY(Utility.typeOfSignature(sig)));
+        } else if (type.endsWith("[]")) {
+            String btype = type;
+            while (btype.endsWith("[]")) {
+                btype = btype.substring(0, btype.length()-2);
+            }
+            String cname = type + "[]";
+            if (ClassItem.isPrimitive(btype)) {
+                cname = Utility.getSignature(cname);
+            }
+            append(new MULTIANEWARRAY(m_instructionBuilder.
+                getConstantPoolGen().addClass(cname), (short)1));
         } else {
             append(new ANEWARRAY(m_instructionBuilder.
                 getConstantPoolGen().addClass(type)));
