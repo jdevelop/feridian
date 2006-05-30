@@ -6,11 +6,11 @@ import java.util.Locale;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.IXMLReader;
-import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.LocaleUtil;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.MessagePacket;
@@ -48,22 +48,22 @@ public class MessagePacketMapper extends AbstractIMPacketMapper implements
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
             MessagePacket packet = (MessagePacket) obj;
-            IXMLWriter writer = ctx.getXmlWriter();
-            ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-            // marshall attributes
-            marshallStanzaAttributes(packet, ctx);
-            ctx.closeStartContent();
-            // marshall out the message
-            marshallMapWithLocale(index, SUBJECT_ELEMENT_NAME, packet.getSubjects(), ctx);
-            marshallMapWithLocale(index, BODY_ELEMENT_NAME, packet.getBodies(), ctx);
-            if (packet.getThreadID() != null)
-                ctx.element(index, THREAD_ELEMENT_NAME, packet.getThreadID());
-            if (packet.getError() != null)
-                marshallStanzaError(packet.getError(), ctx);
-            // marshall extensions
-            marshallExtensions(ctx, packet);
-            ctx.endTag(index, name);
+            XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
             try {
+                writer.startStanzaTagOpen(name);
+                // marshall attributes
+                marshallStanzaAttributes(packet, ctx);
+                writer.closeStartTag();
+                // marshall out the message
+                marshallMapWithLocale(index, SUBJECT_ELEMENT_NAME, packet.getSubjects(), ctx);
+                marshallMapWithLocale(index, BODY_ELEMENT_NAME, packet.getBodies(), ctx);
+                if (packet.getThreadID() != null)
+                    ctx.element(index, THREAD_ELEMENT_NAME, packet.getThreadID());
+                if (packet.getError() != null)
+                    marshallStanzaError(packet.getError(), ctx);
+                // marshall extensions
+                marshallExtensions(ctx, packet);
+                writer.endStanzaTag(name);
                 writer.flush();
             } catch (IOException ex) {
                 throw new JiBXException("Error flushing stream", ex);

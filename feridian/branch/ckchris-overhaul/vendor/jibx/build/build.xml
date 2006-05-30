@@ -294,6 +294,8 @@ file has been tested with ant version 1.6.1.
         <include name="binding4.xml"/>
         <include name="binding5.xml"/>
         <include name="binding5a.xml"/>
+        <include name="binding5b.xml"/>
+        <include name="binding5c.xml"/>
         <include name="binding6.xml"/>
       </bindingfileset>
     </bind>
@@ -433,6 +435,24 @@ file has been tested with ant version 1.6.1.
       <arg value="splittable5a.xml"/>
       <arg value="binding3"/>
       <arg value="splittable3.xml"/>
+      
+      <arg value="multiple.SplitTableBean"/>
+      <arg value="binding5a"/>
+      <arg value="splittable5a.xml"/>
+      <arg value="binding5a"/>
+      <arg value="splittable5a.xml"/>
+      
+      <arg value="multiple.SplitTableBean"/>
+      <arg value="binding5b"/>
+      <arg value="splittable5a.xml"/>
+      <arg value="binding5b"/>
+      <arg value="splittable5a.xml"/>
+      
+      <arg value="multiple.SplitTableBean"/>
+      <arg value="binding5c"/>
+      <arg value="splittable5a.xml"/>
+      <arg value="binding5c"/>
+      <arg value="splittable5a.xml"/>
       
       <arg value="multiple.SplitTableBean"/>
       <arg value="binding6"/>
@@ -589,6 +609,8 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/mybinding3f.xml simple.MyClass3 mytest3.xml"/>
       <arg line="simple/mybinding3f.xml simple.MyClass3 mytest3a.xml"/>
       <arg line="simple/mybinding3f.xml simple.MyClass3 mytest3c.xml"/>
+      <arg line="simple/mybinding3g.xml simple.MyClass3 mytest3.xml"/>
+      <arg line="simple/mybinding3h.xml simple.MyClass3 mytest3.xml"/>
       <arg line="simple/mybinding5.xml simple.MyClass5 mytest5.xml"/>
       <arg line="simple/mybinding5.xml simple.MyClass5 mytest5a.xml"/>
       <arg line="simple/mybinding5a.xml simple.MyClass5 mytest5a.xml"/>
@@ -604,6 +626,7 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/mybinding7a.xml simple.MyClass7 mytest7.xml"/>
       <arg line="simple/mybinding7b.xml simple.MyClass7 mytest7.xml"/>
       <arg line="simple/mybinding7d.xml simple.MyClass7 mytest7b.xml"/>
+      <arg line="simple/mybinding7d.xml simple.MyClass7 mytest7c.xml"/>
     </java>
     <java classname="org.jibx.match.TestLoaderStAX" fork="yes" dir="${simpledata}"
         failonerror="true">
@@ -685,6 +708,8 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/mybinding3f.xml simple.MyClass3 mytest3.xml"/>
       <arg line="simple/mybinding3f.xml simple.MyClass3 mytest3a.xml"/>
       <arg line="simple/mybinding3f.xml simple.MyClass3 mytest3c.xml"/>
+      <arg line="simple/mybinding3g.xml simple.MyClass3 mytest3.xml"/>
+      <arg line="simple/mybinding3h.xml simple.MyClass3 mytest3.xml"/>
       <arg line="simple/mybinding5.xml simple.MyClass5 mytest5.xml"/>
       <arg line="simple/mybinding5.xml simple.MyClass5 mytest5a.xml"/>
       <arg line="simple/mybinding5a.xml simple.MyClass5 mytest5a.xml"/>
@@ -697,6 +722,7 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/mybinding7.xml simple.MyClass7 mytest7.xml"/>
       <arg line="simple/mybinding7a.xml simple.MyClass7 mytest7.xml"/>
       <arg line="simple/mybinding7b.xml simple.MyClass7 mytest7.xml"/>
+      <arg line="simple/mybinding7d.xml simple.MyClass7 mytest7c.xml"/>
     </java>
     <java classname="org.jibx.match.TestLoaderDiff" fork="yes"
         dir="${simpledata}" failonerror="true">
@@ -709,6 +735,9 @@ file has been tested with ant version 1.6.1.
       <arg line="simple/binding5b.xml simple.Customer5 simple5a.xml simple5.xml"/>
       <arg line="simple/mybinding3.xml simple.MyClass3 mytest3b.xml mytest3a.xml"/>
       <arg line="simple/mybinding3a.xml simple.MyClass3 mytest3b.xml mytest3a.xml"/>
+      <arg line="simple/mybinding3g.xml simple.MyClass3 mytest3f.xml mytest3.xml"/>
+      <arg line="simple/mybinding3h.xml simple.MyClass3 mytest3f.xml mytest3.xml"/>
+      <arg line="simple/mybinding3h.xml simple.MyClass3 mytest3g.xml mytest3.xml"/>
       <arg line="simple/mybinding6a.xml simple.MyClass6 mytest6c.xml mytest6b.xml"/>
       <arg line="simple/mybinding7c.xml simple.MyClass7 mytest7a.xml mytest7.xml"/>
     </java>

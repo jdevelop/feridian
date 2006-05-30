@@ -81,13 +81,14 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
         XMPPStreamWriter writer = streamCtx.getWriter();
         UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
         String[] extns = new String[] { NS_STREAM_SASL };
+        int idx = writer.getNamespaceCount();
         writer.pushExtensionNamespaces(extns);
         try {
             streamCtx.getReader().startLogging();
             if (DIGEST_MD5.equals(mechanism))
-                authDigestMD5(uctx, writer, sessCtx, streamCtx);
+                authDigestMD5(idx, uctx, writer, sessCtx, streamCtx);
             else if (PLAIN.equals(mechanism))
-                authPlain(uctx, writer, sessCtx, streamCtx);
+                authPlain(idx, uctx, writer, sessCtx, streamCtx);
             // save username and resource and reset stream callback
             String hostname = sessCtx.getHostName();
             sessCtx.reset();
@@ -124,8 +125,7 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
      * @throws JiBXException
      * @throws XMPPException
      */
-    private void authPlain(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws IOException, JiBXException, XMPPException {
-        int idx = writer.getNamespaces().length;
+    private void authPlain(int idx, UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws IOException, JiBXException, XMPPException {
         // send <stream>
         writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
         writer.addAttribute(0, "mechanism", PLAIN);
@@ -157,8 +157,7 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
      * @throws IOException
      * @throws JiBXException
      */
-    private void authDigestMD5(UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException, IOException, JiBXException {
-        int idx = writer.getNamespaces().length;
+    private void authDigestMD5(int idx, UnmarshallingContext uctx, XMPPStreamWriter writer, XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException, IOException, JiBXException {
         // send <stream>
         writer.startTagNamespaces(idx, "auth", new int[] { idx }, new String[] { "" });
         writer.addAttribute(0, "mechanism", DIGEST_MD5);

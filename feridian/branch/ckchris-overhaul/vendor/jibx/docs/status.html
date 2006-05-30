@@ -318,38 +318,76 @@ This minor release includes several fixes to the 1.0 production release:</p>
 <li>Added checks for several possible errors in binding definition.</li>
 </ul>
 
-<p>The current development download code is the version 1.1 beta2 release. This
-release includes support for StAX parsers and writers as an alternative to the
-XMLPull parser support implemented in version 1.0.X. <!--See the added
-<a href="runtime.html#stax">StAX support</a> section of the runtime documentation
-for details on using StAX. -->The 1.1 beta2 release also features compatibility
-with the <a href="http://ws.apache.org/axis2">Apache Axis2</a> web services
-framework.</p>
+<p>The current development download code is the version 1.1 beta4 release. This
+release includes some additional bug fixes as well as several major new
+features:</p>
+
+<ul>
+<li>Support for StAX parsers and writers as an alternative to the
+XMLPull parser support implemented in version 1.0.X (see
+<a href="runtime.html#stax">StAX support</a> for details on using this).</li>
+<li>Compatibility with the <a href="http://ws.apache.org/axis2">Apache Axis2</a>
+web services framework.</li>
+<li>Support for "flexible" unmarshalling, where unknown elements are ignored
+within unordered groups (using the new <b>flexible</b> attribute in the
+<a href="details/binding-attributes.html#structure">structure attribute</a> group).</li>
+<li>Detection of duplicated element errors within unordered groups (and the
+option of disabling this using the new <b>allow-repeats</b> attribute in the
+<a href="details/binding-attributes.html#structure">structure attribute</a> group)</li>
+<li>Added direct support for using Java 5 enum types as values.</li>
+<li>Provided an option to add no-argument constructors to bound classes if not
+already present (the new <b>add-constructors</b> attribute of the
+<a href="details/binding-element.html#Attributes">binding</a> element).</li>
+<li>Added an easy way to specify the type of instance to be created for an
+interface or abstract class when unmarshalling (using the new <b>create-type</b>
+attribute in the <a href="details/binding-attributes.html#object">object attribute</a>
+group).</li>
+<li>Added support for the ugly-but-useful W3C XML Schema nillable kludge,
+allowing elements to be included in instance documents to represent null values
+(using the new <b>nillable</b> attribute in the
+<a href="details/binding-attributes.html#object">object attribute</a> group).</li>
+<li>Changed the <a href="details/mapping-element.html">mapping element</a> <b>type-name</b>
+attribute, the <a href="details/structure-element.html">structure element</a> <b>map-as</b>
+attribute, the <a href="details/format-element.html">format element</a> <b>label</b> attribute, and
+the <a href="details/value-element.html">value element</a> <b>format</b> attribute to be
+namespace-qualified values. To support this change the names of the
+<a href="details/conversions.html">built-in conversion</a> formats had to be changed.</li>
+<li>Provided J2ME compatibility, with new "j2me" build target to build J2ME
+version of the distribution jars.</li>
+<li>More checking for possible errors during validation of the binding
+definition.</li>
+</ul>
+
+<p>Some of these new features (including the changed names for the built-in
+format definitions, and the changed default behavior to throw an exception when
+a bound element in an unordered groups is repeated) may cause problems for
+existing bindings. Users with custom marshallers/unmarshallers which rely on
+namespace index values may also be effected by the <b>xsi:nil</b> support
+change, which added the schema instance namespace at a fixed position in the
+table of namespaces (index 2). I apologize for breaking full compatibility, but
+felt that these changes were important enough for the future to justify the
+inconvenience to current users.</p>
+
+<p>The production release of 1.1 is coming by the beginning of June, 2006. It'll
+soon be followed by the initial 1.2 test builds.</p>
 
 	    </div>
       <div class="h3">
       <h3><a name="status">Status</a></h3>
 
-<p>Work is now in progress on a 1.1 release of JiBX which supports more input
-and output options, along with a variety of other improvements. The 1.1 beta2
-development release implements full StAX pull parser input and output support.
-The upcoming 1.1 beta3 release will include an improved version of the binding
-generator, and the final 1.1 release will integrate stable versions of both the
-<a href="xsd2jibx/index.html">Xsd2Jibx</a> and
-<a href="%./jibxtools/index.html%">Generator Tools</a>
-subprojects into the JiBX distribution.</p>
+<p>Work is getting started on a 1.2 release of JiBX which focuses on improving
+the tool support. This will include updated and enhanced versions of the binding
+generator, schema generator, and code generator from schema. These tools will
+also be used for a production-grade version of JibxSoap.</p>
 
 <p>Work is also starting on JiBX 2.0. The main focus of the 2.0 changes is an
 entirely new code generation model, which is designed to support both direct
-bytecode generation (as in the 1.X code) and source code generation. Other
-changes will include so-called "flexible" unmarshalling support, where unknown
-elements are skipped and only those elements defined by the binding are handled,
-and some level of support for J2SE 5.0 generics and annotations. The first beta
-release of JiBX 2.0 is planned for August, 2006.</p>
+bytecode generation (as in the 1.X code) and source code generation. The first
+beta release of JiBX 2.0 is planned for August, 2006.</p>
 
 	    </div>
       <div class="h3">
-      <h3><a name="changes">Changes</a></h3>
+      <h3><a name="changes">Changes from earlier versions</a></h3>
 
 <p>The 1.0 production release contains many bug fixes and enhancements
 beyond the earlier Beta and RC releases. Some of the main changes are (see the

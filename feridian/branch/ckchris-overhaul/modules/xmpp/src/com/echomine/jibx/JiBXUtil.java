@@ -3,6 +3,8 @@ package com.echomine.jibx;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.BindingDirectory;
 import org.jibx.runtime.IBindingFactory;
 import org.jibx.runtime.JiBXException;
@@ -16,8 +18,21 @@ import com.echomine.xmpp.packet.mapper.IQPacketMapper;
  * The class provides some useful utility functions to work with jibx.
  */
 public class JiBXUtil {
+    private static Log log = LogFactory.getLog(JiBXUtil.class);
     private static IQPacketMapper iqPacketMapper = new IQPacketMapper();
-
+    private static IBindingFactory iqfactory;
+    
+    static {
+        try {
+            iqfactory = BindingDirectory.getFactory(IQPacket.class);
+            if (iqfactory == null && log.isWarnEnabled())
+                log.warn("No IQPacket Factory found.  IQ packet marshalling is disabled.");
+        } catch (JiBXException ex) {
+            if (log.isWarnEnabled())
+                log.warn("Unable to instantiate IQ Packet Factory from Binding Directory.  IQ packet marshalling is disabled.", ex);
+        }
+    }
+    
     /**
      * unmarshalls a document. This is a convenience method to unmarshall a
      * document from beginning to end without utilizing a previous context.
@@ -136,10 +151,9 @@ public class JiBXUtil {
     public static final void marshallIQPacket(XMPPStreamWriter writer, IQPacket packet) throws JiBXException {
         if (writer == null || packet == null)
             throw new IllegalArgumentException("Writer or packet to marshall cannot be null");
-        IBindingFactory factory = BindingDirectory.getFactory(IQPacket.class);
-        if (factory == null)
+        if (iqfactory == null)
             return;
-        MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
+        MarshallingContext fctx = (MarshallingContext) iqfactory.createMarshallingContext();
         fctx.setXmlWriter(writer);
         iqPacketMapper.marshal(packet, fctx);
     }

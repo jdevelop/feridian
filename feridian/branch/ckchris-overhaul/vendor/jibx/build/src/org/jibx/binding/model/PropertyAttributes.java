@@ -348,7 +348,7 @@ public class PropertyAttributes extends AttributeBase
         
         // handle basic lookups and checks
         ContainerElementBase parent = vctx.getParentContainer();
-        IClass cobj = parent.getObjectType();
+        IClass cobj = parent.getChildObjectType();
         String dtype = null;
         String gtype = null;
         String stype = null;

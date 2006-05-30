@@ -12,6 +12,9 @@ import com.echomine.xmpp.XMPPTestCase;
  * Tests the stream features packet
  */
 public class StreamFeaturesPacketTest extends XMPPTestCase implements XMPPConstants {
+    static final String NS_STREAM_IQ_AUTH = "http://jabber.org/features/iq-auth";
+    static final String NS_STREAM_IQ_REGISTER = "http://jabber.org/features/iq-register";
+
     public void testUnmarshallRequiredTLS() throws Exception {
         String xml = "<stream:features xmlns:stream='http://etherx.jabber.org/streams'>" + "\n\t<starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>\n\t<required/></starttls></stream:features>";
         StringReader reader = new StringReader(xml);

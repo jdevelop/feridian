@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.IXMLReader;
-import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
@@ -24,18 +23,6 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper implements
 
     public StreamErrorPacketMapper(String uri, int index, String name) {
         super(uri, index, name);
-        if (index == 0)
-            this.index = getNamespaceIndex();
-    }
-
-    /**
-     * Override to return the namespace index number to obtain if the index
-     * passed into this mapper is 0.
-     * 
-     * @return the namespace index number
-     */
-    protected int getNamespaceIndex() {
-        return XMPPStreamWriter.IDX_JABBER_STREAM;
     }
 
     /**
@@ -51,8 +38,8 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper implements
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
             ErrorPacket packet = (ErrorPacket) obj;
-            IXMLWriter writer = ctx.getXmlWriter();
-            int idx = writer.getNamespaces().length;
+            XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
+            int idx = writer.getNamespaceCount();
             // add extension namespaces
             String[] extns;
             if (packet.getApplicationCondition() == null)
@@ -61,13 +48,14 @@ public class StreamErrorPacketMapper extends AbstractPacketMapper implements
                 extns = new String[] { NS_STREAMS_ERROR,
                         packet.getApplicationCondition().getNamespaceURI() };
             writer.pushExtensionNamespaces(extns);
-            ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
-            marshallErrorCondition(ctx, idx, idx + 1, packet);
-            // close error tag
-            ctx.endTag(index, name);
-            writer.popExtensionNamespaces();
             try {
+                writer.startStreamTagOpen(name);
+                writer.closeStartTag();
+                marshallErrorCondition(ctx, idx, idx + 1, packet);
+                // close error tag
+                writer.endStreamTag(name);
                 writer.flush();
+                writer.popExtensionNamespaces();
             } catch (IOException ex) {
                 throw new JiBXException("Error flushing stream", ex);
             }

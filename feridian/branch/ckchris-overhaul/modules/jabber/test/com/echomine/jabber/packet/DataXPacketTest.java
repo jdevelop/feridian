@@ -10,7 +10,7 @@ import com.echomine.xmpp.JID;
 import com.echomine.xmpp.XMPPTestCase;
 
 public class DataXPacketTest extends XMPPTestCase {
-    private static final String[] URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", "jabber:x:data" };
+    private static final String[] URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", "http://www.w3.org/2001/XMLSchema-instance", "jabber:x:data" };
 
     protected XMPPStreamWriter createXMPPStreamWriter() {
         return new XMPPStreamWriter(URIS);
@@ -65,21 +65,21 @@ public class DataXPacketTest extends XMPPTestCase {
         reader.reset();
         packet = (DataXPacket) JiBXUtil.unmarshallObject(reader, DataXPacket.class);
         assertEquals("Search Results", packet.getTitle());
-        List list = packet.getReportedFields();
+        List<DataXField> list = packet.getReportedFields();
         int size = list.size();
         assertEquals(5, size);
-        assertEquals("jid", ((DataXField) list.get(0)).getVariableName());
-        assertEquals("first", ((DataXField) list.get(1)).getVariableName());
-        assertEquals("last", ((DataXField) list.get(2)).getVariableName());
-        assertEquals("nick", ((DataXField) list.get(3)).getVariableName());
-        assertEquals("email", ((DataXField) list.get(4)).getVariableName());
+        assertEquals("jid", list.get(0).getVariableName());
+        assertEquals("first", list.get(1).getVariableName());
+        assertEquals("last", list.get(2).getVariableName());
+        assertEquals("nick", list.get(3).getVariableName());
+        assertEquals("email", list.get(4).getVariableName());
     }
 
     /**
      * Tests that the parsing and encoding of the fields are done properly.
      */
     public void testGetFields() throws Exception {
-        String xml = "<x xmlns='jabber:x:data' type='form'><field type='text-single' var='var1' label='label1'><value>value1</value></field><field type='boolean' var='var2'><value>1</value></field></x>";
+        String xml = "<x xmlns='jabber:x:data' type='form'><field type='text-single' var='var1' label='label1'><value>value1</value></field><field type='boolean' var='var2'><value>true</value></field></x>";
         StringReader reader = new StringReader(xml);
         DataXPacket packet = new DataXPacket(DataXPacket.TYPE_FORM);
         DataXField field = new DataXField();
@@ -130,7 +130,7 @@ public class DataXPacketTest extends XMPPTestCase {
         compare(reader);
         reader.reset();
         packet = (DataXPacket) JiBXUtil.unmarshallObject(reader, DataXPacket.class);
-        assertEquals("simple instructions", packet.getInstructions());
+        assertEquals("simple instructions", packet.getInstructions().get(0));
     }
 
     /** tests retrieving/encoding/parsing of title tag */
@@ -150,7 +150,7 @@ public class DataXPacketTest extends XMPPTestCase {
      * Tests that the XML for the create cancel is marshalled/unmarshalled properly
      */
     public void testCreateCancelForm() throws Exception {
-        String xml = "<x xmlns='jabber:x:data' type='cancel'></x>";
+        String xml = "<x xmlns='jabber:x:data' type='cancel'/>";
         StringReader reader = new StringReader(xml);
         DataXPacket packet = new DataXPacket(DataXPacket.TYPE_CANCEL);
         JiBXUtil.marshallObject(writer, packet);

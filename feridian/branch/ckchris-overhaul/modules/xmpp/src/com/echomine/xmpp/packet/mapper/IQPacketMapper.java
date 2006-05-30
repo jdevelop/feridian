@@ -31,10 +31,11 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
 
     /**
      * This constructor uses default uri, index, and name for the packet mapper.
-     * Useful for the API when direct instantiation is required.
+     * Useful for the API when direct instantiation is required.  It sets the index
+     * as 0 as default.
      */
     public IQPacketMapper() {
-        this(XMPPConstants.NS_XMPP_CLIENT, XMPPStreamWriter.IDX_XMPP_CLIENT, "iq");
+        this(XMPPConstants.NS_XMPP_CLIENT, 0, "iq");
     }
 
     /**
@@ -61,7 +62,7 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
             IQPacket packet = (IQPacket) obj;
             try {
                 XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
-                ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
+                writer.startStanzaTagOpen(name);
                 // marshall attributes
                 marshallStanzaAttributes(packet, ctx);
                 ctx.closeStartContent();
@@ -77,7 +78,7 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
                 }
                 if (packet.getError() != null)
                     marshallStanzaError(packet.getError(), ctx);
-                ctx.endTag(index, name);
+                writer.endStanzaTag(name);
                 writer.flush();
             } catch (IOException ex) {
                 throw new JiBXException("Error writing to stream", ex);
@@ -120,8 +121,7 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
                     // ignore unknown stanza
                     ctx.skipElement();
                 }
-                while (ctx.currentEvent() == IXMLReader.TEXT
-                        || (ctx.currentEvent() != IXMLReader.END_TAG && !name.equals(ctx.getName())))
+                while (ctx.currentEvent() == IXMLReader.TEXT)
                     ctx.next();
             }
         }

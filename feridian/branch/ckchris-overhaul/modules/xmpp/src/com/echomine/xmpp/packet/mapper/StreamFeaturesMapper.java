@@ -10,7 +10,6 @@ import java.util.Map;
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
 import org.jibx.runtime.IXMLReader;
-import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
@@ -47,8 +46,7 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements
     protected static final String MECHANISMS_ELEMENT_NAME = "mechanisms";
 
     public StreamFeaturesMapper(String uri, int index, String name) {
-        super(uri, XMPPStreamWriter.IDX_JABBER_STREAM, name);
-        System.out.println("uri: " + uri + ", index=" + index + "name: " + name);
+        super(uri, index, name);
     }
 
     /*
@@ -67,26 +65,27 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
             StreamFeatures packet = (StreamFeatures) obj;
-            IXMLWriter writer = ctx.getXmlWriter();
-            ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "stream" }).closeStartContent();
-            marshallStartTLSFeature(ctx, packet);
-            // marshall sasl
-            List list = packet.getSaslMechanisms();
-            int size = list.size();
-            if (size > 0) {
-                int saslIdx = ctx.getNamespaces().length;
-                String[] extns = new String[] { NS_STREAM_SASL };
-                ctx.getXmlWriter().pushExtensionNamespaces(extns);
-                ctx.startTagNamespaces(saslIdx, MECHANISMS_ELEMENT_NAME, new int[] { saslIdx }, new String[] { "" }).closeStartContent();
-                for (int i = 0; i < size; i++)
-                    ctx.element(saslIdx, MECHANISM_ELEMENT_NAME, (String) list.get(i));
-                ctx.endTag(saslIdx, MECHANISMS_ELEMENT_NAME);
-                ctx.getXmlWriter().popExtensionNamespaces();
-            }
-            // marshall the rest
-            marshallSupportedFeatures(ctx, packet);
-            ctx.endTag(index, name);
+            XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
             try {
+                writer.startStreamTagOpen(name);
+                writer.closeStartTag();
+                marshallStartTLSFeature(writer, packet);
+                // marshall sasl
+                List list = packet.getSaslMechanisms();
+                int size = list.size();
+                if (size > 0) {
+                    int saslIdx = writer.getNamespaceCount();
+                    String[] extns = new String[] { NS_STREAM_SASL };
+                    writer.pushExtensionNamespaces(extns);
+                    ctx.startTagNamespaces(saslIdx, MECHANISMS_ELEMENT_NAME, new int[] { saslIdx }, new String[] { "" }).closeStartContent();
+                    for (int i = 0; i < size; i++)
+                        ctx.element(saslIdx, MECHANISM_ELEMENT_NAME, (String) list.get(i));
+                    ctx.endTag(saslIdx, MECHANISMS_ELEMENT_NAME);
+                    ctx.getXmlWriter().popExtensionNamespaces();
+                }
+                // marshall the rest
+                marshallSupportedFeatures(writer, packet);
+                writer.endStreamTag(name);
                 writer.flush();
             } catch (IOException ex) {
                 throw new JiBXException("Error flushing stream", ex);
@@ -101,8 +100,8 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements
      * @param packet the packet containing the data to marshall
      * @throws JiBXException
      */
-    private void marshallSupportedFeatures(MarshallingContext ctx, StreamFeatures packet) throws JiBXException {
-        int featIdx = ctx.getNamespaces().length;
+    private void marshallSupportedFeatures(XMPPStreamWriter writer, StreamFeatures packet) throws JiBXException, IOException {
+        int featIdx = writer.getNamespaceCount();
         Map features = packet.getFeatures();
         Iterator iter = features.keySet().iterator();
         String ns;
@@ -112,23 +111,20 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements
             // TLS is marshalled separately, so ignore it here
             if (NS_STREAM_TLS.equals(ns) || NS_STREAM_SASL.equals(ns))
                 continue;
-            try {
-                // if there is a value associated with the feature, then
-                // it is automatically assumed that the feature requires a
-                // marshaller. Otherwise, simple marshalling is used
-                StreamFeature feature = packet.getFeature(ns);
-                if (feature.getValue() != null) {
-                    StringWriter strWriter = new StringWriter(256);
-                    JiBXUtil.marshallObject(strWriter, feature.getValue());
-                    ((XMPPStreamWriter) ctx.getXmlWriter()).writeMarkup(strWriter.toString());
-                } else {
-                    extns = new String[] { ns };
-                    ctx.getXmlWriter().pushExtensionNamespaces(extns);
-                    ctx.startTagNamespaces(featIdx, feature.getElementName(), new int[] { featIdx }, new String[] { "" }).closeStartEmpty();
-                    ctx.getXmlWriter().popExtensionNamespaces();
-                }
-            } catch (IOException ex) {
-                throw new JiBXException("Error writing feature to output stream", ex);
+            // if there is a value associated with the feature, then
+            // it is automatically assumed that the feature requires a
+            // marshaller. Otherwise, simple marshalling is used
+            StreamFeature feature = packet.getFeature(ns);
+            if (feature.getValue() != null) {
+                StringWriter strWriter = new StringWriter(256);
+                JiBXUtil.marshallObject(strWriter, feature.getValue());
+                writer.writeMarkup(strWriter.toString());
+            } else {
+                extns = new String[] { ns };
+                writer.pushExtensionNamespaces(extns);
+                writer.startTagNamespaces(featIdx, feature.getElementName(), new int[] { featIdx }, new String[] { "" });
+                writer.closeEmptyTag();
+                writer.popExtensionNamespaces();
             }
         }
     }
@@ -140,24 +136,25 @@ public class StreamFeaturesMapper extends AbstractPacketMapper implements
      * @param packet the packet containing the data to marshall
      * @throws JiBXException
      */
-    private void marshallStartTLSFeature(MarshallingContext ctx, StreamFeatures packet) throws JiBXException {
+    private void marshallStartTLSFeature(XMPPStreamWriter writer, StreamFeatures packet) throws IOException {
         if (!packet.isTLSSupported())
             return;
         String[] extns = new String[] { NS_STREAM_TLS };
-        int tlsIdx = ctx.getNamespaces().length;
-        ctx.getXmlWriter().pushExtensionNamespaces(extns);
-        ctx.startTagNamespaces(tlsIdx, STARTTLS_ELEMENT_NAME, new int[] { tlsIdx }, new String[] { "" });
+        int tlsIdx = writer.getNamespaceCount();
+        writer.pushExtensionNamespaces(extns);
+        writer.startTagNamespaces(tlsIdx, STARTTLS_ELEMENT_NAME, new int[] { tlsIdx }, new String[] { "" });
         // if tls is not required, close tag
         if (!packet.isTLSRequired()) {
-            ctx.closeStartEmpty();
+            writer.closeEmptyTag();
         } else {
-            ctx.closeStartContent();
+            writer.closeStartTag();
             // write out the <required/> element
-            ctx.startTagAttributes(tlsIdx, "required").closeStartEmpty();
+            writer.startTagClosed(tlsIdx, "required");
+            writer.endTag(tlsIdx, "required");
             // close tag
-            ctx.endTag(tlsIdx, STARTTLS_ELEMENT_NAME);
+            writer.endTag(tlsIdx, STARTTLS_ELEMENT_NAME);
         }
-        ctx.getXmlWriter().popExtensionNamespaces();
+        writer.popExtensionNamespaces();
     }
 
     /*

@@ -29,7 +29,7 @@ public class DataXField {
     public static final String TYPE_TEXT_PRIVATE = "text-private";
     public static final String TYPE_TEXT_SINGLE = "text-single";
     private static final String EMPTY_STRING = "";
-    private boolean required = false;
+    private String required = null;
     private String description;
     private ArrayList<String> values = new ArrayList<String>();
     private ArrayList<DataXOption> options = new ArrayList<DataXOption>();
@@ -63,12 +63,15 @@ public class DataXField {
 
     /** whether this field is a required field for input. Defaults to false */
     public boolean isRequired() {
-        return required;
+        return required != null;
     }
 
     /** sets the required attribute for this field */
     public void setRequired(boolean required) {
-        this.required = required;
+        if (required)
+            this.required = "";
+        else
+            this.required = null;
     }
 
     /** @return the description of the field, or empty string if none exists */
@@ -90,7 +93,8 @@ public class DataXField {
      * return type is null.
      */
     public String getFieldType() {
-        if (fieldType == null) return TYPE_TEXT_SINGLE;
+        if (fieldType == null)
+            return TYPE_TEXT_SINGLE;
         return fieldType;
     }
 
@@ -148,10 +152,7 @@ public class DataXField {
         // clear values
         if (!values.isEmpty())
             values.clear();
-        if (value)
-            addValue("1");
-        else
-            addValue("0");
+        addValue(Boolean.valueOf(value).toString());
     }
 
     /**
@@ -247,16 +248,16 @@ public class DataXField {
 
     /**
      * Retrieves the first value as a boolean value. The accepted value is "1"
-     * for true and any other string for false ("0", "false", "true" will all
-     * return false). This method will work for any field types, but it is
-     * normally used to retrieve boolean types.
+     * or "true" for true and "0", "false", or any other string for false. This
+     * method will work for any field types, but it is normally used to retrieve
+     * boolean types.
      * 
      * @return the first value of boolean, or false if there are no values to
      *         retrieve
      */
     public boolean getBooleanValue() {
         String val = values.get(0);
-        if ("1".equals(val))
+        if ("1".equals(val) || "true".equals(val))
             return true;
         return false;
     }
@@ -282,8 +283,8 @@ public class DataXField {
      * 
      * @return a list of JID objects, in the order that was received, or an
      *         empty list if no values exist
-     * @throws JIDFormatException if there is any problem parsing ANY JID out of the
-     *             list of values
+     * @throws JIDFormatException if there is any problem parsing ANY JID out of
+     *             the list of values
      */
     public List<JID> getJIDValues() throws JIDFormatException {
         int size = values.size();
@@ -326,7 +327,7 @@ public class DataXField {
      * list is returned. The return list of values are not modifiable (ie. it's
      * read-only).
      */
-    public List getStringValues() {
+    public List<String> getStringValues() {
         return Collections.unmodifiableList(values);
     }
 
@@ -351,7 +352,7 @@ public class DataXField {
      * returned. The return list of values are not modifiable (ie. it's
      * read-only).
      */
-    public List getOptions() {
+    public List<DataXOption> getOptions() {
         return Collections.unmodifiableList(options);
     }
 

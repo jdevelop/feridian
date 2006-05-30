@@ -283,12 +283,21 @@ public class MappingElement extends TemplateElementBase
                 vctx.addWarning
                     ("Using a name on an abstract mapping is deprecated");
             }
-        } else {
-            if (m_nameAttrs.getName() == null &&
-                ((vctx.isInBinding() && getUnmarshallerName() == null) ||
-                (vctx.isOutBinding() && getMarshallerName() == null))) {
+            if (isNillable()) {
                 vctx.addError
-                    ("Non-abstract mapping must define an element name");
+                    ("nillable='true' cannot be used on an abstract mapping");
+            }
+        } else {
+            if (m_nameAttrs.getName() == null) {
+                if ((vctx.isInBinding() && getUnmarshallerName() == null) ||
+                    (vctx.isOutBinding() && getMarshallerName() == null)) {
+                    vctx.addError
+                        ("Non-abstract mapping must define an element name");
+                }
+                if (isNillable()) {
+                    vctx.addError
+                        ("nillable='true' cannot be used without an element name");
+                }
             }
             if (m_typeQName != null) {
                 vctx.addError

@@ -304,6 +304,20 @@ public class UnmarshallingContext implements IUnmarshallingContext
     }
 
     /**
+     * Throw exception including a name and position information.
+     *
+     * @param msg leading message text
+     * @param ns namespace URI of name
+     * @param name local name part of name
+     * @exception JiBXException always thrown
+     */
+    public void throwNameException(String msg, String ns, String name)
+        throws JiBXException {
+        throw new JiBXException(msg + buildNameString(ns, name) +
+            buildPositionString());
+    }
+
+    /**
      * Advance to next parse item. This wraps the base parser call in order to
      * catch and handle exceptions.
      *

@@ -384,7 +384,8 @@ become substitutes for that "inherited" base mapping.</p></td>
 allows alternative abstract mappings to be defined for the same class, and
 referenced by name with a <b>map-as</b> attribute on a <b>structure</b>
 element (or looked up at runtime when <b>force-classes="true"</b> is used on the
-<b>binding</b> element).</p></td>
+<b>binding</b> element). As of JiBX 1.1, the value of this attribute is
+interpreted as namespace qualified.</p></td>
 </tr>
 <tr class="b">
 <td><a href="binding-attributes.html#style">style</a></td>
@@ -396,11 +397,12 @@ for usage details.</p></td>
 <tr class="a">
 <td><a href="binding-attributes.html#name">name</a></td>
 <td><p>Attributes from the name group define an element mapped to the object
-type handled by this mapping. The name is optional if either
-<b>abstract=&quot;true&quot;</b> is specified or a custom marshaller/unmarshaller
-is supplied (see the <b>object</b> attribute group, below), and otherwise required.
-See the <a href="binding-attributes.html#name">name attribute group</a> description
-for usage details.</p></td>
+type handled by this mapping. The name is required on non-abstract mappings
+unless a custom marshaller/unmarshaller is supplied (see the <b>object</b>
+attribute group, below), in which case it is optional. Abstract mappings should
+not define a name, but are currently allowed to do so with a warning for support
+of legacy bindings. See the <a href="binding-attributes.html#name">name attribute
+group</a> description for name usage details.</p></td>
 </tr>
 <tr class="b">
 <td><a href="binding-attributes.html#object">object</a></td>
@@ -434,7 +436,7 @@ with the same object type cannot be defined in the same context.</p>
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

@@ -62,7 +62,7 @@ implements IContainer
     
     /** Current distribution file name. This is filled in by the Ant build
      process to match the current distribution. */
-    public static final String CURRENT_VERSION_NAME = "jibx_1_1_beta3";
+    public static final String CURRENT_VERSION_NAME = "jibx_1_1_beta4";
     
     /** Prefix used in all code generation for methods and classes. */
     public static final String GENERATE_PREFIX = "JiBX_";

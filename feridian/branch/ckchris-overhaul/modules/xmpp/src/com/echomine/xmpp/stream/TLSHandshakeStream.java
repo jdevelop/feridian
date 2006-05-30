@@ -59,9 +59,9 @@ public class TLSHandshakeStream implements IXMPPStream, XMPPConstants {
             return;
         XMPPStreamWriter writer = streamCtx.getWriter();
         UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
+        int idx = writer.getNamespaceCount();
         String[] extns = new String[] { NS_STREAM_TLS };
         writer.pushExtensionNamespaces(extns);
-        int idx = writer.getNamespaces().length;
         try {
             // send starttls
             writer.startTagNamespaces(idx, STARTTLS_ELEMENT_NAME, new int[] { idx }, new String[] { "" });

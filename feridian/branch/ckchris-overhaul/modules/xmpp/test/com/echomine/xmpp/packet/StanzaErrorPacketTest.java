@@ -11,15 +11,6 @@ import com.echomine.xmpp.XMPPTestCase;
  * This will test both stanza and stream error packets.
  */
 public class StanzaErrorPacketTest extends XMPPTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     /**
      * tests the stream containing all the packet data
      */

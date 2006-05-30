@@ -13,7 +13,6 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPLoggableReader;
-import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
 import com.echomine.net.HandshakeableSocketHandler;
@@ -189,6 +188,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
      */
     public void handle(Socket socket, ConnectionContext connCtx) throws IOException {
         UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
+        // sets the stream context as user context for unmarshallers to use
+        uctx.setUserContext(streamCtx);
         // start incoming data packet reading and outgoing packet queue sending
         try {
             while (state != RunningState.STOPPED) {
@@ -220,11 +221,10 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
                     } else if (uctx.isAt(NS_XMPP_CLIENT, MESSAGE_ELEMENT_NAME)) {
                         MessagePacket msgPkt = (MessagePacket) JiBXUtil.unmarshallObject(uctx, MessagePacket.class);
                         // according to XMPP, message stanza with no child
-                        // element
-                        // or unknown namespace extensions should be ignored
-                        // This translates to this API ignoring message stanzas
-                        // with no child elements
-                        // and no extensions in this API.
+                        // element or unknown namespace extensions should be
+                        // ignored. This translates to this API ignoring message
+                        // stanzas with no child elements and no extensions in
+                        // this API.
                         if (msgPkt.getBodies().isEmpty()
                                 && msgPkt.getExtensions().isEmpty()
                                 && msgPkt.getSubjects().isEmpty()
@@ -512,8 +512,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
      */
     protected void endStream() {
         try {
-            streamCtx.getWriter().endTag(XMPPStreamWriter.IDX_JABBER_STREAM, "stream");
-            streamCtx.getWriter().flush();
+            streamCtx.getWriter().endStream();
         } catch (IOException ex) {
             // intentionally left empty
         }

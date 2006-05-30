@@ -3,7 +3,7 @@
   <namespace uri="http://www.jibx.org/ns1" default="elements"/>
   <namespace uri="http://www.jibx.org/ns2" prefix="ns2" default="attributes"/>
   <namespace uri="http://www.jibx.org/ns3" prefix="ns3"/>
-  <include path="/home/dennis/projects/jibx/core/build/test/binding5b-include1.xml"/>
+  <include path="../binding5b-include1.xml"/>
   <mapping name="timetable" class="multiple.SplitTableBean">
     <collection name="carriers" field="m_carriers"
       item-type="multiple.CarrierBean"/>
