@@ -1,5 +1,0 @@
-<feridian>
-  <packets>
-    <packet ns="jabber:x:data" class="com.echomine.jabber.packet.DataXPacket"/>
-  </packets>
-</feridian>

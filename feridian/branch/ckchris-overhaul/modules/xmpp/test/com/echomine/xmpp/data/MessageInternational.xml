@@ -1,8 +1,0 @@
-<message xmlns="jabber:client" id="id_0001" to="romeo@shakespeare.com"
-	from="juliet@shakespeare.com" type="chat" xml:lang="en-ca">
-	<subject>hello!</subject>
-	<subject xml:lang="it">ciao!</subject>
-	<body>good day!</body>
-	<body xml:lang="it">buon giorno!</body>
-	<thread>test-thread</thread>
-</message>

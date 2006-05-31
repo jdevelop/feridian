@@ -1,3 +1,0 @@
-<iq xmlns="jabber:client" type="get">
-  <query xmlns='jabber:iq:roster'/>
-</iq>
