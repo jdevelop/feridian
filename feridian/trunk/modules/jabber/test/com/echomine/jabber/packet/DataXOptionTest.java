@@ -8,7 +8,7 @@ import com.echomine.xmpp.XMPPTestCase;
 
 /** tests the DataXOption class */
 public class DataXOptionTest extends XMPPTestCase {
-    private static final String[] URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", "jabber:x:data" };
+    private static final String[] URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", "http://www.w3.org/2001/XMLSchema-instance", "jabber:x:data" };
 
     protected XMPPStreamWriter createXMPPStreamWriter() {
         return new XMPPStreamWriter(URIS);

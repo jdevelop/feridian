@@ -11,7 +11,11 @@
 		<attribute name="target"/>
 		<sequential>
 			<subant target="@{target}" inheritall="true">
-				<fileset dir="modules" includes="*/build.xml"/>
+				<filelist dir="modules">
+					<file name="xmpp/build.xml"/>
+					<file name="jabber/build.xml"/>
+					<file name="jabber-compat/build.xml"/>
+				</filelist>
 			</subant>
 		</sequential>
 	</macrodef>

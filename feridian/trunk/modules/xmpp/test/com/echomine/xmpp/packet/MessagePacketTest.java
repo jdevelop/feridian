@@ -6,7 +6,6 @@ import java.util.Locale;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.JID;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPTestCase;
 
 /**
@@ -85,7 +84,7 @@ public class MessagePacketTest extends XMPPTestCase {
         item.setName("MyContact");
         item.addGroup("MyBuddies");
         ext.addItem(item);
-        packet.addExtension(XMPPConstants.NS_IQ_ROSTER, ext);
+        packet.addExtension("jabber:iq:roster", ext);
         JiBXUtil.marshallObject(writer, packet);
         compare(rdr);
     }

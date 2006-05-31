@@ -39,15 +39,22 @@ public class XMPPTestCase extends TestCase {
         uctx = new UnmarshallingContext();
         writer = createXMPPStreamWriter();
         writer.setOutput(os);
+        setupXMPPStreamWriter();
     }
 
     /**
-     * Creates a new XMPP Stream writer for use during setup.  This method
-     * is here so that subclasses can override to create customized stream writers
-     * for testing (such as changing the URIs).
+     * Creates a new XMPPStreamWriter object.
+     * @return
      */
     protected XMPPStreamWriter createXMPPStreamWriter() {
         return new XMPPStreamWriter();
+    }
+    
+    /**
+     * sets up xmpp stream writer
+     */
+    protected void setupXMPPStreamWriter() {
+        writer.pushExtensionNamespaces(new String[] { "jabber:client" });
     }
     
     /*

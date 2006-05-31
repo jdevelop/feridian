@@ -35,11 +35,12 @@ import com.echomine.xmpp.IPacket;
  * </p>
  * <p>
  * <b>Current Implementation: <a
- * href="http://www.jabber.org/jeps/jep-0004.html">JEP-0004 Version 2.1</a></b>
+ * href="http://www.jabber.org/jeps/jep-0004.html">JEP-0004 Version 2.7</a></b>
  * </p>
  * 
  * @see DataXField
  * @see DataXOption
+ * @see DataXItemList
  */
 public class DataXPacket implements IPacket {
     public static final String TYPE_SUBMIT = "submit";
@@ -141,7 +142,7 @@ public class DataXPacket implements IPacket {
      * 
      * @return an unmodifiable list of DataXField objects, or null if no fields exist
      */
-    public List getFields() {
+    public List<DataXField> getFields() {
         if (fields == null) return null;
         return Collections.unmodifiableList(fields);
     }
@@ -153,7 +154,7 @@ public class DataXPacket implements IPacket {
      * 
      * @return an unmodifiable list of DataXField objects, or null if no reported fields exist
      */
-    public List getReportedFields() {
+    public List<DataXField> getReportedFields() {
         if (reportedFields == null) return null;
         return Collections.unmodifiableList(reportedFields);
     }

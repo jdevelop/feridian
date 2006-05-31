@@ -4,10 +4,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 import com.echomine.jibx.MockXMPPLoggableReader;
-import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.xmpp.IXMPPStream;
-import com.echomine.xmpp.XMPPException;
-import com.echomine.xmpp.XMPPStreamContext;
 
 /**
  * Base class for stream test cases to extend from that provides many common
@@ -154,11 +150,7 @@ public class BaseStreamTestCase extends XMPPTestCase {
      * @throws Exception
      */
     protected void startOutgoingStreamHeader() throws Exception {
-        writer.startTagNamespaces(XMPPStreamWriter.IDX_JABBER_STREAM, "stream", new int[] { 2, 3 }, new String[] { "stream", "" });
-        writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "version", "1.0");
-        writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", sessCtx.getHostName());
-        writer.closeStartTag();
-        writer.flush();
+        writer.startHandshakeStream(XMPPConstants.NS_XMPP_CLIENT, sessCtx.getHostName(), null);
     }
 
     /**

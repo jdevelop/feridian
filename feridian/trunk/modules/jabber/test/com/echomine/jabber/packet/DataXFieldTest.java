@@ -10,34 +10,47 @@ import com.echomine.xmpp.JID;
 import com.echomine.xmpp.XMPPTestCase;
 
 public class DataXFieldTest extends XMPPTestCase {
-    private static final String[] URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", "jabber:x:data" };
+    private static final String[] URIS = new String[] { "", "http://www.w3.org/XML/1998/namespace", "http://www.w3.org/2001/XMLSchema-instance", "jabber:x:data" };
 
+    @Override
     protected XMPPStreamWriter createXMPPStreamWriter() {
         return new XMPPStreamWriter(URIS);
     }
 
+    @Override
+    protected void setupXMPPStreamWriter() {
+    }
+
     /** tests the parsing and encoding for options */
     public void testOptions() throws Exception {
-        String xml = "<field xmlns='jabber:x:data' type='list-single'><option label='label1'><value>option1</value></option><option><value>option2</value></option><option label='label3'><value>option3</value></option></field>";
+        String xml = "<field xmlns='jabber:x:data' type='list-multi'><option label='label1'><value>option1</value></option><option><value>option2</value></option><option label='label3'><value>option3</value></option><value>option2</value><value>option3</value></field>";
         StringReader reader = new StringReader(xml);
-        DataXField field = new DataXField(DataXField.TYPE_LIST_SINGLE);
+        DataXField field = new DataXField(DataXField.TYPE_LIST_MULTI);
         ArrayList<DataXOption> options = new ArrayList<DataXOption>();
         options.add(new DataXOption("option1", "label1"));
         options.add(new DataXOption("option2"));
         options.add(new DataXOption("option3", "label3"));
+        ArrayList<String> values = new ArrayList<String>();
+        values.add("option2");
+        values.add("option3");
         field.setOptions(options);
+        field.setValues(values);
         JiBXUtil.marshallObject(writer, field);
         compare(reader);
         reader.reset();
         field = (DataXField) JiBXUtil.unmarshallObject(reader, DataXField.class);
-        assertEquals(DataXField.TYPE_LIST_SINGLE, field.getFieldType());
-        List list = field.getOptions();
+        assertEquals(DataXField.TYPE_LIST_MULTI, field.getFieldType());
+        List<DataXOption> list = field.getOptions();
         assertEquals(3, list.size());
-        assertEquals("label1", ((DataXOption) list.get(0)).getLabel());
-        assertEquals("option1", ((DataXOption) list.get(0)).getValue());
-        assertEquals("option2", ((DataXOption) list.get(1)).getValue());
-        assertEquals("option3", ((DataXOption) list.get(2)).getValue());
-        assertEquals("label3", ((DataXOption) list.get(2)).getLabel());
+        assertEquals("label1", list.get(0).getLabel());
+        assertEquals("option1", list.get(0).getValue());
+        assertEquals("option2", list.get(1).getValue());
+        assertEquals("option3", list.get(2).getValue());
+        assertEquals("label3", list.get(2).getLabel());
+        List<String> valList = field.getStringValues();
+        assertEquals(2, valList.size());
+        assertEquals("option2", valList.get(0));
+        assertEquals("option3", valList.get(1));
     }
 
     /** tests marshalling/unmarshalling of values */
@@ -93,8 +106,8 @@ public class DataXFieldTest extends XMPPTestCase {
         assertEquals(DataXField.TYPE_TEXT_SINGLE, field.getFieldType());
     }
 
-    /** test the list-single and list-multi field */
-    public void testListSingleAndMultiField() throws Exception {
+    /** test the list-single field */
+    public void testListSingleField() throws Exception {
         DataXField field = new DataXField(DataXField.TYPE_LIST_SINGLE);
         ArrayList<DataXOption> options = new ArrayList<DataXOption>();
         options.add(new DataXOption("option1", "label1"));

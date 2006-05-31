@@ -353,6 +353,13 @@ if any.</p></td>
 <h4><a name="object">object</a></h4>
 <table cellpadding="3" cellspacing="2" border="1" width="100%">
 <tr class="b">
+<td>create-type</td>
+<td><p>Gives the type to be used when creating instances of the object during
+unmarshalling. This gives an alternative to the <b>factory</b> attribute when
+all you want to do is use a specific implementation for an interface or an
+abstract class.</p></td>
+</tr>
+<tr class="a">
 <td>factory</td>
 <td><p>Defines a factory method for constructing new instances of an object
 type. This applies to bindings for unmarshalling only, and if supplied it must
@@ -370,13 +377,25 @@ unmarshalling context is passed in the method call (this allows access to the
 entire stack of objects being unmarshalled). If not supplied, instances of the
 bound class are constructed using a null argument constructor.</p></td>
 </tr>
+<tr class="b">
+<td>marshaller</td>
+<td><p>Defines a custom serialization handler class, as the fully-qualified
+name of a class implementing the <code>org.jibx.runtime.Marshaller</code>
+interface. This is only allowed with an output binding; it is required if an
+unmarshaller is defined for an input-output binding.</p></td>
+</tr>
 <tr class="a">
-<td>pre-set</td>
-<td><p>Defines a bound class method called on new instances of the class before
-they are populated with data from unmarshalling. This can be used for any
-initialization or special handling required before a constructed instance is
-used. Three different method signatures are supported, as described in the
-<b>factory</b> attribute text.</p></td>
+<td>nillable</td>
+<td><p>Allows the W3C XML Schema attribute <b>xsi:nil="true"</b> to be used on
+an element in instance documents to indicate that the corresponding object is
+<code>null</code>. The default value is "false", set this attribute "true" to
+enable <b>xsi:nil</b> support. The marshalling behavior when the attribute is
+"true" and the object reference is <code>null</code> depends on whether the
+binding defines the corresponding element as optional or required. If the
+element is optional it will simply be left out of the marshalled document. If
+the element is required it will be written with an <b>xsi:nil="true"</b>
+attribute. This attribute can only be used with objects that are bound to an
+element name.</p></td>
 </tr>
 <tr class="b">
 <td>post-set</td>
@@ -394,11 +413,12 @@ required by the class. Three different method signatures are supported, as
 described in the <b>factory</b> attribute text.</p></td>
 </tr>
 <tr class="b">
-<td>marshaller</td>
-<td><p>Defines a custom serialization handler class, as the fully-qualified
-name of a class implementing the <code>org.jibx.runtime.Marshaller</code>
-interface. This is only allowed with an output binding; it is required if an
-unmarshaller is defined for an input-output binding.</p></td>
+<td>pre-set</td>
+<td><p>Defines a bound class method called on new instances of the class before
+they are populated with data from unmarshalling. This can be used for any
+initialization or special handling required before a constructed instance is
+used. Three different method signatures are supported, as described in the
+<b>factory</b> attribute text.</p></td>
 </tr>
 <tr class="a">
 <td>unmarshaller</td>
@@ -420,16 +440,19 @@ values from a collection, or when both <b>get-method</b> (for output bindings)
 and <b>set-method</b> (for input bindings) definitions are supplied.</p></td>
 </tr>
 <tr class="a">
-<td>type</td>
-<td><p>Supplies the fully-qualified class name for the property value. This can
-be used to force a more specific type for a property value defined by the field
-definition or access method signature as either a base class or an interface.</p></td>
+<td>get-method</td>
+<td><p>Defines a &quot;get&quot; method for retrieving the property value from
+an instance of the containing class. This is the name of a no-argument method
+returning a value (primitive or object)</p></td>
 </tr>
 <tr class="b">
-<td>usage</td>
-<td><p>Defines the usage requirement for this property. The value can either be
-&quot;required&quot; (property is always present, the default if not specified) or
-&quot;optional&quot; (property is optional).</p></td>
+<td>set-method</td>
+<td><p>Defines a &quot;set&quot; method for storing the property value in
+an instance of the containing class. This is the name of a method with return
+type <code>void</code>, taking a single value (primitive or object) as a
+parameter. If both <b>get-method</b> and <b>set-method</b> are defined, the
+<b>set-method</b> parameter type must be the same as the <b>get-method</b>
+return value.</p></td>
 </tr>
 <tr class="a">
 <td>test-method</td>
@@ -443,29 +466,31 @@ value different from the default, and a <code>equals()</code> comparison for
 object types with non-null defaults</p></td>
 </tr>
 <tr class="b">
-<td>get-method</td>
-<td><p>Defines a &quot;get&quot; method for retrieving the property value from
-an instance of the containing class. This is the name of a no-argument method
-returning a value (primitive or object)</p></td>
+<td>type</td>
+<td><p>Supplies the fully-qualified class name for the property value. This can
+be used to force a more specific type for a property value defined by the field
+definition or access method signature as either a base class or an interface.</p></td>
 </tr>
 <tr class="a">
-<td>set-method</td>
-<td><p>Defines a &quot;set&quot; method for storing the property value in
-an instance of the containing class. This is the name of a method with return
-type <code>void</code>, taking a single value (primitive or object) as a
-parameter. If both <b>get-method</b> and <b>set-method</b> are defined, the
-<b>set-method</b> parameter type must be the same as the <b>get-method</b>
-return value.</p></td>
+<td>usage</td>
+<td><p>Defines the usage requirement for this property. The value can either be
+&quot;required&quot; (property is always present, the default if not specified) or
+&quot;optional&quot; (property is optional).</p></td>
 </tr>
 </table>
 
 <h4><a name="structure">structure</a></h4>
 <table cellpadding="3" cellspacing="2" border="1" width="100%">
 <tr class="b">
-<td>ordered</td>
-<td><p>Defines whether child binding definitions represent an ordered list
-(value "true", the default) or an unordered set ("false"). Only optional child
-definitions are allowed within an unordered set.</p></td>
+<td>allow-repeats</td>
+<td><p>Determines whether repeated elements within an unordered group should be
+allowed. The default is "false", meaning that if a bound element is repeated the
+runtime code will throw an exception. Setting this "true" means repeated
+elements will be processed the same as in pre-1.1 versions of JiBX. A "true"
+value for this attribute is only allowed when all child definitions are elements
+(no attributes or text), and requires <b>ordered="false"</b>. It cannot be used
+in combination with <b>choice="true"</b>. This attribute is ignored on a
+<b>collection</b> element.</td>
 </tr>
 <tr class="a">
 <td>choice</td>
@@ -473,15 +498,33 @@ definitions are allowed within an unordered set.</p></td>
 alternatives, with only one allowed (value "true") or a set of possibilities of
 which one or more may be present ("false", the default). A "true" value for this
 attribute is only allowed when all child definitions are elements (no attributes
-or text), and also requires <b>ordered="false"</b>. This attribute is ignored on
-a <b>collection</b> element.</p></td>
+or text), and requires <b>ordered="false"</b>. It cannot be used in combination
+with <b>allow-repeats="true"</b> or <b>flexible="true"</b>. This attribute is
+ignored on a <b>collection</b> element.</p></td>
 </tr>
 <tr class="b">
+<td>flexible</td>
+<td><p>Defines whether unknown elements within an unordered group should be
+ignored. The default is "false", meaning that if an unknown element (one not
+allowed by the binding) is found during unmarshalling the runtime code will
+throw an exception. Setting this "true" means unknown elements will be ignored
+(along with all their content). A "true" value for this attribute is only
+allowed when all child definitions are elements (no attributes or text), and
+requires <b>ordered="false"</b>. It cannot be used in combination with
+<b>choice="true"</b>. This attribute is ignored on a <b>collection</b>
+element.</p></td>
+</tr>
+<tr class="a">
 <td>label</td>
 <td><p>Gives a label allowing the list of child components to be referenced
 from elsewhere in the binding definition. <b>Note that this technique has been
 deprecated, and will not be supported in JiBX 2.0. In most cases an abstract
 mapping can be used as a replacement.</b></p></td>
+</tr>
+<tr class="b">
+<td>ordered</td>
+<td><p>Defines whether child binding definitions represent an ordered list
+(value "true", the default) or an unordered set ("false").</p></td>
 </tr>
 <tr class="a">
 <td>using</td>
@@ -509,13 +552,6 @@ same as the member variable initial state defined by the JLS, and for object
 types is &quot;null&quot;.</p></td>
 </tr>
 <tr class="a">
-<td>serializer</td>
-<td><p>Defines a custom serialization handler method, as the fully-qualified
-name of a static method with the signature <code>String xxxx(Target value)</code>,
-where <code>xxxx</code> is the method name and <code>Target</code> is the type
-of the property (primitive or object type).</p></td>
-</tr>
-<tr class="b">
 <td>deserializer</td>
 <td><p>Defines a custom deserialization handler method, as the fully-qualified
 name of a static method with the signature <code>Target xxxx(String text)</code>,
@@ -526,6 +562,13 @@ default value, that method will be called with a <code>null</code> argument
 when the corresponding value is missing in the input document. It's up to the
 handler method to handle this case appropriately (by returning either a
 <code>null</code> or an object of the expected type).</p></td>
+</tr>
+<tr class="b">
+<td>serializer</td>
+<td><p>Defines a custom serialization handler method, as the fully-qualified
+name of a static method with the signature <code>String xxxx(Target value)</code>,
+where <code>xxxx</code> is the method name and <code>Target</code> is the type
+of the property (primitive or object type).</p></td>
 </tr>
 </table>
 
@@ -542,7 +585,7 @@ handler method to handle this case appropriately (by returning either a
 <table border="0" cellspacing="0" cellpadding="4">
   <tbody>
     <tr>
-      <td> &copy; 2003-2005, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
       Licensed to the JiBX Project for free distribution and use. </td>
     </tr>
   </tbody>

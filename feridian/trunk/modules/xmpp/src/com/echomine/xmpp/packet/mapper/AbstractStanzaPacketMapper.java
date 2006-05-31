@@ -4,10 +4,8 @@ import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.JID;
 import com.echomine.xmpp.JIDFormatException;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 import com.echomine.xmpp.packet.StanzaPacketBase;
 
@@ -23,19 +21,14 @@ public abstract class AbstractStanzaPacketMapper extends AbstractPacketMapper {
     protected static final String TO_ATTRIBUTE_NAME = "to";
     protected static final String ERROR_ELEMENT_NAME = "error";
 
-    private StanzaErrorPacketMapper errorMapper = new StanzaErrorPacketMapper(XMPPConstants.NS_XMPP_CLIENT, XMPPStreamWriter.IDX_XMPP_CLIENT, "error");
+    private StanzaErrorPacketMapper errorMapper;
 
     /**
-     * Allows super constructor to set values and then checks if index is 0. If
-     * index is 0, it will set it to the default xmpp jabber:client namespace
-     * index.
-     * 
      * @see com.echomine.xmpp.jibx.XMPPStreamWriter
      */
     public AbstractStanzaPacketMapper(String uri, int index, String name) {
         super(uri, index, name);
-        if (this.index == 0)
-            this.index = XMPPStreamWriter.IDX_XMPP_CLIENT;
+        errorMapper = new StanzaErrorPacketMapper(uri, index, "error");
     }
 
     /**
@@ -84,7 +77,7 @@ public abstract class AbstractStanzaPacketMapper extends AbstractPacketMapper {
      * Marshalls the stanza error at the current context position. It will
      * immediately start writing out the error element. Thus, before calling
      * this method, the context should already close (not end) a start tag and
-     * be ready to write. When this method returns, the context will be position
+     * be ready to write. When this method returns, the context will be positioned
      * at the end of the ending error element.
      * 
      * @param packet the error packet to marshall

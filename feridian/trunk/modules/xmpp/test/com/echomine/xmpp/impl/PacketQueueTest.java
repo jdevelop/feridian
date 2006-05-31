@@ -22,6 +22,7 @@ public class PacketQueueTest extends TestCase {
     protected void setUp() throws Exception {
         handler = new MockXMPPConnectionHandler();
         queue = new TestablePacketQueue(handler);
+        handler.getStreamContext().getWriter().pushExtensionNamespaces(new String[] { "jabber:client" });
     }
 
     protected void tearDown() throws Exception {

@@ -40,8 +40,8 @@ public class StructureAttributes extends AttributeBase
 {
     /** Enumeration of allowed attribute names */
     public static final StringArray s_allowedAttributes =
-        new StringArray(new String[] { "choice", "flexible", "label", "ordered",
-        "using" });
+        new StringArray(new String[] { "allow-repeats", "choice", "flexible",
+        "label", "ordered", "using" });
     
     //
     // Instance data.
@@ -50,16 +50,19 @@ public class StructureAttributes extends AttributeBase
     private boolean m_isFlexible;
     
     /** Flag for ordered child content. */
-    protected boolean m_isOrdered;
+    private boolean m_isOrdered;
     
     /** Flag for choice child content. */
-    protected boolean m_isChoice;
+    private boolean m_isChoice;
+    
+    /** Flag for repeated child elements to be ignored. */
+    private boolean m_isAllowRepeats;
     
     /** Name for labeled child content defined elsewhere. */
-    protected String m_usingName;
+    private String m_usingName;
     
     /** Name for labeled child content potentially referenced elsewhere. */
-    protected String m_labelName;
+    private String m_labelName;
 
     /**
      * Constructor.
@@ -121,6 +124,25 @@ public class StructureAttributes extends AttributeBase
     public void setChoice(boolean choice) {
         m_isChoice = choice;
     }
+
+    /**
+     * Check if repeated child elements are allowed.
+     *
+     * @return <code>true</code> if repeats allowed, <code>false</code> if not
+     */
+    public boolean isAllowRepeats() {
+        return m_isAllowRepeats;
+    }
+    
+    /**
+     * Set repeated child elements allowed flag.
+     * 
+     * @param ignore <code>true</code> if repeated child elements to be allowed,
+     * <code>false</code> if not
+     */
+    public void setAllowRepeats(boolean ignore) {
+        m_isAllowRepeats = ignore;
+    }
     
     /**
      * Get name for child component list definition.
@@ -173,10 +195,18 @@ public class StructureAttributes extends AttributeBase
                 vctx.addError
                     ("flexible='true' cannot be used with ordered children");
             }
-            if (m_isChoice && m_isFlexible) {
+            if (m_isAllowRepeats) {
                 vctx.addError
-                    ("choice='true' and flexible='true' cannot be used together");
+                    ("allow-repeats='true' cannot be used with ordered children");
             }
+        }
+        if (m_isChoice && m_isFlexible) {
+            vctx.addError
+                ("choice='true' and flexible='true' cannot be used together");
+        }
+        if (m_isChoice && m_isAllowRepeats) {
+            vctx.addError
+                ("choice='true' and allow-repeats='true' cannot be used together");
         }
         super.prevalidate(vctx);
     }

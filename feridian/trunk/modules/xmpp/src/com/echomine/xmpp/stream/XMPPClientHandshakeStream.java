@@ -38,15 +38,7 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
         try {
             XMPPStreamWriter writer = streamCtx.getWriter();
             UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
-            writer.startTagNamespaces(XMPPStreamWriter.IDX_JABBER_STREAM, STREAM_ELEMENT_NAME, new int[] { 2, 3 }, new String[] { "stream", "" });
-            writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "version", "1.0");
-            writer.addAttribute(XMPPStreamWriter.IDX_XMPP_CLIENT, "to", sessCtx.getHostName());
-            if (sessCtx.getLocale() != null)
-                writer.addAttribute(XMPPConstants.IDX_XML, "lang", LocaleUtil.format(sessCtx.getLocale()));
-            writer.closeStartTag();
-            //work around a jibx bug where '>' is not being written until next operation
-            writer.writeTextContent("");
-            writer.flush();
+            writer.startHandshakeStream(XMPPConstants.NS_XMPP_CLIENT, sessCtx.getHostName(), sessCtx.getLocale());
             // start logging
             streamCtx.getReader().startLogging();
             // no need to sync on first read from unmarshalling context

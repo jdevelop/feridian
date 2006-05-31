@@ -54,7 +54,7 @@ public class XMPPResourceBindingStreamTest extends BaseStreamTestCase {
             runAndCompare(inRes, outRes, stream, false, false);
             fail("An error should be thrown");
         } catch (XMPPException ex) {
-            assertTrue(ex instanceof XMPPStanzaErrorException);
+            assertTrue("exception should be of type XMPPStanzaErrorException", ex instanceof XMPPStanzaErrorException);
             assertEquals(ErrorCode.C_BAD_REQUEST, ((XMPPStanzaErrorException) ex).getErrorCondition());
         }
     }

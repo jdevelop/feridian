@@ -385,6 +385,9 @@ public class NestedCollection extends NestedBase
         if (m_itemType != null) {
             System.out.print(" (" + m_itemType + ")");
         }
+        if (isFlexible()) {
+            System.out.print(", flexible");
+        }
         System.out.println();
         for (int i = 0; i < m_contents.size(); i++) {
             IComponent comp = (IComponent)m_contents.get(i);

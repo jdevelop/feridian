@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.jibx.runtime.IMarshallingContext;
 import org.jibx.runtime.IUnmarshallingContext;
-import org.jibx.runtime.IXMLWriter;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.MarshallingContext;
 import org.jibx.runtime.impl.UnmarshallingContext;
@@ -28,15 +27,6 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper {
         super(uri, index, name);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.echomine.xmpp.packet.mapper.StreamErrorPacketMapper#getNamespaceIndex()
-     */
-    protected int getNamespaceIndex() {
-        return XMPPStreamWriter.IDX_XMPP_CLIENT;
-    }
-
     /**
      * marshalls the data into an xml string
      */
@@ -50,27 +40,28 @@ public class StanzaErrorPacketMapper extends StreamErrorPacketMapper {
             // start by generating start tag for container
             MarshallingContext ctx = (MarshallingContext) ictx;
             StanzaErrorPacket packet = (StanzaErrorPacket) obj;
-            IXMLWriter writer = ctx.getXmlWriter();
+            XMPPStreamWriter writer = (XMPPStreamWriter) ctx.getXmlWriter();
             // validate
             if (packet.getErrorType() == null)
                 throw new JiBXException("XMPP requires the error type to be set for stanza errors");
             // add extension namespaces
-            int stanzasIdx = writer.getNamespaces().length;
+            int stanzasIdx = writer.getNamespaceCount();
             String[] extns;
             if (packet.getApplicationCondition() == null)
                 extns = new String[] { XMPPConstants.NS_STANZA_ERROR };
             else
-                extns = new String[] { XMPPConstants.NS_STANZA_ERROR, packet.getApplicationCondition().getNamespaceURI() };
+                extns = new String[] { XMPPConstants.NS_STANZA_ERROR,
+                        packet.getApplicationCondition().getNamespaceURI() };
             writer.pushExtensionNamespaces(extns);
-            ctx.startTagNamespaces(index, name, new int[] { index }, new String[] { "" });
-            ctx.attribute(0, "type", packet.getErrorType());
-            ctx.closeStartContent();
-            marshallErrorCondition(ctx, stanzasIdx, stanzasIdx + 1, packet);
-            // close error tag
-            ctx.endTag(index, name);
-            writer.popExtensionNamespaces();
             try {
+                writer.startStanzaTagOpen(name);
+                writer.addAttribute(0, "type", packet.getErrorType());
+                writer.closeStartTag();
+                marshallErrorCondition(ctx, stanzasIdx, stanzasIdx + 1, packet);
+                // close error tag
+                writer.endStanzaTag(name);
                 writer.flush();
+                writer.popExtensionNamespaces();
             } catch (IOException ex) {
                 throw new JiBXException("Error flushing stream", ex);
             }

@@ -20,7 +20,8 @@ import com.echomine.xmpp.XMPPException;
  */
 public class TLSHandshakeStreamTest extends BaseStreamTestCase {
     TLSHandshakeStream stream;
-
+    
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         stream = new TestableTLSHandshakeStream();

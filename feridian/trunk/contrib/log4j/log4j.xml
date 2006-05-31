@@ -26,17 +26,17 @@
   </appender>
 
   <category name="com.echomine.feridian.packet.incoming" additivity="false">
-    <priority value="debug"/>
+    <priority value="warn"/>
     <appender-ref ref="INAPPENDER"/>
   </category>
 
   <category name="com.echomine.feridian.packet.outgoing" additivity="false">
-    <priority value="debug"/>
+    <priority value="warn"/>
     <appender-ref ref="OUTAPPENDER"/>
   </category>
 
   <category name="com.echomine.feridian.packet.ignored" additivity="false">
-    <priority value="debug"/>
+    <priority value="warn"/>
     <appender-ref ref="IGNOREDAPPENDER"/>
   </category>
 

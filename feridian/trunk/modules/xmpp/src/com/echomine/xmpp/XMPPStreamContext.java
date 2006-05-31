@@ -139,11 +139,9 @@ public class XMPPStreamContext {
     }
 
     /**
-     * sets the input reader
+     * sets the input reader.
      */
     public void setReader(XMPPLoggableReader reader) {
         this.reader = reader;
-    }
-    
-    
+    } 
 }

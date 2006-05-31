@@ -321,6 +321,11 @@ public class StructureElement extends StructureElementBase
                 }
             }
         }
+        
+        // make sure name is defined if nillable
+        if (isNillable() && !hasName()) {
+            vctx.addError("Need element name for nillable='true'");
+        }
         super.validate(vctx);
     }
 

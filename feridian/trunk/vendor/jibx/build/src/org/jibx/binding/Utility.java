@@ -48,6 +48,7 @@ import org.jibx.binding.def.BindingBuilder;
 import org.jibx.binding.def.BindingDefinition;
 import org.jibx.binding.def.MappingBase;
 import org.jibx.binding.model.BindingElement;
+import org.jibx.binding.model.IncludeElement;
 import org.jibx.binding.model.MappingElement;
 import org.jibx.binding.model.ValidationContext;
 import org.jibx.runtime.JiBXException;
@@ -272,23 +273,7 @@ public class Utility
             } else {
                 
                 // find package of first mapping to use for added classes
-                ArrayList childs = root.topChildren();
-                if (childs != null) {
-                    
-                    // set up package information from mapped class
-                    for (int i = 0; i < childs.size(); i++) {
-                        Object child = childs.get(i);
-                        if (child instanceof MappingElement) {
-                            
-                            // end scan if a real mapping is found
-                            MappingElement map = (MappingElement)child;
-                            cf = map.getHandledClass().getClassFile();
-                            if (!cf.isInterface() && cf.isModifiable()) {
-                                break;
-                            }
-                        }
-                    }
-                }
+                cf = findMappedClass(root);
                 tpack = root.getTargetPackage();
                 if (tpack == null && cf != null) {
                     tpack = cf.getPackage();
@@ -361,6 +346,45 @@ public class Utility
             throw new JiBXException("Binding " + fname +
                 " is unusable because of validation errors");
         }
+    }
+
+    /**
+     * Recursively search through binding definitions for a modifiable mapped
+     * class. This is used to determine the default package for code generation.
+     * 
+     * @param childs
+     * @return
+     */
+    private static ClassFile findMappedClass(BindingElement root) {
+        ArrayList childs = root.topChildren();
+        if (childs != null) {
+            
+            // recursively search for modifiable mapped class
+            for (int i = 0; i < childs.size(); i++) {
+                Object child = childs.get(i);
+                if (child instanceof MappingElement) {
+                    
+                    // end scan if a real mapping is found
+                    MappingElement map = (MappingElement)child;
+                    ClassFile cf = map.getHandledClass().getClassFile();
+                    if (!cf.isInterface() && cf.isModifiable()) {
+                        return cf;
+                    }
+                    
+                } else if (child instanceof IncludeElement) {
+                    
+                    // recurse on included binding
+                    BindingElement bind = ((IncludeElement)child).getBinding();
+                    if (bind != null) {
+                        ClassFile cf = findMappedClass(bind);
+                        if (cf != null) {
+                            return cf;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
     
     /**
