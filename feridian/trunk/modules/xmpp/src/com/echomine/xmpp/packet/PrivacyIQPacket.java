@@ -49,7 +49,7 @@ public class PrivacyIQPacket extends IQPacket {
     }
 
     /**
-     * @param activeName The activeName to set.
+     * @param listName The activeName to set.
      */
     public void setActiveName(String listName) {
         if (listName == null) {

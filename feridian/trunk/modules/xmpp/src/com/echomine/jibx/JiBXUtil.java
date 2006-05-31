@@ -82,7 +82,6 @@ public class JiBXUtil {
      * 
      * @param parentCtx the parent marshalling context
      * @param obj the object to marshall
-     * @param cls the object's class type
      * @throws JiBXException
      */
     public static final void marshallObject(MarshallingContext parentCtx, Object obj) throws JiBXException {
@@ -105,7 +104,6 @@ public class JiBXUtil {
      * 
      * @param writer the parent marshalling context
      * @param obj the object to marshall
-     * @param idx the index of the marshaller
      * @throws JiBXException
      */
     public static final void marshallObject(XMPPStreamWriter writer, Object obj) throws JiBXException {

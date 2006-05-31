@@ -544,12 +544,11 @@ public class Base64 {
     /* ******** I N N E R C L A S S I N P U T S T R E A M ******** */
 
     /**
-     * A {@link Base64#InputStream} will read data from another
+     * A input stream will read data from another
      * {@link java.io.InputStream}, given in the constructor, and encode/decode
      * to/from Base64 notation on the fly.
      * 
      * @see Base64
-     * @see java.io.FilterInputStream
      * @since 1.3
      */
     public static class InputStream extends java.io.FilterInputStream {
@@ -560,9 +559,9 @@ public class Base64 {
         private int numSigBytes; // Number of meaningful bytes in the buffer
 
         /**
-         * Constructs a {@link Base64#InputStream} in DECODE mode.
+         * Constructs a input stream in DECODE mode.
          * 
-         * @param in the {@link java.io.InputStream} from which to read data.
+         * @param in the input stream  from which to read data.
          * @since 1.3
          */
         public InputStream(java.io.InputStream in) {
@@ -570,10 +569,10 @@ public class Base64 {
         } // end constructor
 
         /**
-         * Constructs a {@link Base64#InputStream} in either ENCODE or DECODE
+         * Constructs a input stream} in either ENCODE or DECODE
          * mode.
          * 
-         * @param in the {@link java.io.InputStream} from which to read data.
+         * @param in the input stream from which to read data.
          * @param encode Conversion direction
          * @see Base64#ENCODE
          * @see Base64#DECODE
@@ -698,12 +697,11 @@ public class Base64 {
     /* ******** I N N E R C L A S S O U T P U T S T R E A M ******** */
 
     /**
-     * A {@link Base64#OutputStream} will write data to another
+     * A output stream will write data to another
      * {@link java.io.OutputStream}, given in the constructor, and
      * encode/decode to/from Base64 notation on the fly.
      * 
      * @see Base64
-     * @see java.io.FilterOutputStream
      * @since 1.3
      */
     public static class OutputStream extends java.io.FilterOutputStream {
@@ -714,9 +712,9 @@ public class Base64 {
         private int lineLength;
 
         /**
-         * Constructs a {@link Base64#OutputStream} in ENCODE mode.
+         * Constructs a output stream in ENCODE mode.
          * 
-         * @param out the {@link java.io.OutputStream} to which data will be
+         * @param out the output stream to which data will be
          *            written.
          * @since 1.3
          */
@@ -725,10 +723,10 @@ public class Base64 {
         } // end constructor
 
         /**
-         * Constructs a {@link Base64#OutputStream} in either ENCODE or DECODE
+         * Constructs a output stream in either ENCODE or DECODE
          * mode.
          * 
-         * @param out the {@link java.io.OutputStream} to which data will be
+         * @param out the output stream to which data will be
          *            written.
          * @param encode Conversion direction
          * @see Base64#ENCODE

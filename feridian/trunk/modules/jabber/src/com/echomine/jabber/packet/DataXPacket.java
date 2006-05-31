@@ -106,7 +106,7 @@ public class DataXPacket implements IPacket {
     /**
      * This adds only one instruction, which is typically the case. This will
      * 
-     * @param instructions
+     * @param instruction
      */
     public void addInstruction(String instruction) {
         if (instruction == null) return;

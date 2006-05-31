@@ -235,7 +235,6 @@ public class PrivacyHelper {
      * @param conn the connection that the packet will be sent through
      * @param listName the name of the list to retrieve
      * @param wait true to wait for a reply
-     * @return the privacy list, or null if wait is false
      * @throws SendPacketFailedException if packet cannot be sent or if timeout
      *             occurred while waiting for reply
      * @throws XMPPStanzaErrorException if wait is true and reply packet is an

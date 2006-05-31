@@ -167,7 +167,7 @@ public class PrivacyItem {
      * By setting this to deny incoming presence, the user will not receive any
      * presence notifications from entities matching the rule.
      * 
-     * @param denyIncomingPresence true if item denies incoming presence, false
+     * @param denyPresenceIn true if item denies incoming presence, false
      *            otherwise
      */
     public void setDenyIncomingPresence(boolean denyPresenceIn) {
@@ -185,7 +185,7 @@ public class PrivacyItem {
      * By setting this to deny outgoing presence, entities matching the rule
      * will not receiving presence notifications.
      * 
-     * @param denyOutgoingPresence true if item denies outgoing presence, false
+     * @param denyPresenceOut true if item denies outgoing presence, false
      *            otherwise
      */
     public void setDenyOutgoingPresence(boolean denyPresenceOut) {

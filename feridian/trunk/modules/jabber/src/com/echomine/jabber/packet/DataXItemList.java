@@ -8,7 +8,7 @@ import java.util.List;
  * properly without having to write a custom marshaller. It simply contains a
  * list of fields stored in each item list.
  * 
- * @autho Chris Chen
+ * @author Chris Chen
  */
 public class DataXItemList {
     List<DataXField> fields = new ArrayList<DataXField>();

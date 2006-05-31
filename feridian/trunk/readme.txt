@@ -54,6 +54,10 @@ There is an ANT build.xml file in the main directory.  You can simply run it fro
 there to rebuild the entire source tree (ie. if you happen to modify the source).
 The default option is to make a jar for you to use.
 
+Before running the build for the first time, you MUST make a copy of build.properties.sample
+and name it as build.properties.  The build.xml file requires properties set in 
+build.properties. The build will not run properly if you do not have this file.
+
 You must have ANT installed already on your system in order to compile.
 If you do not have ANT installed, you can download it at
 http://ant.apache.org/.  After installing ANT, you can change into Feridian's
@@ -88,9 +92,6 @@ contrib/ -- contains useful files (log4j config file) that is not
     not required to run Feridian but is useful as reference to enhance your
     experience in using the API.
 
-docs/ -- may/may not exist, but it contains the javadocs and other docs for
-    the API.
-
 license/ -- contains all the license files for Feridian and also any libraries that
 		it depends on.
 
@@ -100,11 +101,12 @@ examples/ -- contains any example classes that you can run directly to check out
     learn how to use the API as fast as possible.
 
 vendor/ -- contains external 3rd party library source trees used by Feridian
-    that requires custom code changes not present in the library itself.
+    that requires custom code changes not present in the library itself. This directory
+    does not exist in the distribution but exists in the SVN tree.
 
 work/ -- contains all the temporary working sources and classes when you run
     ANT.  This is where ANT keeps all its dirty work.  Running "ant clean" will
-    remove this directory.  This directory is a temporary working directory
+    clean this directory.  This directory is a temporary working directory
     and is not packaged with the distribution.
 
 Contact Info

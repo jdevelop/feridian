@@ -58,7 +58,8 @@ public class PerpetualSocketAcceptor extends SocketAcceptor {
      * thread.
      * </p>
      * 
-     * @param optional name of thread
+     * @param socketHandler the socket handler to use
+     * @param threadName optional thread name for the socket acceptor
      */
     public void accept(final SocketHandler socketHandler, String threadName) {
         shutdown = false;

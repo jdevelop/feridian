@@ -11,8 +11,6 @@ public interface IXMPPStream {
      * check for those exceptions through the use of "instanceof".  
      * 
      * @param sessCtx the session context
-     * @param uctx the unmarshalling context
-     * @param writer the output stream writer
      * @param streamCtx the stream context
      * @throws XMPPException if any exceptions occur
      */

@@ -260,7 +260,6 @@ public class SocketConnector extends TimeableConnection {
      * Establishes the connection -- this will connect to the remote connection.
      * Any handshaking will be done here as well.
      * 
-     * @param socket the socket
      * @param socketHandler the socket handler
      * @param connectionCtx the connection context
      * @throws IOException if there any errors occur

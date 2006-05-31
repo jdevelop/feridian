@@ -99,11 +99,11 @@ public abstract class IMPacket extends StanzaPacketBase {
     /**
      * Get a list of extensions. This list is not modifiable.
      * 
-     * @return
+     * @return a list of extensions
      */
-    public Collection getExtensions() {
+    public Collection<IPacket> getExtensions() {
         if (extensions == null)
-            return Collections.EMPTY_SET;
+            extensions = new HashMap<String, IPacket>();
         return Collections.unmodifiableCollection(extensions.values());
     }
 }

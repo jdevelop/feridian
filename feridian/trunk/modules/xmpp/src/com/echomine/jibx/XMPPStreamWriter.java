@@ -45,14 +45,6 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
         super(uris);
     }
 
-    /**
-     * retrieves the index that is associated with the XMPP Client namespace
-     * 
-     * @return the index
-     */
-    /*
-     * public int getXMPPPClientIndex() { return IDX_XMPP_CLIENT; }
-     */
     /*
      * (non-Javadoc)
      * 

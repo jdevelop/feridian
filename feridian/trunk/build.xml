@@ -33,7 +33,7 @@
 		<echo message=""/>
 	</target>
 
-    <target name="prepare" depends="env">
+    <target name="prepare" depends="">
 		<mkdir dir="${work.dir}"/>
     </target>
 
@@ -44,15 +44,15 @@
 		<iterate target="compile"/>
 	</target>	
 
-	<target name="bind" depends="compile">
+	<target name="bind" depends="prepare">
 		<iterate target="bind"/>
 	</target>	
 
-	<target name="jar" depends="bind">
+	<target name="jar" depends="prepare">
 		<iterate target="jar"/>
 	</target>	
 
-	<target name="test" depends="bind">
+	<target name="test" depends="prepare">
 		<iterate target="test"/>
 	</target>	
 
@@ -72,9 +72,16 @@
     <target name="javadocs" depends="prepare">
         <mkdir dir="${javadoc.dest}"/>
         <javadoc author="true" bottom="Copyright &amp;copy; ${year} Echomine. All Rights Reserved." destdir="${javadoc.dest}"
-            doctitle="${Name} ${version} API" packagenames="com.echomine.*" private="false" sourcepath="${build.src}"
-            use="true" version="true" windowtitle="${Name} ${version} API">
-            <classpath refid="compile.classpath"/>
+            doctitle="${project.name} ${version} API" packagenames="com.echomine.*" private="false"
+            use="true" version="true" windowtitle="${project.name} ${version} API">
+        		<classpath>
+        			<fileset dir='lib' includes='*.jar'/>
+        		</classpath>
+        		<fileset dir="modules">
+        			<include name="**/*.java"/>
+        			<exclude name="muse-old/**"/>
+        			<exclude name="**/test/**"/>
+        		</fileset>
         </javadoc>
     </target>
 
@@ -84,38 +91,21 @@
     <target name="prepare-package" depends="jar">
         <delete dir="${dist.dir}" verbose="false"/>
         <mkdir dir="${dist.dir}"/>
-
-        <copy todir="${dist.dir}/src">
-            <fileset dir="${src.java.dir}"/>
-        </copy>
-        <copy todir="${dist.dir}/examples">
-            <fileset dir="${src.examples.dir}"/>
-        </copy>
-        <copy todir="${dist.dir}/test">
-            <fileset dir="${src.test.dir}"/>
-        </copy>
-        <copy todir="${dist.dir}/build">
-            <fileset dir="${project.home}/build"/>
-        </copy>
+		
+    		<copy todir="${dist.dir}">
+    			<fileset dir="${project.home}">
+    				<exclude name="build.properties"/>
+    				<exclude name="modules/muse-old/**"/>
+    				<exclude name="vendor/**"/>
+    				<exclude name="work/**"/>
+    				<exclude name=".*"/>
+    				<exclude name=".*/**"/>
+    			</fileset>
+    		</copy>
         <copy todir="${dist.dir}/lib">
-            <fileset dir="${src.lib.dir}"/>
-            <fileset dir="${work.dir}">
-                <include name="${jar.name}"/>
-                <include name="${jar.examples.name}"/>
-            </fileset>
-        </copy>
-        <copy todir="${dist.dir}/license">
-            <fileset dir="${src.license.dir}"/>
-        </copy>
-
-        <copy todir="${dist.dir}">
-            <fileset dir="${project.home}">
-                <include name="build*.*"/>
-            </fileset>
-            <fileset dir="${src.docs.dir}">
-                <include name="readme.txt"/>
-                <include name="changelog.txt"/>
-            </fileset>
+			<fileset dir="${work.dir}">
+				<include name="feridian-*.jar"/>    				
+			</fileset>
         </copy>
     </target>
 
@@ -124,17 +114,18 @@
     <!-- =================================================================== -->
     <target name="package-zip" depends="prepare-package">
         <delete file="${work.dir}/${dist.zip.name}" verbose="false"/>
-        <zip basedir="${dist.dir}" includes="**/**" zipfile="${work.dir}/${dist.zip.name}"/>
+        <zip basedir="${work.dir}" includes="${project.version.name}/**" zipfile="${work.dir}/${dist.zip.name}"/>
     </target>
 
     <!-- =================================================================== -->
     <!-- Packages the distribution with TAR-GZIP (with or w/o docs)          -->
     <!-- =================================================================== -->
     <target name="package-tgz" depends="prepare-package">
-        <delete file="${work.dir}/${dist.tar.name}" verbose="false"/>
-        <delete file="${work.dir}/${dist.tgz.name}" verbose="false"/>
-        <tar basedir="${dist.dir}" includes="**/**" tarfile="${work.dir}/${dist.tar.name}"/>
-        <gzip src="${work.dir}/${dist.tar.name}" zipfile="${work.dir}/${dist.tgz.name}"/>
+        	<delete file="${work.dir}/${dist.tar.name}" verbose="false"/>
+        	<delete file="${work.dir}/${dist.tgz.name}" verbose="false"/>
+        	<tar basedir="${work.dir}" includes="${project.version.name}/**" tarfile="${work.dir}/${dist.tar.name}"/>
+        	<gzip src="${work.dir}/${dist.tar.name}" zipfile="${work.dir}/${dist.tgz.name}"/>
+    		<delete file="${work.dir}/${dist.tar.name}"/>
     </target>
 
     <!-- =================================================================== -->

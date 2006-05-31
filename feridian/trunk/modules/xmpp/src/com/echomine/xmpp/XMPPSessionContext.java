@@ -55,10 +55,10 @@ public class XMPPSessionContext {
     }
 
     /**
-     * @param streamId The streamId to set.
+     * @param streamId The session id to set.
      */
-    public void setStreamId(String sessionId) {
-        this.streamId = sessionId;
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
     }
 
     /**

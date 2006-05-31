@@ -92,7 +92,6 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
      * The constructor for the handler. It accepts a connection context to use
      * the data stored or to store any connection-related data.
      * 
-     * @param listenerManager the listener manager to use
      * @throws IllegalArgumentException if handshake stream is not defined or
      *             cannot be found
      */
@@ -107,7 +106,8 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
      * 
      * @param sessCtx the custom session context
      * @param streamCtx the custom stream context
-     * @param listenerManager the listener manager to use
+     * @throws IllegalArgumentException if handshake stream is not defined or
+     *             cannot be found
      */
     public XMPPConnectionHandler(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) {
         this.sessCtx = sessCtx;
