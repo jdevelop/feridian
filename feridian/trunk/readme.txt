@@ -17,7 +17,7 @@ See the included Changelog file for more information on version updates
 
 Requirements
 --------------
-Feridian API is now developed under JDK 1.4 and requires JDK 1.4+ to run.
+Feridian API is now developed under JDK 1.5 and requires JDK 1.5+ to run.
 
 There are also external libraries needed by Feridian.  These libraries come as
 part of the distribution, and should also be added into the classpath when

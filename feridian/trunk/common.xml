@@ -52,7 +52,7 @@
     <!-- compile the module -->
     <target name="compile" depends="prepare" if="module.name">
         <echo message="Compiling Module ${module.name}"/>
-        <javac srcdir="${module.home}/src"
+        <javac srcdir="${module.home}/src" target="1.5" source="1.5"
             destdir="${module.work}/classes" debug="${compile.debug}"
             deprecation="${compile.deprecation}" optimize="${compile.optimize}">
             <classpath refid="compile.classpath"/>

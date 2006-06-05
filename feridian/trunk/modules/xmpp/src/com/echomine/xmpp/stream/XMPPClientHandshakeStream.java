@@ -2,6 +2,8 @@ package com.echomine.xmpp.stream;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
@@ -9,6 +11,7 @@ import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.LocaleUtil;
 import com.echomine.xmpp.IXMPPStream;
+import com.echomine.xmpp.NonCompliantXMPPServerException;
 import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPSessionContext;
@@ -18,14 +21,19 @@ import com.echomine.xmpp.packet.ErrorPacket;
 import com.echomine.xmpp.packet.StreamFeatures;
 
 /**
- * This is the initial handshaking stream to work with XMPP. Its job is to send
+ * <p>This is the initial handshaking stream to work with XMPP. Its job is to send
  * outgoing handshake and parse incoming handshake header only. Once the
  * handshake is finished, this stream handler will relinquish control to another
  * stream handler. This handler does NOT close the stream in any way. It only
  * works with sending the initiating stream tag as well as receiving up to the
- * stream features.
+ * stream features.</p>
+ * <p>If at any time this client detects a stream that is non-xmpp compliant (ie. no version
+ * attribute defined), a NonCompliantXMPPServerException will be thrown.  This exception
+ * can be checked to see whether the exception is a normal handshaking error or a non-compliant
+ * xmpp server error. (use the instanceof to find out)</p>
  */
 public class XMPPClientHandshakeStream implements IXMPPStream {
+    private static final Log log = LogFactory.getLog(XMPPClientHandshakeStream.class);
     private static final String STREAM_ELEMENT_NAME = "stream";
 
     /*
@@ -58,7 +66,17 @@ public class XMPPClientHandshakeStream implements IXMPPStream {
                 sessCtx.setVersion(uctx.attributeText(null, "version"));
             if (uctx.hasAttribute(XMPPConstants.NS_XML, "lang"))
                 sessCtx.setLocale(LocaleUtil.parseLocale(uctx.attributeText(XMPPConstants.NS_XML, "lang")));
-            // parse past start tag
+            streamCtx.getReader().flushLog();
+            // this is a workaround for non-XMPP compliant servers
+            // if no "version" is detected, then we assume that there will be no
+            // stream features available.  Basically, we assume handshake is successful
+            if (sessCtx.getVersion() == null) {
+                if (log.isFatalEnabled())
+                    log.fatal("The server is not an XMPP compliant server.  Feridian will only communicate with XMPP servers.");
+                throw new NonCompliantXMPPServerException("Server is not XMPP compliant (possibly running an older jabber server).  Feridian does not support non-XMPP compliant server.");
+            }
+            // check whether there is any data to be read.
+            // if not, then assume that there are no jabber features available
             uctx.next();
             // read in any possible error element
             if (uctx.isAt(XMPPConstants.NS_JABBER_STREAM, "error")) {

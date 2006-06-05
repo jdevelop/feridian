@@ -15,7 +15,6 @@ import org.jibx.runtime.impl.UnmarshallingContext;
 import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
-import com.echomine.xmpp.XMPPConstants;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.StanzaErrorPacket;
 
@@ -28,15 +27,6 @@ import com.echomine.xmpp.packet.StanzaErrorPacket;
  */
 public class IQPacketMapper extends AbstractStanzaPacketMapper {
     private final static Log log = LogFactory.getLog(IQPacketMapper.class);
-
-    /**
-     * This constructor uses default uri, index, and name for the packet mapper.
-     * Useful for the API when direct instantiation is required.  It sets the index
-     * as 0 as default.
-     */
-    public IQPacketMapper() {
-        this(XMPPConstants.NS_XMPP_CLIENT, 0, "iq");
-    }
 
     /**
      * @param uri the uri of the element working with
@@ -107,7 +97,7 @@ public class IQPacketMapper extends AbstractStanzaPacketMapper {
         while (ctx.currentEvent() != IXMLReader.END_DOCUMENT
                 && ctx.currentEvent() != IXMLReader.END_TAG
                 && !name.equals(ctx.getName())) {
-            if (ctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "error")) {
+            if (ctx.isAt(uri, "error")) {
                 tpkt.setError((StanzaErrorPacket) JiBXUtil.unmarshallObject(ctx, StanzaErrorPacket.class));
             } else {
                 Class iqClass = FeridianConfiguration.getConfig().getClassForUri(ctx.getNamespace());

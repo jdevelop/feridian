@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
  * A set of utility methods for working with classes, classloading, resource
  * loading, etc.
  */
-@SuppressWarnings("unchecked")
 public class ClassUtil {
 
     /**
@@ -20,7 +19,7 @@ public class ClassUtil {
      * @return the class associated with the class name
      * @throws ClassNotFoundException if class is not found in classpath
      */
-    public static Class loadClass(String className) throws ClassNotFoundException {
+    public static Class<?> loadClass(String className) throws ClassNotFoundException {
         if (className == null)
             return null;
         return Thread.currentThread().getContextClassLoader().loadClass(className);
@@ -65,7 +64,7 @@ public class ClassUtil {
      * @throws InstantiationException if class does not implement/subclass
      *             reference class or class cannot be instantiated
      */
-    public static Object newInstance(Class clsToInstantiate, Class referenceClass) throws InstantiationException, IllegalAccessException {
+    public static Object newInstance(Class<?> clsToInstantiate, Class<?> referenceClass) throws InstantiationException, IllegalAccessException {
         if (referenceClass != null && !referenceClass.isAssignableFrom(clsToInstantiate))
             throw new InstantiationException("The class to instantiate is not a subclass, or does not implement, the reference class");
         return clsToInstantiate.newInstance();

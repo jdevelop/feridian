@@ -27,7 +27,7 @@ public abstract class AbstractStanzaPacketMapper extends AbstractPacketMapper {
      * @see com.echomine.jibx.XMPPStreamWriter
      */
     public AbstractStanzaPacketMapper(String uri, int index, String name) {
-        super(uri, index, name);
+        super(uri, index, name);        
         errorMapper = new StanzaErrorPacketMapper(uri, index, "error");
     }
 

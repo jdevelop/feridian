@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.ErrorCode;
+import com.echomine.xmpp.NonCompliantXMPPServerException;
 import com.echomine.xmpp.XMPPException;
 import com.echomine.xmpp.XMPPStanzaErrorException;
 
@@ -65,5 +66,15 @@ public class XMPPClientHandshakeStreamTest extends BaseStreamTestCase {
         compare(outRes);
         assertTrue(streamCtx.getFeatures().isTLSSupported());
         assertTrue(streamCtx.getFeatures().isTLSRequired());
+    }
+    
+    public void testHandshakeWithNoVersion() throws Exception {
+        StringReader rdr = new StringReader("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='c2s_123' from='example.com'>");
+        try {
+            run(rdr, stream);
+            fail("A stream without version (older jabber servers) must throw an exception");
+        } catch (XMPPException ex) {
+            assertTrue("The exception thrown must be of type NonCompliantXMPPServerException", ex instanceof NonCompliantXMPPServerException);
+        }
     }
 }

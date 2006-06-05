@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /**
  * The context stores all session-specific data exchanged during communication
- * and is used by the connetion and stream handlers to hold session-specific
+ * and is used by the connection and stream handlers to hold session-specific
  * data. It contains information set by the local entity (us) and stores data
  * sent by the remote entity. In case of TLS and/or SASL handshakes, the context
  * will get reset during such communication due to XMPP specification or

@@ -23,6 +23,7 @@ import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.StreamFeatures;
 
 /**
+ * <p>
  * This authentication stream will perform non-sasl authentication, essentially
  * following JEP-0078. This stream will only work with Plain and Digest
  * password. Note that zero-knowledge authentication is deprecated. This stream
@@ -33,6 +34,8 @@ import com.echomine.xmpp.packet.StreamFeatures;
  * Lastly, if no features exist whatsoever, then we assume the server is an old
  * server that only supports Non-SASL authentication, in which case, this
  * authenticator will perform its duty.
+ * </p>
+ * <p>Implementation: <a href="http://www.jabber.org/jeps/jep-0078.html">JEP-0078</a> version 2.2</p>
  */
 public class NonSASLAuthenticator implements IXMPPAuthenticator {
     private static final Log log = LogFactory.getLog(NonSASLAuthenticator.class);

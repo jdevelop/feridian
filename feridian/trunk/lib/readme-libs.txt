@@ -28,4 +28,4 @@ Build time
 
 junit.jar (3.8.1)
 jibx-*.jar (CVS)
-bcel.jar
+bcel.jar (5.1)

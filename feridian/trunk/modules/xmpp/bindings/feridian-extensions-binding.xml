@@ -9,17 +9,20 @@
 			usage="optional"/>
 	</mapping>
 	
+	<!-- each authenticator will support a different type of authentication -->
 	<mapping name="authenticator" value-style="attribute"
 		class="com.echomine.feridian.FeridianAuthenticator">
 		<value name="class" field="cls" deserializer="com.echomine.util.ClassUtil.loadClass"/>
 	</mapping>
 
+	<!-- each packet element will name the class associated with each extention packet namespace -->
 	<mapping name="packet" value-style="attribute"
 		class="com.echomine.feridian.FeridianPacketExtension">
 		<value name="ns" field="namespace"/>
 		<value name="class" field="cls" deserializer="com.echomine.util.ClassUtil.loadClass"/>
 	</mapping>
 
+	<!-- each stream element will indicate a stream processor for a specific namespace -->
 	<mapping name="stream" value-style="attribute"
 		class="com.echomine.feridian.FeridianStreamExtension">
 		<value name="ns" field="namespace"/>
