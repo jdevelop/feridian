@@ -1,0 +1,11 @@
+<iq xmlns="jabber:client" type="result">
+	<query xmlns='jabber:iq:roster'>
+	  <item
+	      jid='contact@example.org'
+	      subscription='none'
+	      ask='subscribe'
+	      name='MyContact'>
+	    <group>MyBuddies</group>
+	  </item>
+	</query>
+</iq>

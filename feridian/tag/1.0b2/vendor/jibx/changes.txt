@@ -1,0 +1,40 @@
+Fixes since 1.0.2:
+
+1. Added support for StAX parser input and StAX writer output.
+2. Added method to get and set a user context object to both marshalling and
+unmarshalling contexts. This user context object can be anything the user wants
+to have available for use with their own extension code. (JIBX-96)
+3. Added <binding add-constructors="true"> option to generate no-argument
+constructors where needed.
+
+Fixes since 1.1 beta2
+
+1. Fixed a bug in the new add-constructors option which resulted in multiple
+copies of the no-argument constructor when the same class was used more than
+once in the binding.
+2. Fixed a problem with array collections used as only child of <mapping>.
+3. Corrected the build version reported by the binding compiler.
+
+Changes since 1.1 beta3
+
+1. Added flexible attribute to structure group (requires ordered="false", all
+child components must define element names).
+2. Changed mapping type-name and map-as to be namespace-qualified names.
+3. Changed format label and value format attributes to be namespace-qualified
+names (and changed the names for build-in formats!).
+4. Added nillable attribute to object group and value element, supporting the
+xsi:nil attribute at runtime (requires element name, not allowed on abstract
+mapping)
+5. Added create-type attribute to object group.
+6. Added direct support for Java 5 enumerations.
+7. Fixed problem in using a binding file with no mapping elements, only
+includes.
+8. Provided J2ME compatibility, with new "j2me" build target to build J2ME
+version of the distribution jars.
+9. Added support for test-method/get-method/set-method with context as a
+parameter.
+10. Added support for required elements in ordered="false" groups, along with
+checks for repeated elements, defined allow-repeats attribute in structure group
+to disable checking.
+11. Fixed several problems with multi-dimensional array collections.
+12. More checking during binding validation.

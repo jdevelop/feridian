@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<stream:stream from='example.com' id="someid" version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<stream:features>
+	    <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
+	        <mechanism>PLAIN</mechanism>
+	    </mechanisms>
+  	</stream:features>
+	<iq type='result' id='iq_0001' to='romeo@example.com'>
+		<query xmlns='jabber:iq:roster'>
+			<item jid='romeo@example.org'
+        			name='Romeo'
+		    		subscription='both'>
+				<group>Friends</group>
+			</item>
+		</query>
+	</iq>
+	<stream:error>
+	  <xml-not-well-formed xmlns='urn:ietf:params:xml:ns:xmpp-streams'/>
+	</stream:error>
+</stream:stream>

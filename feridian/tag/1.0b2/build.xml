@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="jar" name="feridian">
+
+    <!-- =================================================================== -->
+    <!-- Variable Initialization                                             -->
+    <!-- =================================================================== -->
+    <property file="${user.home}/build.properties"/>
+    <property file="build.properties"/>
+
+    	<macrodef name="iterate">
+		<attribute name="target"/>
+		<sequential>
+			<subant target="@{target}" inheritall="true">
+				<filelist dir="modules">
+					<file name="xmpp/build.xml"/>
+					<file name="jabber/build.xml"/>
+					<file name="jabber-compat/build.xml"/>
+				</filelist>
+			</subant>
+		</sequential>
+	</macrodef>
+
+	<!-- ================================================================== -->
+    <!-- Basic preparation                                                  -->
+    <!-- ================================================================== -->
+	<target name="env">
+		<echo message="project.home = ${project.home}"/>
+		<echo message="java.home = ${java.home}"/>
+		<echo message="java.version = ${java.version}"/>
+		<echo message="user.home = ${user.home}"/>
+		<echo message="os.name = ${os.name}"/>
+		<echo message="java.class.path = ${java.class.path}"/>
+		<echo message=""/>
+	</target>
+
+    <target name="prepare" depends="">
+		<mkdir dir="${work.dir}"/>
+    </target>
+
+	<!-- ================================================================== -->
+    <!-- Call all tasks related to sub ant tasks                            -->
+    <!-- ================================================================== -->
+	<target name="compile" depends="prepare">
+		<iterate target="compile"/>
+	</target>	
+
+	<target name="bind" depends="prepare">
+		<iterate target="bind"/>
+	</target>	
+
+	<target name="jar" depends="prepare">
+		<iterate target="jar"/>
+	</target>	
+
+	<target name="jar-src" depends="prepare">
+		<iterate target="jar-src"/>
+	</target>	
+
+	<target name="maven-bundle" depends="prepare">
+		<iterate target="maven-bundle"/>
+	</target>	
+
+	<target name="test" depends="prepare">
+		<iterate target="test"/>
+	</target>	
+
+	<target name="clean" depends="prepare">
+		<iterate target="clean"/>
+		<delete>
+			<fileset dir="${work.dir}" includes="*"/>
+		</delete>
+	</target>
+	
+	<target name="jar-examples" depends="jar">
+		<subant target="jar" inheritall="true">
+			<fileset dir="examples" includes="build.xml"/>
+		</subant>
+	</target>
+	
+    <!-- =================================================================== -->
+    <!-- Creates the API documentation for all modules                       -->
+    <!-- =================================================================== -->
+    <target name="javadocs" depends="prepare">
+	    <delete dir="${javadoc.dest}" verbose="false"/>
+        <mkdir dir="${javadoc.dest}"/>
+        <javadoc author="true" bottom="Copyright &amp;copy; ${year} Echomine. All Rights Reserved." destdir="${javadoc.dest}"
+            doctitle="${project.name} ${version} API" packagenames="com.echomine.*" private="false"
+            use="true" version="true" windowtitle="${project.name} ${version} API">
+        		<classpath>
+        			<fileset dir='lib' includes='*.jar'/>
+        		</classpath>
+        		<fileset dir="modules">
+        			<include name="**/*.java"/>
+        			<exclude name="muse-old/**"/>
+        			<exclude name="**/test/**"/>
+        		</fileset>
+        </javadoc>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Package Preparation (no archiving yet)                              -->
+    <!-- =================================================================== -->
+    <target name="prepare-package" depends="jar">
+        <delete dir="${dist.dir}" verbose="false"/>
+        <mkdir dir="${dist.dir}"/>
+		
+    		<copy todir="${dist.dir}">
+    			<fileset dir="${project.home}">
+    				<exclude name="build.properties"/>
+    				<exclude name="modules/muse-old/**"/>
+    				<exclude name="vendor/**"/>
+    				<exclude name="work/**"/>
+    				<exclude name=".*"/>
+    				<exclude name=".*/**"/>
+    			</fileset>
+    		</copy>
+        <copy todir="${dist.dir}/lib">
+			<fileset dir="${work.dir}">
+				<include name="feridian-*.jar"/>    				
+			</fileset>
+        </copy>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Packages the distribution with ZIP (with or w/o docs)               -->
+    <!-- =================================================================== -->
+    <target name="package-zip" depends="prepare-package">
+        <delete file="${work.dir}/${dist.zip.name}" verbose="false"/>
+        <zip basedir="${work.dir}" includes="${project.version.name}/**" zipfile="${work.dir}/${dist.zip.name}"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Packages the distribution with TAR-GZIP (with or w/o docs)          -->
+    <!-- =================================================================== -->
+    <target name="package-tgz" depends="prepare-package">
+        	<delete file="${work.dir}/${dist.tar.name}" verbose="false"/>
+        	<delete file="${work.dir}/${dist.tgz.name}" verbose="false"/>
+        	<tar basedir="${work.dir}" includes="${project.version.name}/**" tarfile="${work.dir}/${dist.tar.name}"/>
+        	<gzip src="${work.dir}/${dist.tar.name}" zipfile="${work.dir}/${dist.tgz.name}"/>
+    		<delete file="${work.dir}/${dist.tar.name}"/>
+    </target>
+
+    <!-- =================================================================== -->
+    <!-- Packages the distribution with ZIP and TAG-GZIP (with or w/o docs)  -->
+    <!-- =================================================================== -->
+    <target name="package-all" depends="package-zip, package-tgz">
+    </target>
+</project>

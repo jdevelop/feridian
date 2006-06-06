@@ -1,0 +1,5 @@
+<?xml version='1.0'?>
+<stream:stream from='example.com' version='1.0'
+	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+	<testing>123</test>
+</stream:stream>

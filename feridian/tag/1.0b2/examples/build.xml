@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir=".." default="jar" name="feridian-examples">
+    <property file="${user.home}/build.properties"/>
+    <property file="build.properties"/>
+
+    <path id="compile.classpath">
+        <fileset dir="${src.lib.dir}">
+            <include name="**/*.jar"/>        	
+        </fileset>
+    		<fileset dir="${work.dir}">
+    			<include name="*.jar"/>
+    			<exclude name="*-examples.jar"/>
+    		</fileset>
+    </path>
+	<!-- ================================================================== -->
+    <!-- Generic example tasks for use by all modules                       -->
+    <!-- ================================================================== -->
+
+    <target name="prepare">
+        <mkdir dir="${work.dir}/examples"/>
+        <mkdir dir="${work.dir}/examples/classes"/>
+    </target>
+    
+    <target name="compile" depends="prepare">
+        <javac srcdir="${project.home}/examples/src"
+            destdir="${work.dir}/examples/classes"
+            debug="${compile.debug}" optimize="${compile.optimize}"
+            deprecation="${compile.deprecation}">
+            <classpath refid="compile.classpath"/>
+        </javac>
+    </target>
+    
+    <target name="jar" depends="compile">
+        <echo message="Jarring Examples"/>
+        <jar jarfile="${work.dir}/${project}-examples.jar">
+            <fileset dir="${work.dir}/examples/classes"/>
+            <manifest>
+                <attribute name="Implementation-Title" value="${project}-examples"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Implementation-Vendor" value="Echomine Inc."/>
+            </manifest>
+        </jar>
+    </target>
+</project>
