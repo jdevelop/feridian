@@ -25,7 +25,7 @@ test.fileset=**/*Test.class
 # project settings
 project.name=Echomine Feridian
 project=feridian
-version=1.0b1
+version=1.0b2
 year=2005, 2006
 project.home=${basedir}
 work.dir=${project.home}/work
@@ -37,7 +37,6 @@ src.lib.dir=${project.home}/lib
 src.examples.dir=${project.home}/examples
 src.docs.dir=${project.home}/docs
 src.license.dir=${project.home}/license
-
 
 # dist settings
 project.version.name=${project}-${version}

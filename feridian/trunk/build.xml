@@ -52,12 +52,23 @@
 		<iterate target="jar"/>
 	</target>	
 
+	<target name="jar-src" depends="prepare">
+		<iterate target="jar-src"/>
+	</target>	
+
+	<target name="maven-bundle" depends="prepare">
+		<iterate target="maven-bundle"/>
+	</target>	
+
 	<target name="test" depends="prepare">
 		<iterate target="test"/>
 	</target>	
 
 	<target name="clean" depends="prepare">
 		<iterate target="clean"/>
+		<delete>
+			<fileset dir="${work.dir}" includes="*"/>
+		</delete>
 	</target>
 	
 	<target name="jar-examples" depends="jar">
@@ -70,6 +81,7 @@
     <!-- Creates the API documentation for all modules                       -->
     <!-- =================================================================== -->
     <target name="javadocs" depends="prepare">
+	    <delete dir="${javadoc.dest}" verbose="false"/>
         <mkdir dir="${javadoc.dest}"/>
         <javadoc author="true" bottom="Copyright &amp;copy; ${year} Echomine. All Rights Reserved." destdir="${javadoc.dest}"
             doctitle="${project.name} ${version} API" packagenames="com.echomine.*" private="false"

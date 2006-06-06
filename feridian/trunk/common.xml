@@ -83,6 +83,19 @@
         </jar>
     </target>
 
+    <!-- jars all the source module files -->
+    <target name="jar-src" depends="prepare" if="module.name">
+        <echo message="Jarring Module ${module.name} Sources"/>
+        <jar jarfile="${work.dir}/${project}-${module.name}-sources.jar">
+            <fileset dir="${module.home}/src"/>
+            <manifest>
+                <attribute name="Implementation-Title" value="${project}-${module.name}-sources"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+                <attribute name="Implementation-Vendor" value="Echomine Inc."/>
+            </manifest>
+        </jar>
+    </target>
+	
     <!-- Cleans up the module build directory  -->
     <target name="clean" if="module.name">
     	    <echo message="Cleaning Module ${module.name}"/>
@@ -90,7 +103,36 @@
         <delete dir="${module.work}"/>
     </target>
 
-    <!-- ================================================================== -->
+    <!-- =================================================================== -->
+    <!-- Packages the distribution for maven repository                      -->
+    <!-- =================================================================== -->
+    <target name="maven-bundle" depends="jar,jar-src">
+		<delete dir="${module.work}/maven" verbose="false"/>
+    		<delete file="${module.work}/${project}-${module.name}-${version}-bundle.jar"/>
+    		<!-- copy over the jar'ed files -->
+    		<copy file='${modules.dir}/pom.xml' tofile="${module.work}/maven/pom.xml">
+    			<filterset>
+    				<filter token="VERSION" value="${version}"/>
+    				<filter token="ARTIFACTID" value="${project}-${module.name}"/>
+    				<filter token="MODULENAME" value="${module.name}"/>
+    			</filterset>
+    		</copy>
+    		<copy file="${work.dir}/${project}-${module.name}.jar" 
+    			tofile="${module.work}/maven/${project}-${module.name}-${version}.jar"/>
+		<copy file="${work.dir}/${project}-${module.name}-sources.jar" 
+			tofile="${module.work}/maven/${project}-${module.name}-${version}-sources.jar"/>
+    		<!-- bundle up the files -->
+    		<jar basedir="${module.work}/maven" 
+    			destfile="${work.dir}/${project}-${module.name}-${version}-bundle.jar">
+    			<manifest>
+    			    <attribute name="Implementation-Title" value="${project}-${module.name} Maven Bundle"/>
+    			    <attribute name="Implementation-Version" value="${version}"/>
+    			    <attribute name="Implementation-Vendor" value="Echomine Inc."/>
+    			</manifest>
+    		</jar>
+    </target>
+
+	<!-- ================================================================== -->
     <!-- Generic unit testing tasks for use by all modules                  -->
     <!-- ================================================================== -->
 
