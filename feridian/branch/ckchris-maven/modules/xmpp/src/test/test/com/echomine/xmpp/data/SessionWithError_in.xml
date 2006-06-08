@@ -1,0 +1,6 @@
+<iq xmlns="jabber:client" type='error' id='test_001'>
+  <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
+  <error type='auth'>
+    <forbidden xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+  </error>
+</iq>

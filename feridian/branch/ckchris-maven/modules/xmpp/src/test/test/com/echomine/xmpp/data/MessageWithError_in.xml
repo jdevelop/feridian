@@ -1,0 +1,7 @@
+<message xmlns="jabber:client" id="id_0001" to="romeo@shakespeare.com"
+	from="juliet@shakespeare.com" type="error">
+	<body>test body</body>
+	<error type="auth">
+		<not-allowed xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"/>
+	</error>
+</message>
