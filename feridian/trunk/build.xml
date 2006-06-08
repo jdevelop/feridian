@@ -100,7 +100,7 @@
     <!-- =================================================================== -->
     <!-- Package Preparation (no archiving yet)                              -->
     <!-- =================================================================== -->
-    <target name="prepare-package" depends="jar">
+    <target name="prepare-package" depends="jar,jar-examples">
         <delete dir="${dist.dir}" verbose="false"/>
         <mkdir dir="${dist.dir}"/>
 		
@@ -117,6 +117,8 @@
         <copy todir="${dist.dir}/lib">
 			<fileset dir="${work.dir}">
 				<include name="feridian-*.jar"/>    				
+				<exclude name="*-sources.jar"/>
+				<exclude name="*-bundle.jar"/>
 			</fileset>
         </copy>
     </target>
