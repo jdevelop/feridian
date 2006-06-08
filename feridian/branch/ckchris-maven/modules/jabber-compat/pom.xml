@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <parent>
+    <groupId>com.echomine.feridian</groupId>
+    <artifactId>feridian</artifactId>
+    <version>1.0b3</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>feridian-jabber-compat</artifactId>
+  <name>Feridian Jabber-Compatibility Module</name>
+  <description>Feridian Jabber-Compatibility is an addon module to support historical Jabber JEPs</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.echomine.feridian</groupId>
+      <artifactId>feridian-xmpp</artifactId>
+      <version>1.0b3</version>
+    </dependency>
+  </dependencies>
+</project>
