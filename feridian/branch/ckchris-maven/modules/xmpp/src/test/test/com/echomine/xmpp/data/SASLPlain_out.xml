@@ -1,6 +1,0 @@
-<?xml version='1.0'?>
-<stream:stream to='example.com' version='1.0'
-	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
-	<!-- romeo@example.com/Home\0romeo\0somepass -->
-	<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">cm9tZW9AZXhhbXBsZS5jb20vSG9tZQByb21lbwBzb21lcGFzcw==</auth>
-</stream:stream>

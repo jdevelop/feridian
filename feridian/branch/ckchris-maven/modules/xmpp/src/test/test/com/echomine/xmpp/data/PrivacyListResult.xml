@@ -1,9 +1,0 @@
-<iq xmlns="jabber:client" type="result">
-<query xmlns='jabber:iq:privacy'>
-  <active name='private'/>
-  <default name='public'/>
-  <list name='public'/>
-  <list name='private'/>
-  <list name='special'/>
-</query>
-</iq>
