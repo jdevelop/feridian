@@ -1,0 +1,17 @@
+<feridian>
+  <authenticators>
+  	<authenticator class="com.echomine.xmpp.auth.SASLAuthenticator"/>
+  </authenticators>
+  <streams>
+  	<stream ns="urn:echomine:feridian:xmpp-handshake" class="com.echomine.xmpp.stream.XMPPClientHandshakeStream"/>
+  	<stream ns="urn:ietf:params:xml:ns:xmpp-tls" class="com.echomine.xmpp.stream.TLSHandshakeStream"/>
+  	<stream ns="urn:ietf:params:xml:ns:xmpp-bind" class="com.echomine.xmpp.stream.XMPPResourceBindingStream"/>
+  	<stream ns="urn:ietf:params:xml:ns:xmpp-session" class="com.echomine.xmpp.stream.XMPPSessionStream"/>
+  </streams>
+  <packets>
+    <packet ns="urn:ietf:params:xml:ns:xmpp-bind" class="com.echomine.xmpp.packet.ResourceBindIQPacket"/>
+    <packet ns="urn:ietf:params:xml:ns:xmpp-session" class="com.echomine.xmpp.packet.SessionIQPacket"/>
+    <packet ns="jabber:iq:roster" class="com.echomine.xmpp.packet.RosterIQPacket"/>
+    <packet ns="jabber:iq:privacy" class="com.echomine.xmpp.packet.PrivacyIQPacket"/>
+  </packets>
+</feridian>

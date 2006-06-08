@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="../.." default="jar" name="feridian-xmpp">
+	<!-- ================================================================== -->
+    <!-- xmpp Module definitions                                            -->
+    <!-- ================================================================== -->
+	<property name="module.name" value="xmpp"/>
+	
+	<import file="../../common.xml"/>
+
+	<path id="module.classpath">
+    </path>
+</project>

@@ -1,0 +1,50 @@
+#------- Normally you only have to edit the stuff here ---
+#------- Others stuff should not have to be modified -----
+
+# compile options
+# change these to modify compile-time behavior
+compile.debug=on
+compile.optimize=on
+compile.deprecation=off
+
+# additional classpaths to include when running unit tests
+# these can include a custom or separate classpath or directory
+# where you put log4j configuration or perhaps other configuration
+# files used during testing.
+test.classpath.extra=work/log4j
+
+# test settings
+# These allow you to specify the specific test to run.
+# Sometimes you only want to test a certain part of the API
+# and not run through all tests.  You can specify which
+# tests to run.
+test.fileset=**/*Test.class
+
+#===============YOU CAN STOP HERE==========================
+
+# project settings
+project.name=Echomine Feridian
+project=feridian
+version=1.0b2
+year=2005, 2006
+project.home=${basedir}
+work.dir=${project.home}/work
+modules.dir=${project.home}/modules
+
+#module source settings
+lib.compile.dir=${project.home}/build
+src.lib.dir=${project.home}/lib
+src.examples.dir=${project.home}/examples
+src.docs.dir=${project.home}/docs
+src.license.dir=${project.home}/license
+
+# dist settings
+project.version.name=${project}-${version}
+dist.dir=${work.dir}/${project.version.name}
+build.docs.dir=${work.dir}/docs
+javadoc.dest=${build.docs.dir}/api
+
+#dist jar names
+dist.zip.name=${project.version.name}.zip
+dist.tar.name=${project.version.name}.tar
+dist.tgz.name=${project}-${version}.tar.gz

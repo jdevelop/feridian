@@ -1,0 +1,4 @@
+<message xmlns="jabber:client" id="id_0001" to="romeo@shakespeare.com"
+	from="juliet@shakespeare.com" type="chat">
+	<body>test body</body>
+</message>

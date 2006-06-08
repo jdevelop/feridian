@@ -1,0 +1,11 @@
+<message xmlns='jabber:client' to='ckchris@sourcecode.de' type='chat' id='test_001'>
+<body>test</body>
+<html xmlns='http://jabber.org/protocol/xhtml-im'>
+<body xmlns='http://www.w3.org/1999/xhtml' style='background-color:#E68CBD;color:#000000'>
+<span style='font-family:Helvetica'>test</span>
+</body>
+</html>
+<x xmlns='jabber:x:event'>
+<composing/>
+</x>
+</message>

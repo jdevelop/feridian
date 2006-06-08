@@ -1,0 +1,606 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>JiBX: Schema Compatability</title>
+      <style type="text/css">
+        @import url("./style/tigris.css");
+        @import url("./style/maven.css");
+    .dtd-comment {
+      color: #993399;
+      font-weight: bold;
+      </style>
+      <script type="text/javascript">
+        if (document.layers) {
+          document.writeln('<link rel="stylesheet" type="text/css" href="./style/ns4_only.css" media="screen" /><link rel="stylesheet" type="text/css" href="./style/maven_ns4_only.css" media="screen" />')
+        }
+      </script>
+      <link rel="stylesheet" type="text/css" href="./style/print.css" media="print" />
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+</head>
+<body class="composite">
+<div id="banner">
+<table border="0" cellspacing="0" cellpadding="8" width="100%">
+  <tbody>
+    <tr>
+      <td><h1>JiBX: Schema Compatability</h1>
+      </td>
+      <td>
+      <div align="right" id="login"><a href="http://sourceforge.net">
+      <img src="http://sourceforge.net/sflogo.php?group_id=69358&amp;type=5"
+        width="210" height="62" border="0" alt="SourceForge.net Logo"></a></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="breadcrumbs">
+<table border="0" cellspacing="0" cellpadding="4" width="100%">
+  <tbody>
+    <tr>
+      <td>
+        <div align="right">
+          <a href="./index.html">Home Page</a> |
+          <a href="http://www.sourceforge.net/projects/jibx/">SourceForge Page</a> |
+          <a href="./mail-lists.html">Mailing Lists</a> |
+          <a href="http://wiki.jibx.org">Wiki</a> |
+          <a href="./bugs.html">Bugs</a> |
+          <a href="http://sourceforge.net/project/showfiles.php?group_id=69358">Downloads</a>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<table border="0" cellspacing="0" cellpadding="8" width="100%" id="main">
+  <tbody>
+	<tr valign="top">
+	  <td id="leftcol" width="20%">
+		<div id="navcolumn">
+
+
+                  <div>
+            <strong>JiBX Basics</strong>
+                              <div>
+            <small>
+                    <a href="index.html">Overview</a>
+                  </small>
+                              <div>
+            <small>
+                    <a href="flexibility.html">Flexibility</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="performance.html">Performance</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="clean-code.html">Clean code</a>
+                  </small>
+                </div>
+                      </div>
+                                    <div>
+            <small>
+                    <a href="status.html">News and Status</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="comments.html">User Comments</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="bugs.html">Bugs</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="start.html">Getting Started</a>
+                  </small>
+                              <div>
+            <small>
+                    <a href="tutorial/binding-tutorial.html">Binding Tutorial</a>
+                  </small>
+                              <div>
+            <small>
+                    <a href="tutorial/binding-start.html">A basic binding</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-extras.html">Binding extras</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-structures.html">Structure mapping</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-collects.html">Collections</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-mappings.html">Using mappings</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-advanced.html">Advanced binding</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-extend.html">Method hooks</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="tutorial/binding-custom.html">Custom code</a>
+                  </small>
+                </div>
+                      </div>
+                                    <div>
+            <small>
+                    <a href="bindcomp.html">Binding Compiler</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="bindonload.html">Binding on Load</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="runtime.html">Runtime</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="extras.html">JiBX Extras</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="building.html">Building JiBX</a>
+                  </small>
+                </div>
+                      </div>
+                                    <div>
+            <small>
+                    <span class="menu-selection">Schema Compatibility</span>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="mail-lists.html">Mailing Lists</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="faq.html">FAQ</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="contributing.html">Contributing</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="jibx-license.html">License</a>
+                  </small>
+                </div>
+                      </div>
+                        <div>
+            <strong>Binding Definition</strong>
+                              <div>
+            <small>
+                    <a href="details/binding-overview.html">Definition details</a>
+                  </small>
+                              <div>
+            <small>
+                    <a href="details/contexts.html">Definition contexts</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/conversions.html">Conversions</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/xml-summary.html">XML summary</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/binding-element.html">&lt;binding&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/include-element.html">&lt;include&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/format-element.html">&lt;format&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/namespace-element.html">&lt;namespace&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/mapping-element.html">&lt;mapping&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/value-element.html">&lt;value&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/structure-element.html">&lt;structure&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/collection-element.html">&lt;collection&gt; element</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="details/binding-attributes.html">Attribute groups</a>
+                  </small>
+                </div>
+                      </div>
+                      </div>
+                        <div>
+            <strong>Usage API</strong>
+                              <div>
+            <small>
+                    <a href="./api/index.html">Runtime JavaDocs</a>
+                  </small>
+                </div>
+                      </div>
+                        <div>
+            <strong>Subprojects</strong>
+                              <div>
+            <small>
+                    <a href="jibxtools/index.html">Generator Tools</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="jibxsoap/index.html">JibxSoap</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="siteamatic/index.html">SiteAMatic</a>
+                  </small>
+                </div>
+                                    <div>
+            <small>
+                    <a href="xsd2jibx/index.html">Xsd2Jibx</a>
+                  </small>
+                </div>
+                      </div>
+      
+
+        </div>
+      </td>
+      <td>
+
+
+      <div id="bodycol">
+      <div class="app">
+      <div class="h3">
+      <h3><a name="compat">Schema compatability</a></h3>
+
+<p>The W3C XML Schema specification is considered by many to be complex and
+poorly structured, to the point where several years after its release
+compatibility problems are still being found effecting the few relatively
+"complete" implementations available. Even so, the backing of all the major
+industry players has largely succeeded in establishing schema as the preferred
+mechanism for defining XML document grammars. Compatibility with schema
+definitions is therefore an increasingly important issue for many Java
+developers working with XML.</p>
+
+<p>JiBX binding definitions are primarily designed for ease of use by Java
+developers working with XML. Most schema constructs have JiBX equivalents, but
+some of the equivalents are not exact; also, some JiBX binding definition
+constructs do not have schema equivalents. This page attempts to cover both the
+similarities and differences between bindings and schemas. If you need to work
+with schemas, it's best to keep these differences in mind. JiBX is extensible
+enough to provide work-arounds for most of the schema issues, but your
+development will be easier the more you can avoid issues in the first place
+by using compatible XML structures.</p>
+
+<p>If you're starting from existing Java code the <a href="./jibxtools/index.html">Generator
+Tools</a> subproject can be useful to give you a default binding definition, and
+a basic schema definition from the combination of Java code and a binding
+definition (whether generated or constructed by hand). Likewise, if you're
+starting from a schema, the <a href="xsd2jibx/index.html">Xsd2Jibx</a> subproject can
+generate both Java code and a binding definition to match the schema. But both
+these subprojects have limitations on the features they can handle, so you'll
+often need to hand-modify the generated artifacts in complex cases.</p>
+
+      </div>
+      <div class="h3">
+      <h3><a name="basics">Basic schema components</a></h3>
+
+<p>Global elements and named complex types are the most common components at the
+top level of a schema document. Each global element can be the root element of
+an instance document matching the schema, and can also be included by reference
+in other definitions. In JiBX terms, a non-abstract mapping definition
+that's a direct child of the <b>binding</b> element corresponds precisely to a
+global element of a schema definition. Each named complex type in a schema is essentially an
+anonymous element definition which can be referenced within other definitions,
+with the actual element name set at the point of use (and possibly different for
+each use). A named complex type roughly corresponds to an abstract mapping
+definition with no extension mappings, but the abstract mapping is more
+flexible.</p>
+
+<p>The flexibility of the JiBX abstract mapping allows it to be used for
+several other schema constructs, including named model and attribute groups.
+Abstract mappings can even be used for a combined model and attribute group
+structure which has no equivalent in schema terms. The difference between using
+an abstract mapping as a complex type and using it as a model or attribute group
+equivalent just comes down to whether you specify a name on the reference to the
+abstract mapping. With a name specified you're using the mapping as a complex
+type-equivalent, where the specified name creates a wrapper element for the
+structure defined by the mapping. Without a name on the reference you're
+embedding the mapping structure directly within the enclosing definition.</p>
+
+<p>Extension mappings provide the equivalent of schema substitution groups. In
+schema terms, a substitution group is a tree structure of
+element definitions, where the root of the tree sets a basic structure which can
+be extended or restricted by branches. When a mapping is used as the
+base of a substitution group it is extended by other mapping definitions, each
+defining a distinct element name.</p>
+
+      </div>
+      <div class="h3">
+      <h3><a name="subclas">Subclass relationships</a></h3>
+
+<p>Schema defines an extension mechanism for complex types which is roughly
+equivalent to the extends relationship between a subclass and the superclass.
+This can be modeled in JiBX binding definitions by using abstract mapping
+definitions for both the base class (or interface) and the subclass. The
+mapping for the subclass can then invoke the superclass mapping as part of its
+structure (by using a <b>structure</b> element with a <b>map-as</b> attribute
+specifying the superclass). It's not necessary for the subclass mapping to
+extend the base class mapping (and would generally not be appropriate for it to
+do so, except in the case where the definitions are being used as part of a
+substitution group).</p>
+
+<p>The schema form of extension only allows an extension type to append to the
+base type definition, not insert new components into the base structure. In
+terms of JiBX bindings, this means that mapping definitions which are
+intended to be used as the equivalent of schema extensions should invoke the
+base class mapping as the first item in the ordered list of child components.
+Schema has no equivalent to the more flexible structure allowed by JiBX, where
+extension types can include the base class mapping at any point in the
+structure (or even replace the base class mapping completely).</p>
+
+<p>Schema also defines a restriction mechanism for complex types which has no
+equivalent in programming language terms. The closest analogy is probably to a
+subclass which prohibits the use of some fields of the base class. This
+relationship is not one which is normally seen as desirable in object-oriented
+programming terms. If you really want to implement this type of relationship
+using JiBX you can do so, by defining a trivial subclass of the base class (one
+which does not add anything to the base class), then mapping only those
+inherited fields or properties of the base class corresponding to items included
+in the restricted schema type.</p>
+
+      </div>
+      <div class="h3">
+      <h3><a name="models">Content models</a></h3>
+
+<p>Schema uses three separate model group variations for representing the order
+and sequence of child elements within an instance document. The <b>sequence</b>
+variation is the most common. It's used to represent a set of child elements
+occurring in a particular order. This is the same as the default form of
+grouping used in JiBX binding definitions, so no special handling is needed to
+represent a sequence model group in a binding. The other two model group
+variations are <b>choice</b> and <b>all</b>, and these do require some special
+handling.</p>
+
+<p>The <b>choice</b> variation is the second most common content model. A choice
+element in a schema definition allows one and only one of the nested element
+definitions to be present at that point in an instance document. JiBX 1.1
+binding definitions provide the loose equivalent of a <b>choice</b> model group
+by using the <b>choice="true"</b> attribute of a <b>mapping</b> or
+<b>structure</b> definition. This properly accepts only one of the alternative
+elements in the group when unmarshalling, but will generate output with more
+than one of the alternatives when marshalling if the values are present (but see
+<a href="#hooks">Verification hooks</a> if you need to enforce the schema
+limits).</p>
+
+<p>Both <b>sequence</b> and <b>choice</b> model groups can contain nested model
+groups of these same types, in addition to actual element definitions. Each of
+the child components of these model groups, whether an element or a nested model
+group, can specify minimum and maximum occurance counts for that component.
+These occurrance counts each default to <i>1</i>, meaning that by default one
+and only one occurrance of a component can be present in an instance document.
+This is the same as the default in a JiBX binding definition. The common case of
+an optional component in the schema (<i>minOccurs="0"</i>) is handled using
+<i>optional="true"</i> in the binding definition, while cases with repeated
+values (a <b>maxOccurs</b> value greater than <i>1</i>, or <i>"unbounded"</i>)
+correspond to <b>collection</b> elements in the binding definition. JiBX does not
+enforce the equivalent of schema limits on the number of times a repeated value
+occurs, but this is generally a minor issue (again, see <a
+href="#hooks">Verification hooks</a> if you need to enforce the schema
+limits).</p>
+
+<p>The third schema content model variation is the <b>all</b> element. This allows
+at most one occurrance of each contained element, which can be in any order. The
+<b>all</b> model group can only contain element definitions, and cannot be used as a
+child component of the other types of model groups. Because of these
+restrictions it's probably the most uncommon model group variation. JiBX supports
+this model directly as a group of element definitions nested within a
+<b>structure</b> with <i>ordered="false"</i>. Note that versions of JiBX prior
+to 1.1 did not fully support this model, because they required all components of
+an unordered grouping to be optional; this restriction has been removed in
+1.1.</p>
+
+<p>Schema definitions permit <b>any</b> components as part of a content model,
+meaning that any element (potentially restricted by namespace) will be allowed
+at that point in an instance document. This type of arbitrary XML content cannot
+be handled directly by any data binding framework. However, JiBX supports using
+document models for portions of documents by way of custom
+marshaller/unmarshallers supplied as part of the <i>jibx-extras.jar</i>. See <a
+href="extras.html#docmods">Document models</a> for details of using this extension
+to the basic JiBX framework.</p>
+
+<p>One final content model issue relates to the handling of text content. JiBX
+provides support for specifying the structure of mixed content (with a
+combination of text and child elements) which is missing from schema. The best
+you can do in schema terms is to flag the containing element as using mixed
+content. JiBX also allows you to specify <i>CDATA</i> text values in your
+output, but this is strictly a syntactical convenience which doesn't actually
+effect the grammar of the generated XML documents.</p>
+
+      </div>
+      <div class="h3">
+      <h3><a name="simtypes">Simple types</a></h3>
+
+<p>Schema definitions can make use of a wide variety of types for both attribute
+values and text content. Starting from a base of forty-some predefined types,
+you can derive your own even more esoteric and specialized types by either
+restricting the possible values on a type, forming a list of
+whitespace-separated instances of a type, or merging multiple types in a union.
+Derived types may be named (when defined as top-level components of the schema
+definition) or anonymous.</p>
+
+<p>The JiBX binding definition equivalent to a simple type is a
+serializer/deserializer method pair. These convert the text representation of a
+value to and from the representation used by the Java application code. The Java
+representation can be either an object or a primitive type. Named simple types
+in a schema generally correspond to <b>format</b> elements in a binding
+definition, while inline simple types correspond to using
+<i>serializer="class-and-method"</i> and
+<i>deserializer="class-and-method"</i> directly on a <b>value</b> element.</p>
+
+<p>The most common schema predefined types have default Java equivalents in JiBX
+terms (see <a href="details/conversions.html">Value Conversions</a> for details). For other
+predefined types you can generally define your own conversions in the form of
+serializer/deserializer methods. The same holds for derived types: In the case
+of restriction-derived types you can either use the base type directly and rely
+on checks in your code to enforce the restriction (such as a value range check
+in the setter method for a property) or define your own conversion methods to
+handle the derived type directly. For list types you can again define your own
+conversion methods (which would generally convert from and to arrays of some
+base type). For union types you probably need to define a corresponding class
+which wraps fields of each possible type, along with a custom conversion for
+this class. See <a
+href="tutorial/binding-extend.html#serdeser">Custom serializers and deserializers</a> for
+an introduction to working with custom value conversions.</p>
+
+<p>The only predefined schema types which cause problems when working with JiBX
+are <i>QName</i> and <i>IDREFS</i>. Both of these require access to the
+marshalling/unmarshalling context information in order to properly handle
+conversions (in the first case for the namespace information, in the second for
+access to <i>ID</i> definitions). These are not commonly used types in general
+XML, but are often used for special purposes. With JiBX 1.0 the only way to
+handle these types is with a custom marshaller/unmarshaller for the containing
+element. See <a href="tutorial/binding-custom.html#marunmar">Custom marshallers and
+unmarshallers</a> for an introduction to extending JiBX in this manner. JiBX 1.1
+includes a QName implementation as part of the standard runtime (the
+<code>org.jibx.runtime.QName</code> class).</p>
+
+      </div>
+      <div class="h3">
+      <h3><a name="hooks">Verification hooks</a></h3>
+
+<p>JiBX user extensions can support selective verification of schema constraints
+when marshalling and unmarshalling. The <b>pre-get</b> attribute specifies a
+method to be called on an instance of a class before that instance is
+marshalled. A method of this type can check that all property values of the
+instance match the schema requirements, throwing an exception if any error is
+found. The <b>post-set</b> attribute specifies a method to be called on an
+instance of a class after that instance is unmarshalled. A method of this type
+can check that the property values unmarshalled from a document match the schema
+definition, again throwing an exception if any error is found.</p>
+
+<p>These user extension methods can verify any or all aspects of data with
+respect to the schema definition, including such things as making sure only one
+component of a <b>choice</b> model group is present when marshalling, or that
+restricted values match the expected patterns. There is currently no support for
+generating methods of these types automatically, but a future replacement for
+the current Xsd2Jibx code may add this functionality.</p>
+
+      </div>
+      <div class="h3">
+      <h3><a name="unsupport">Unsupported schema features</a></h3>
+
+<p>There are a few aspects of schema usage which are not supported at all in the
+current JiBX 1.0 code. Probably the most important missing feature is support
+for <b>xsi:type</b> attributes in instance documents. This attribute effectively
+embeds schema metadata directly into the instance document, which seems a
+questionable practice from the standpoint of structuring. However, its use has
+become so widespread (especially in the context of web services) that support is
+probably necessary in a general XML framework. JiBX 2.0 will fully support this
+attributes.</p>
+
+<p>The <b>xsi:nil</b> attribute, also used in instance documents, was not
+supported by JiBX 1.0. JiBX 1.1 added support for this feature using the
+<b>nillable</b> attribute in the
+<a href="details/binding-attributes.html#object">object attribute</a> group.</p>
+
+<p>Another part of schema which is not supported by JiBX is the use of identity
+constraints in the form of <b>keyref</b>, <b>keydef</b>, and <b>unique</b> elements.
+These schema definition elements build on top of the XPath document navigation
+paths to define database-like references between document components. The XPath
+navigation unfortunately does not correspond well with programming language
+object structures. It's possible that some form of partial support for these
+components may be added in JiBX 2.0, but they are unlikely to ever be supported
+fully as such.</p>
+
+<p>These XPath-based identity constraints tend to be rarely used in practice.
+JiBX <i>does</i> include extended support for the more common ID-IDREF links
+between document components, which can often be substituted for the XPath-based
+alternatives. If you really need the XPath type of linkages you can use a
+combination of user extensions methods and (in the most difficult cases) custom
+marshaller/unmarshallers to implement these linkages in a flexible way.</p>
+
+<p>Finally, there's no JiBX equivalent to <b>anyAttribute</b> "wildcard"
+attributes in schema. These allow any attribute (potentially restricted by
+namespace) to be used with that element in an instance document. The only way to
+handle arbitrary attributes with JiBX is by using custom code such as a
+specialized <b>pre-get</b> method or a marshaller/unmarshaller for the
+element.</p>
+
+      </div>
+      </div>
+      </div>
+
+
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div id="footer">
+<table border="0" cellspacing="0" cellpadding="4">
+  <tbody>
+    <tr>
+      <td> &copy; 2003-2006, Dennis M. Sosnoski (<a href="http://www.sosnoski.com">Sosnoski Software Solutions, Inc.</a>).
+      Licensed to the JiBX Project for free distribution and use. </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<br>
+</body>
+</html>
