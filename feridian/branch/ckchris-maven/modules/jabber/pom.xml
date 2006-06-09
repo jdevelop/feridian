@@ -6,10 +6,10 @@
     <version>1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>feridian-jabber-compat</artifactId>
+  <artifactId>feridian-jabber</artifactId>
+  <name>Feridian Jabber Module</name>
   <version>${modules.version}</version>
-  <name>Feridian Jabber-Compatibility Module</name>
-  <description>Feridian Jabber-Compatibility is an addon module to support historical Jabber JEPs</description>
+  <description>Feridian Jabber is the addon module to support finalized Jabber JEPs</description>
   <dependencies>
     <dependency>
       <groupId>com.echomine.feridian</groupId>

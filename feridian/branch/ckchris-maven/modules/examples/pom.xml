@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <parent>
+    <groupId>com.echomine.feridian</groupId>
+    <artifactId>feridian-modules</artifactId>
+    <version>1</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>feridian-examples</artifactId>
+  <name>Feridian Examples</name>
+  <version>${modules.version}</version>
+  <description>Example classes (such as a simple client) to run/test Feridian</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.echomine.feridian</groupId>
+      <artifactId>feridian-xmpp</artifactId>
+    </dependency>
+  </dependencies>
+</project>

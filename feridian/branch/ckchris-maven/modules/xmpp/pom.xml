@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <parent>
+    <groupId>com.echomine.feridian</groupId>
+    <artifactId>feridian-modules</artifactId>
+    <version>1</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>feridian-xmpp</artifactId>
+  <version>${modules.version}</version>
+  <name>Feridian XMPP Module</name>
+  <description>Feridian XMPP is the core module to access XMPP servers</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+      <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-jar-plugin</artifactId>
+		<executions>
+		  <execution>
+		    <goals>
+			  <goal>test-jar</goal>
+			</goals>
+	      </execution>
+		</executions>
+	  </plugin>
+    </plugins>
+  </build>
+</project>

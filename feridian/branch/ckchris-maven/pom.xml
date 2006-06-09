@@ -3,26 +3,18 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.echomine.feridian</groupId>
   <artifactId>feridian</artifactId>
-  <name>Feridian</name>
-  <version>1.0b2</version>
+  <name>Echomine Feridian</name>
+  <version>1.0b3</version>
+  <packaging>pom</packaging>
   <description>Feridian is a XMPP-compliant Java API to access XMPP/Jabber servers</description>
   <url>http://open.echomine.org/confluence/display/FERIDIAN/</url>
   <issueManagement>
     <url>http://open.echomine.org/jira/browse/FRDN</url>
   </issueManagement>
-  <ciManagement>
-    <notifiers>
-      <notifier>
-        <configuration>
-          <address>echomine-feridian@lists.berlios.de</address>
-        </configuration>
-      </notifier>
-    </notifiers>
-  </ciManagement>
   <inceptionYear>2005</inceptionYear>
   <mailingLists>
     <mailingList>
-      <name>Feridian Dev List</name>
+      <name>Feridian Development List</name>
       <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</subscribe>
       <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</unsubscribe>
       <archive>https://lists.berlios.de/pipermail/echomine-feridian/</archive>
@@ -42,7 +34,7 @@
       <organization>Echomine</organization>
       <roles>
         <role>Feridian Maintainer</role>
-        <role>Java Developer</role>
+        <role>Lead Java Developer</role>
       </roles>
     </developer>
   </developers>
@@ -55,40 +47,16 @@
   </licenses>
   <scm>
     <connection>scm:svn:http://svn.berlios.de/svnroot/repos/echomine/feridian/trunk</connection>
-    <url>http://svn.berlios.de/viewcvs/echomine/feridian/trunk/</url>
+    <url>http://svn.berlios.de/viewcvs/echomine/feridian/trunk</url>
   </scm>
   <organization>
     <name>Echomine</name>
     <url>http://open.echomine.org/</url>
   </organization>
-  <dependencies>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.0.4</version>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>[1.2.9,1.2.12]</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>xpp3</groupId>
-      <artifactId>xpp3</artifactId>
-      <version>1.1.3.4.O</version>
-    </dependency>
-    <dependency>
-      <groupId>bcel</groupId>
-      <artifactId>bcel</artifactId>
-      <version>5.1</version>
-      <scope>build</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>modules</module>
+  </modules>
+  <properties>
+    <modules.version>1.0b3</modules.version>
+  </properties>
 </project>
