@@ -1,0 +1,19 @@
+<assembly>
+  <id>src</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/lib</outputDirectory>
+      <scope>runtime</scope>
+      <unpack>false</unpack>
+      <includes>
+        <include>com.echomine.feridian:feridian-xmpp</include>
+        <include>com.echomine.feridian:feridian-jabber</include>
+        <include>com.echomine.feridian:feridian-jabber-compat</include>
+        <include>com.echomine.feridian:feridian-examples</include>
+      </includes>
+    </dependencySet>
+  </dependencySets>
+</assembly>

@@ -1,17 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.echomine.feridian</groupId>
-    <artifactId>feridian</artifactId>
-    <version>1.0b3</version>
-  </parent>
   <groupId>com.echomine.feridian</groupId>
-  <artifactId>feridian-modules</artifactId>
-  <name>Feridian Modules Parent POM</name>
-  <version>1</version>
+  <artifactId>feridian-parent</artifactId>
+  <name>Echomine Feridian Parent POM</name>
+  <version>1.0b3</version>
   <packaging>pom</packaging>
-  <description>Base parent POM file for all modules</description>
+  <description>Feridian is a XMPP-compliant Java API to access XMPP/Jabber servers</description>
+  <url>http://open.echomine.org/confluence/display/FERIDIAN/</url>
+  <issueManagement>
+    <url>http://open.echomine.org/jira/browse/FRDN</url>
+  </issueManagement>
+  <inceptionYear>2005</inceptionYear>
+  <mailingLists>
+    <mailingList>
+      <name>Feridian Development List</name>
+      <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</subscribe>
+      <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</unsubscribe>
+      <archive>https://lists.berlios.de/pipermail/echomine-feridian/</archive>
+    </mailingList>
+    <mailingList>
+      <name>Echomine Announcement List</name>
+      <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-announce</subscribe>
+      <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-announce</unsubscribe>
+      <archive>https://lists.berlios.de/pipermail/echomine-announce/</archive>
+    </mailingList>
+  </mailingLists>
+  <developers>
+    <developer>
+      <id>ckchris</id>
+      <name>Chris Chen</name>
+      <email>ckchris at echomine dot com</email>
+      <organization>Echomine</organization>
+      <roles>
+        <role>Feridian Maintainer</role>
+        <role>Lead Java Developer</role>
+      </roles>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://open.echomine.org/confluence/display/FERIDIAN/Feridian+License</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:svn:http://svn.berlios.de/svnroot/repos/echomine/feridian/trunk</connection>
+    <url>http://svn.berlios.de/viewcvs/echomine/feridian/trunk</url>
+  </scm>
+  <organization>
+    <name>Echomine</name>
+    <url>http://open.echomine.org/</url>
+  </organization>
   <build>
     <pluginManagement>
       <plugins>
@@ -61,13 +102,6 @@
         </configuration>
       </plugin>
       <!-- test only classes specified -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <test>*Test</test>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -155,9 +189,24 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptorSourceDirectory>maven/assembly</descriptorSourceDirectory>
+          <finalName>${artifactId}-${version}</finalName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <modules>
-    <module>xmpp</module>
-    <module>jabber</module>
-    <module>jabber-compat</module>
+    <module>modules/xmpp</module>
+    <module>modules/jabber</module>
+    <module>modules/jabber-compat</module>
+    <module>modules/examples</module>
   </modules>
+  <properties>
+    <modules.version>1.0b3</modules.version>
+  </properties>
 </project>
