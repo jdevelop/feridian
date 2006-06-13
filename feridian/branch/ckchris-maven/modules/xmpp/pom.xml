@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.echomine.feridian</groupId>
-    <artifactId>feridian-parent</artifactId>
+    <artifactId>feridian</artifactId>
     <version>1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
@@ -30,4 +30,22 @@
 	  </plugin>
     </plugins>
   </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.jibx</groupId>
+      <artifactId>jibx-bind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jibx</groupId>
+      <artifactId>jibx-extras</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>bcel</groupId>
+      <artifactId>bcel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+  </dependencies>
 </project>

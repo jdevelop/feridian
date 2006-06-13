@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.echomine.feridian</groupId>
+  <artifactId>feridian-parent</artifactId>
+  <name>Feridian Parent</name>
+  <version>1</version>
+  <packaging>pom</packaging>
+  <url>http://open.echomine.org/confluence/display/FERIDIAN/</url>
+  <issueManagement>
+    <url>http://open.echomine.org/jira/browse/FRDN</url>
+  </issueManagement>
+  <inceptionYear>2005</inceptionYear>
+  <mailingLists>
+    <mailingList>
+      <name>Feridian Development List</name>
+      <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</subscribe>
+      <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</unsubscribe>
+      <archive>https://lists.berlios.de/pipermail/echomine-feridian/</archive>
+    </mailingList>
+    <mailingList>
+      <name>Echomine Announcement List</name>
+      <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-announce</subscribe>
+      <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-announce</unsubscribe>
+      <archive>https://lists.berlios.de/pipermail/echomine-announce/</archive>
+    </mailingList>
+  </mailingLists>
+  <developers>
+    <developer>
+      <id>ckchris</id>
+      <name>Chris Chen</name>
+      <email>ckchris at echomine dot com</email>
+      <organization>Echomine</organization>
+      <roles>
+        <role>Feridian Maintainer</role>
+        <role>Lead Java Developer</role>
+      </roles>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://open.echomine.org/confluence/display/FERIDIAN/Feridian+License</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:svn:http://svn.berlios.de/svnroot/repos/echomine/feridian/trunk</connection>
+    <url>http://svn.berlios.de/viewcvs/echomine/feridian/trunk</url>
+  </scm>
+  <organization>
+    <name>Echomine</name>
+    <url>http://open.echomine.org/</url>
+  </organization>
+</project>

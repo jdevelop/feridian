@@ -1,0 +1,31 @@
+<assembly>
+  <id>bin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>..</directory>
+      <includes>
+        <include>README*</include>
+		<include>LICENSE*</include>
+		<include>NOTICE*</include>
+	  </includes>
+	</fileSet>
+    <fileSet>
+      <directory>../contrib</directory>
+      <outputDirectory>/contrib</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>target/dependencies</directory>
+      <outputDirectory>/lib</outputDirectory>
+      <includes>
+        <include>*</include>
+      </includes>
+      <excludes>
+        <exclude>bcel*</exclude>
+        <exclude>jibx-bind*</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+</assembly>
