@@ -6,6 +6,7 @@ import java.io.StringReader;
 
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
+import com.echomine.net.MockConnectionContext;
 import com.echomine.net.MockSocket;
 import com.echomine.util.ClassUtil;
 import com.echomine.xmpp.ErrorCode;
@@ -17,16 +18,19 @@ import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;
-import com.echomine.xmpp.packet.RosterIQPacket;
 import com.echomine.xmpp.packet.PresencePacket;
+import com.echomine.xmpp.packet.RosterIQPacket;
 
 /**
  * Tests the main connection handler class
  */
 public class XMPPConnectionHandlerTest extends XMPPTestCase {
     XMPPConnectionHandler handler;
+
     XMPPStreamContext streamCtx;
+
     MockSocket socket;
+
     ConnectionContext connectionCtx;
 
     protected void setUp() throws Exception {
@@ -35,11 +39,12 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         handler.start();
         streamCtx = handler.getStreamContext();
         sessCtx = handler.getSessionContext();
-        socket = new MockSocket("example.com", IXMPPConnection.DEFAULT_XMPP_PORT);
+        socket = new MockSocket(IXMPPConnection.DEFAULT_XMPP_PORT);
         streamCtx.setSocket(socket);
         streamCtx.setWriter(writer);
         streamCtx.setUnmarshallingContext(uctx);
-        connectionCtx = new ConnectionContext("example.com", IXMPPConnection.DEFAULT_XMPP_PORT);
+        connectionCtx = new MockConnectionContext("example.com", "127.0.0.1",
+                IXMPPConnection.DEFAULT_XMPP_PORT);
     }
 
     protected void tearDown() throws Exception {
@@ -64,7 +69,8 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
      * Tests the sending packet method is working properly
      */
     public void testSendIQPacket() throws Exception {
-        String out = "<iq xmlns='jabber:client' " + "type='get' id='id_001'><query xmlns='jabber:iq:roster'/></iq>";
+        String out = "<iq xmlns='jabber:client' "
+                + "type='get' id='id_001'><query xmlns='jabber:iq:roster'/></iq>";
         RosterIQPacket packet = new RosterIQPacket();
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_GET);
@@ -90,8 +96,10 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         } catch (IOException ex) {
             assertNotNull(ex.getCause());
             assertTrue(ex.getCause() instanceof XMPPStanzaErrorException);
-            XMPPStanzaErrorException xex = (XMPPStanzaErrorException) ex.getCause();
-            assertEquals(ErrorCode.S_XML_NOT_WELL_FORMED, xex.getErrorCondition());
+            XMPPStanzaErrorException xex = (XMPPStanzaErrorException) ex
+                    .getCause();
+            assertEquals(ErrorCode.S_XML_NOT_WELL_FORMED, xex
+                    .getErrorCondition());
         }
     }
 
@@ -117,7 +125,8 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         String inRes = "com/echomine/xmpp/data/XMPPConnectionHandlerIgnoredMessage.xml";
         socket.setOutputStream(os);
         socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
-        PacketListenerManager listenerManager = new PacketListenerManager(new XMPPConnectionImpl());
+        PacketListenerManager listenerManager = new PacketListenerManager(
+                new XMPPConnectionImpl());
         handler.setPacketListenerManager(listenerManager);
         PacketReceiver rec = new PacketReceiver();
         listenerManager.addPacketListener(rec);
@@ -130,7 +139,8 @@ public class XMPPConnectionHandlerTest extends XMPPTestCase {
         String inRes = "com/echomine/xmpp/data/XMPPConnectionHandler_in1.xml";
         socket.setOutputStream(os);
         socket.setInputStream(ClassUtil.getResourceAsStream(inRes));
-        PacketListenerManager listenerManager = new PacketListenerManager(new XMPPConnectionImpl());
+        PacketListenerManager listenerManager = new PacketListenerManager(
+                new XMPPConnectionImpl());
         handler.setPacketListenerManager(listenerManager);
         PacketReceiver rec = new PacketReceiver();
         listenerManager.addPacketListener(rec);

@@ -1,8 +1,10 @@
-- In order to run this maven submodule, some additional steps are required
-  - maven-dependency-plugin 2.0-SNAPSHOT is required, and must be locally installed.
-    - this should be an automatic process, but in case the plugin cannot be downloaded,
-      go to the next step.
-  - checkout the latest maven-dependency-plugin from 
-    https://svn.apache.org/repos/asf/maven/plugins/trunk/maven-dependency-plugin
-  - run and install the dependency plugin "mvn install"
-- After this, you can run "mvn package" to properly create a distribution bundle.
+- The current distribution creation mechanism is separated into two steps.
+  This is due to some incompatibility between the assembly plugin and
+  the packaging (ie. binary distribution will package up all dependencies,
+  including unnecessary ones not required by Feridian). The current way
+  is to counter the bugs and incompatibilities with the assembly plugin
+  without having to resort to using custom scripting.
+  - the source distribution is created by running "mvn assembly:assembly"
+    from the main Feridian POM file.
+  - the binary distribution is created by running "mvn package"
+    from this dist/ directory.

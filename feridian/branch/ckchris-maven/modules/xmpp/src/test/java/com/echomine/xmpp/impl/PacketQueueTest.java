@@ -17,12 +17,14 @@ import com.echomine.xmpp.packet.RosterIQPacket;
  */
 public class PacketQueueTest extends TestCase {
     MockXMPPConnectionHandler handler;
+
     TestablePacketQueue queue;
 
     protected void setUp() throws Exception {
         handler = new MockXMPPConnectionHandler();
         queue = new TestablePacketQueue(handler);
-        handler.getStreamContext().getWriter().pushExtensionNamespaces(new String[] { "jabber:client" });
+        handler.getStreamContext().getWriter().pushExtensionNamespaces(
+                new String[] { "jabber:client" });
     }
 
     protected void tearDown() throws Exception {
@@ -30,6 +32,7 @@ public class PacketQueueTest extends TestCase {
     }
 
     public void testQueueShutdownClearData() throws Exception {
+        queue.start(true);
         queue.queuePacket(new PresencePacket(), false);
         assertEquals(1, queue.getQueue().size());
         assertEquals(0, queue.getReplyTable().size());
@@ -52,8 +55,8 @@ public class PacketQueueTest extends TestCase {
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_RESULT);
         queue.packetReceived(packet);
-        //assertEquals(0, queue.getQueue().size());
-        //assertEquals(0, queue.getReplyTable().size());
+        // assertEquals(0, queue.getQueue().size());
+        // assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
         assertTrue(runner.replyPacket instanceof RosterIQPacket);
         assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
@@ -74,7 +77,6 @@ public class PacketQueueTest extends TestCase {
         assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
         assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
-        queue.stop();
     }
 
     public void testPacketReceived() throws Exception {
@@ -89,7 +91,23 @@ public class PacketQueueTest extends TestCase {
      */
     public void testStartStopState() throws Exception {
         queue.start();
-        assertFalse(queue.isShutdown());
+        assertTrue(queue.isRunning());
+        queue.stop();
+        assertTrue(queue.isShutdown());
+    }
+
+    /**
+     * Checks that the resume and pause states work as expected
+     * 
+     * @throws Exception
+     */
+    public void testPauseResumeState() throws Exception {
+        queue.start();
+        assertTrue(queue.isRunning());
+        queue.pause();
+        assertTrue(queue.isPaused());
+        queue.resume();
+        assertTrue(queue.isRunning());
         queue.stop();
         assertTrue(queue.isShutdown());
     }
@@ -118,6 +136,14 @@ public class PacketQueueTest extends TestCase {
 
         public boolean isShutdown() {
             return state == RunningState.STOPPED;
+        }
+
+        public boolean isRunning() {
+            return state == RunningState.RUNNING;
+        }
+
+        public boolean isPaused() {
+            return state == RunningState.PAUSED;
         }
 
         public LinkedBlockingQueue getQueue() {

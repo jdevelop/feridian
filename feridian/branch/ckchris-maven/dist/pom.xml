@@ -42,8 +42,9 @@
             </goals>
             <configuration>
               <descriptors>
-                <descriptor>bin.xml</descriptor>
+                <descriptor>src.xml</descriptor>
               </descriptors>
+               <outputDirectory>${project.build.directory}</outputDirectory>
               <finalName>feridian-${version}</finalName>
             </configuration>
           </execution>

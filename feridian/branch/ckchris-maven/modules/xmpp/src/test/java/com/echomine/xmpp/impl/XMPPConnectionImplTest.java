@@ -51,12 +51,12 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
      * connected
      */
     public void testSuccessfulConnect() throws Exception {
-        conn.connect("example.com", IXMPPConnection.DEFAULT_XMPP_PORT, true);
+        conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, true);
         assertTrue(conn.isConnected());
     }
 
     public void testSuccessfulDisconnect() throws Exception {
-        conn.connect("example.com", IXMPPConnection.DEFAULT_XMPP_PORT, true);
+        conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, true);
         assertTrue(conn.isConnected());
         conn.disconnect();
         assertFalse(conn.isConnected());
@@ -65,7 +65,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
     public void testConnectionFailure() throws Exception {
         connector.setConnectionFailure(true);
         try {
-            conn.connect("example.com", IXMPPConnection.DEFAULT_XMPP_PORT, true);
+            conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, true);
             fail("Connection should fail but did not");
         } catch (ConnectionException ex) {
         }
@@ -75,7 +75,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
         connector.setConnectionFailure(false);
         handler.setFailHandshake(true);
         try {
-            conn.connect("example.com", IXMPPConnection.DEFAULT_XMPP_PORT, true);
+            conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, true);
             fail("Handshake should have failed but did not");
         } catch (ConnectionException ex) {
             if (!(ex instanceof HandshakeFailedException))
@@ -86,7 +86,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
 
     public void testSuccessfulConnectionUsingListener() throws Exception {
         conn.addConnectionListener(l);
-        conn.connect("example.com", IXMPPConnection.DEFAULT_XMPP_PORT, false);
+        conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, false);
         Thread thread = new Thread() {
             public void run() {
                 conn.disconnect();
@@ -104,7 +104,7 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
         handler.setFailHandshake(true);
         conn.addConnectionListener(l);
         try {
-            conn.connect("example.com", IXMPPConnection.DEFAULT_XMPP_PORT, true);
+            conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, true);
             fail("Handshake should have failed but did not");
         } catch (ConnectionException ex) {
         }

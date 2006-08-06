@@ -28,8 +28,15 @@ public class MockSocket extends Socket {
         this.port = port;
     }
 
-    public MockSocket(String host, int port) throws UnknownHostException, IOException {
-        this.address = InetAddress.getByName(host);
+    /**
+     * Creates a mock socket with the inet address of localhost
+     * 
+     * @param port the port number to use
+     * @throws UnknownHostException
+     * @throws IOException
+     */
+    public MockSocket(int port) throws UnknownHostException, IOException {
+        this.address = InetAddress.getLocalHost();
         this.port = port;
     }
 

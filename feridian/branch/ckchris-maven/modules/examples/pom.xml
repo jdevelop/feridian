@@ -11,6 +11,22 @@
   <name>Feridian Examples</name>
   <version>${modules.version}</version>
   <description>Example classes (such as a simple client) to run/test Feridian</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.echomine.xmpp.SimpleXMPPClient</mainClass>
+              <addClasspath>true</addClasspath>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>com.echomine.feridian</groupId>

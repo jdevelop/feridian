@@ -27,7 +27,7 @@ public class PacketQueue implements Runnable {
     private static final String QUEUE_PAUSED = "Feridian Packet Queue -- PAUSED";
 
     protected enum RunningState {
-        RUNNING, PAUSED, STOPPED
+        RUNNING, PAUSED, STOPPING, STOPPED
     }
 
     protected LinkedBlockingQueue<IStanzaPacket> queue;
@@ -98,11 +98,11 @@ public class PacketQueue implements Runnable {
      * caller.
      */
     public void stop() {
-        if (state == RunningState.STOPPED)
-            return;
         lock.lock();
         try {
-            state = RunningState.STOPPED;
+            if (state == RunningState.STOPPED || state == RunningState.STOPPING)
+                return;
+            state = RunningState.STOPPING;
             queueThread.interrupt();
             if (!queue.isEmpty()) {
                 // finish sending off all the remaining packets
@@ -128,6 +128,7 @@ public class PacketQueue implements Runnable {
         } catch (SendPacketFailedException ex) {
             // intentionally left empty (connection likely closed)
         } finally {
+            state = RunningState.STOPPED;
             lock.unlock();
         }
     }
@@ -139,10 +140,10 @@ public class PacketQueue implements Runnable {
      * be running in order to pause.
      */
     public void pause() {
-        if (state != RunningState.RUNNING)
-            return;
         lock.lock();
         try {
+            if (state != RunningState.RUNNING)
+                return;
             state = RunningState.PAUSED;
             pauseLock.tryAcquire();
         } finally {
@@ -155,10 +156,10 @@ public class PacketQueue implements Runnable {
      * to resume.
      */
     public void resume() {
-        if (state != RunningState.PAUSED)
-            return;
         lock.lock();
         try {
+            if (state != RunningState.PAUSED)
+                return;
             state = RunningState.RUNNING;
             if (pauseLock.availablePermits() == 0)
                 pauseLock.release();
@@ -226,6 +227,8 @@ public class PacketQueue implements Runnable {
      *             reply
      */
     public IStanzaPacket queuePacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException {
+        if (state == RunningState.STOPPED)
+            throw new SendPacketFailedException("The Queue is STOPPED, unable to queue packet for sending.");
         if (wait) {
             synchronized (packetReplyTable) {
                 packetReplyTable.put(packet.getId(), packet);
@@ -255,7 +258,7 @@ public class PacketQueue implements Runnable {
     public void run() {
         IStanzaPacket packet;
         try {
-            while (state != RunningState.STOPPED) {
+            while (state != RunningState.STOPPED && state != RunningState.STOPPING) {
                 while (state == RunningState.PAUSED) {
                     try {
                         Thread.currentThread().setName(QUEUE_PAUSED);

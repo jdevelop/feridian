@@ -4,11 +4,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * Contains all the data that are needed by Connector to make a connection.
+ * <p>Contains all the data that are needed by Connector to make a connection.
  * Subclasses can store additional details such as protocol version (ie. HTTP
  * 1.1). This connection context also adds support for throttling and bandwidth
  * management. Not all uses of this context will make use of such feature, but the
  * feature is there if a need arises.
+ * </p>
  */
 public class ConnectionContext {
     long startTime;
@@ -146,6 +147,8 @@ public class ConnectionContext {
 
     /** @return a string in the format of <ip>:<port> */
     public String toString() {
+        if (host == null)
+            return "<host not set>:" + port;
         return host.getHostAddress() + ":" + port;
     }
 
