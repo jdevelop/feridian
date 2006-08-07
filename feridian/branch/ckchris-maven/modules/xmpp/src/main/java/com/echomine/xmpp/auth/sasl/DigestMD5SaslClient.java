@@ -52,7 +52,7 @@ public class DigestMD5SaslClient {
         StringBuffer buf = new StringBuffer();
         cnonce = generateCNonce();
         digesturi = "xmpp/" + sessCtx.getHostName();
-        authzid = new JID(auth.getUsername(), sessCtx.getHostName(), auth.getResource());
+        authzid = new JID(auth.getUsername(), sessCtx.getHostName(), null);
         buf.append("username=\"").append(auth.getUsername()).append("\"");
         if (challengeCtx.getRealm() != null)
             buf.append(",realm=\"").append(challengeCtx.getRealm()).append("\"");
