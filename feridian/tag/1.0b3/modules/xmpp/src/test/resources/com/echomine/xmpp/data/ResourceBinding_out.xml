@@ -1,0 +1,3 @@
+<iq xmlns="jabber:client" type='set' id='test_001'>
+  <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>
+</iq>

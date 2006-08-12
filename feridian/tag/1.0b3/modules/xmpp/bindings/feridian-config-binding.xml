@@ -1,0 +1,22 @@
+<!-- Binding file for feridian's own configuration file -->
+<binding direction="input">
+	<mapping name="feridian" class="com.echomine.feridian.FeridianConfiguration">
+		<!-- the factory that will create xmpp connection objects.  configure
+			this to instantiate a customized connection object -->
+		<structure name="connection-factory">
+			<value name="class" style="attribute" field="connectionFactoryClass" 
+				deserializer="com.echomine.util.ClassUtil.loadClass"/>
+		</structure>
+		<!-- the stream factory knows how to lookup and create stream classes
+			that will process stream features or handshaking.  -->
+		<structure name="stream-factory">
+			<value name="class" style="attribute" field="streamFactoryClass" 
+				deserializer="com.echomine.util.ClassUtil.loadClass"/>
+		</structure>
+		<!-- the id generator used to generate each unique packet id -->
+		<structure name='id-generator'>
+			<value name="class" style="attribute" field="idGeneratorClass" 
+				deserializer="com.echomine.util.ClassUtil.loadClass"/>
+		</structure>
+	</mapping>
+</binding>
