@@ -275,9 +275,12 @@ public class PacketQueue implements Runnable {
                 }
             }
         } catch (InterruptedException ex) {
-            // intentionally left empty (likely a shutdown request)
+            if (log.isInfoEnabled())
+                log.info("Thread is interrupted.  Likely a shutdown request was received.");
         } catch (SendPacketFailedException ex) {
             // either packet cannot be marshalled or IO exception occurred.
+            if (log.isInfoEnabled())
+                log.info("Packet cannot be sent.  Likely an IO Exception occurred.", ex);
         } finally {
             stop();
         }

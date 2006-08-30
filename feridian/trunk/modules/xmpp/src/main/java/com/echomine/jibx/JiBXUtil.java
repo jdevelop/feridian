@@ -26,7 +26,7 @@ public class JiBXUtil {
         try {
             iqfactory = BindingDirectory.getFactory(IQPacket.class);
             if (iqfactory == null && log.isWarnEnabled()) {
-                log.warn("No IQPacket Factory found.  IQ packet marshalling is disabled.");
+                log.warn("No IQPacket Factory found (check to make sure binding file exists).  IQ packet marshalling is disabled.");
             } else {
                 //obtain the iq packet mapper
                 int i = 0;
@@ -125,7 +125,12 @@ public class JiBXUtil {
             return;
         MarshallingContext fctx = (MarshallingContext) factory.createMarshallingContext();
         fctx.setXmlWriter(writer);
-        fctx.marshalDocument(obj);
+        try {
+            writer.setStreamCloseable(false);
+            fctx.marshalDocument(obj);
+        } finally {
+            writer.setStreamCloseable(true);
+        }
     }
 
     /**
@@ -165,6 +170,11 @@ public class JiBXUtil {
             return;
         MarshallingContext fctx = (MarshallingContext) iqfactory.createMarshallingContext();
         fctx.setXmlWriter(writer);
-        iqPacketMapper.marshal(packet, fctx);
+        try {
+            writer.setStreamCloseable(false);
+            iqPacketMapper.marshal(packet, fctx);
+        } finally {
+            writer.setStreamCloseable(true);
+        }
     }
 }

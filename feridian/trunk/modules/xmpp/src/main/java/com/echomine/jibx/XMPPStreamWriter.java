@@ -18,13 +18,18 @@ import com.echomine.xmpp.XMPPLogger;
  */
 public class XMPPStreamWriter extends UTF8StreamWriter {
     private static final int IDX_JABBER_STREAM = 3;
+
     private int STANZA_IDX = 4;
+
     private static final String JABBER_STREAM_PREFIX = "stream";
+
     private static final String[] STREAM_URIS = new String[] { "",
             "http://www.w3.org/XML/1998/namespace",
             "http://www.w3.org/2001/XMLSchema-instance",
             XMPPConstants.NS_JABBER_STREAM };
-    
+
+    private boolean streamCloseable = true;
+
     /**
      * This constructor will setup a default set of URIs specifically for XMPP
      */
@@ -35,11 +40,11 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
 
     /**
      * @param uris ordered array of URIs for namespaces used in document (must
-     *            be constant; the value in position 0 must always be the empty
-     *            string "", and the value in position 1 must always be the XML
-     *            namespace "http://www.w3.org/XML/1998/namespace"). Position 3
-     *            must always be the Jabber Streams namespace
-     *            "http://etherx.jabber.org/streams"
+     *        be constant; the value in position 0 must always be the empty
+     *        string "", and the value in position 1 must always be the XML
+     *        namespace "http://www.w3.org/XML/1998/namespace"). Position 3 must
+     *        always be the Jabber Streams namespace
+     *        "http://etherx.jabber.org/streams"
      */
     public XMPPStreamWriter(String[] uris) {
         super(uris);
@@ -48,13 +53,35 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
     /*
      * (non-Javadoc)
      * 
+     * @see org.jibx.runtime.impl.StreamWriterBase#reset()
+     */
+    @Override
+    public void reset() {
+        super.reset();
+        streamCloseable = true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.jibx.runtime.IXMLWriter#flush()
      */
+    @Override
     public void flush() throws IOException {
         if (XMPPLogger.canLogOutgoing())
             if (m_fillOffset != 0)
                 XMPPLogger.logOutgoing(new String(m_buffer, 0, m_fillOffset));
         super.flush();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jibx.runtime.impl.StreamWriterBase#close()
+     */
+    @Override
+    public void close() throws IOException {
+        if (streamCloseable) super.close();
     }
 
     /**
@@ -76,18 +103,22 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      * @param locale optional locale for the stream, null if not used
      * @throws IOException when error occurs while writing out the tag
      */
-    public void startHandshakeStream(String stanzaNs, String hostName, Locale locale) throws IOException {
+    public void startHandshakeStream(String stanzaNs, String hostName,
+            Locale locale) throws IOException {
         if (stanzaNs == null || hostName == null)
-            throw new IllegalArgumentException("Namespace and host name cannot be null");
+            throw new IllegalArgumentException(
+                    "Namespace and host name cannot be null");
         // pushes the stanza namespace in use
         String[] uris = new String[] { stanzaNs };
         pushExtensionNamespaces(uris);
         startTagNamespaces(IDX_JABBER_STREAM, "stream", new int[] {
-                IDX_JABBER_STREAM, STANZA_IDX }, new String[] { JABBER_STREAM_PREFIX, "" });
+                IDX_JABBER_STREAM, STANZA_IDX }, new String[] {
+                JABBER_STREAM_PREFIX, "" });
         addAttribute(0, "version", "1.0");
         addAttribute(0, "to", hostName);
         if (locale != null)
-            addAttribute(XMPPConstants.IDX_XML, "lang", LocaleUtil.format(locale));
+            addAttribute(XMPPConstants.IDX_XML, "lang", LocaleUtil
+                    .format(locale));
         closeStartTag();
         flagContent();
         flush();
@@ -112,7 +143,9 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      * @throws IOException
      */
     public void startStreamTagOpen(String name) throws IOException {
-        startTagNamespaces(IDX_JABBER_STREAM, name, new int[] { IDX_JABBER_STREAM }, new String[] { JABBER_STREAM_PREFIX });
+        startTagNamespaces(IDX_JABBER_STREAM, name,
+                new int[] { IDX_JABBER_STREAM },
+                new String[] { JABBER_STREAM_PREFIX });
     }
 
     /**
@@ -131,11 +164,12 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      * continue writing content.
      * 
      * @param name the local element name for the IQ tag (normally "iq" by xmpp
-     *            spec standard).
+     *        spec standard).
      * @throws IOException when error occurs while writing out the tag
      */
     public void startStanzaTagOpen(String name) throws IOException {
-        startTagNamespaces(STANZA_IDX, name, new int[] { STANZA_IDX }, new String[] { "" });
+        startTagNamespaces(STANZA_IDX, name, new int[] { STANZA_IDX },
+                new String[] { "" });
     }
 
     /**
@@ -143,10 +177,14 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
      * IQ stanza.
      * 
      * @param name the local element name for the IQ tag (normally "iq" by xmpp
-     *            spec standard).
+     *        spec standard).
      * @throws IOException when error occurs while writing out the tag
      */
     public void endStanzaTag(String name) throws IOException {
         endTag(STANZA_IDX, name);
+    }
+
+    public void setStreamCloseable(boolean streamCloseable) {
+        this.streamCloseable = streamCloseable;
     }
 }

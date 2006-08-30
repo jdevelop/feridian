@@ -194,7 +194,7 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
         try {
             while (state != RunningState.STOPPED) {
                 while (state == RunningState.PAUSED)
-                    try {
+                    try {      
                         pauseLock.acquire();
                     } catch (InterruptedException ex) {
                         // intentionally left empty
