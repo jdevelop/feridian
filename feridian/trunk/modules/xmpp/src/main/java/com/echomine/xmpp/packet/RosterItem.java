@@ -153,6 +153,8 @@ public class RosterItem {
      * @return true item is in group, false otherwise
      */
     public boolean isInGroup(String groupName) {
-        return groups.contains(groupName);
+        if (groups != null)
+            return groups.contains(groupName);
+        return false;
     }
 }
