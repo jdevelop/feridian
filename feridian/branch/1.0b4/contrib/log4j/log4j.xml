@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd" >
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <appender name="INAPPENDER" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="  [RECV]: %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="OUTAPPENDER" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="  [SEND]: %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="IGNOREDAPPENDER" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="  [IGNORED]: %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d %-5p [%c] - %m%n"/>
+    </layout>
+  </appender>
+
+  <category name="com.echomine.feridian.packet.incoming" additivity="false">
+    <priority value="debug"/>
+    <appender-ref ref="INAPPENDER"/>
+  </category>
+
+  <category name="com.echomine.feridian.packet.outgoing" additivity="false">
+    <priority value="debug"/>
+    <appender-ref ref="OUTAPPENDER"/>
+  </category>
+
+  <category name="com.echomine.feridian.packet.ignored" additivity="false">
+    <priority value="warn"/>
+    <appender-ref ref="IGNOREDAPPENDER"/>
+  </category>
+
+  <root>
+    <priority value="warn"/>
+    <appender-ref ref="STDOUT"/>
+  </root>
+</log4j:configuration>

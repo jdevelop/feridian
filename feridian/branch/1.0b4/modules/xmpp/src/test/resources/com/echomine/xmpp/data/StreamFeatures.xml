@@ -1,0 +1,13 @@
+<stream:features xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
+    <starttls xmlns='urn:ietf:params:xml:ns:xmpp-tls'>
+	    <required/>
+    </starttls>
+    <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
+        <mechanism>DIGEST-MD5</mechanism>
+        <mechanism>PLAIN</mechanism>
+    </mechanisms>
+    <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>
+    <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
+    <iq-auth xmlns='http://jabber.org/features/iq-auth'/>
+    <iq-register xmlns='http://jabber.org/features/iq-register'/>
+</stream:features>

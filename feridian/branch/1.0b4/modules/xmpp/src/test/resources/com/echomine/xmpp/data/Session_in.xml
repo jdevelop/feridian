@@ -1,0 +1,3 @@
+<iq xmlns="jabber:client" type='result' id='test_001'>
+  <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
+</iq>

@@ -1,0 +1,5 @@
+<iq xmlns="jabber:client" from="juliet@example.com/balcony" type="set">
+  <query xmlns='jabber:iq:roster'>
+    <item jid='nurse@example.com' subscription='remove'/>
+  </query>
+</iq>
