@@ -101,6 +101,8 @@ public class XMPPTestCase extends TestCase {
      * @throws Exception
      */
     protected void compare(Reader outReader) throws Exception {
+        //must first close off the output stream
+        writer.flush();
         // check that the stream sent by the stream is proper.
         String str = os.toString("UTF-8");
         InputStreamReader brdr = new InputStreamReader(new ByteArrayInputStream(os.toByteArray()), "UTF-8");

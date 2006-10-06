@@ -184,6 +184,15 @@ public class XMPPStreamWriter extends UTF8StreamWriter {
         endTag(STANZA_IDX, name);
     }
 
+    /**
+     * sets the stream to be closeable.  If a stream is not closeable,
+     * then this writer will ignore any close() events.  This is
+     * useful as a workaround when using JiBX's own marshalling methods
+     * that will automatically close any output streams after marshalling.
+     * <p><b>NOTE: once a call to set stream back to closeable, remember
+     * to flush if required.  flush() is not explicitly called after
+     * marshalling.</b></p>
+     */
     public void setStreamCloseable(boolean streamCloseable) {
         this.streamCloseable = streamCloseable;
     }
