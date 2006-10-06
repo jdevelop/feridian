@@ -1,5 +1,0 @@
-<presence xmlns="jabber:client" type="error">
-	<error type="auth">
-		<not-allowed xmlns="urn:ietf:params:xml:ns:xmpp-stanzas"/>
-	</error>
-</presence>
