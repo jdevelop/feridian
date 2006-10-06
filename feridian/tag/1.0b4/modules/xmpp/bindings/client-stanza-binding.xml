@@ -1,0 +1,36 @@
+<!-- 
+	binding file for working with the stanzas required by the XMPP
+	standard.
+-->
+<binding>
+	<namespace uri="http://etherx.jabber.org/streams" prefix="stream"/>
+	<namespace uri="jabber:client" default="elements"/>
+
+	<!-- setup serializers/deserializers -->
+	<format type="com.echomine.xmpp.JID" serializer="com.echomine.xmpp.JID.toString"
+		deserializer="com.echomine.xmpp.JID.parseJID"/>
+		
+	<!-- stanza error support -->
+	<mapping name="error" class="com.echomine.xmpp.packet.StanzaErrorPacket"
+		marshaller="com.echomine.xmpp.packet.mapper.StanzaErrorPacketMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.StanzaErrorPacketMapper"
+		ns="jabber:client"/>
+		
+	<!-- message packet support -->
+	<mapping name="message" ns="jabber:client"
+		marshaller="com.echomine.xmpp.packet.mapper.MessagePacketMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.MessagePacketMapper"
+		class="com.echomine.xmpp.packet.MessagePacket"/>
+
+	<!-- presence packet support -->
+	<mapping name="presence" ns="jabber:client"
+		marshaller="com.echomine.xmpp.packet.mapper.PresencePacketMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.PresencePacketMapper"
+		class="com.echomine.xmpp.packet.PresencePacket"/>
+
+	<!-- iq packet support -->
+	<mapping name="iq" ns="jabber:client"
+		marshaller="com.echomine.xmpp.packet.mapper.IQPacketMapper"
+		unmarshaller="com.echomine.xmpp.packet.mapper.IQPacketMapper"
+		class="com.echomine.xmpp.packet.IQPacket"/>
+</binding>

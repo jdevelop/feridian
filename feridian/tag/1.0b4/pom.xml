@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.echomine.feridian</groupId>
+  <artifactId>feridian</artifactId>
+  <name>Feridian</name>
+  <version>1</version>
+  <packaging>pom</packaging>
+  <description>Feridian is a XMPP-compliant Java API to access XMPP/Jabber servers</description>
+  <url>http://open.echomine.org/confluence/display/FERIDIAN/</url>
+  <issueManagement>
+    <url>http://open.echomine.org/jira/browse/FRDN</url>
+  </issueManagement>
+  <inceptionYear>2005</inceptionYear>
+  <mailingLists>
+    <mailingList>
+      <name>Feridian Development List</name>
+      <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</subscribe>
+      <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-feridian</unsubscribe>
+      <archive>https://lists.berlios.de/pipermail/echomine-feridian/</archive>
+    </mailingList>
+    <mailingList>
+      <name>Echomine Announcement List</name>
+      <subscribe>https://lists.berlios.de/mailman/listinfo/echomine-announce</subscribe>
+      <unsubscribe>https://lists.berlios.de/mailman/listinfo/echomine-announce</unsubscribe>
+      <archive>https://lists.berlios.de/pipermail/echomine-announce/</archive>
+    </mailingList>
+  </mailingLists>
+  <developers>
+    <developer>
+      <id>ckchris</id>
+      <name>Chris Chen</name>
+      <email>ckchris at echomine dot com</email>
+      <organization>Echomine</organization>
+      <roles>
+        <role>Feridian Maintainer</role>
+        <role>Lead Java Developer</role>
+      </roles>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://open.echomine.org/confluence/display/FERIDIAN/Feridian+License</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:svn:http://svn.berlios.de/svnroot/repos/echomine/feridian/trunk</connection>
+    <url>http://svn.berlios.de/viewcvs/echomine/feridian/trunk</url>
+  </scm>
+  <organization>
+    <name>Echomine</name>
+    <url>http://open.echomine.org/</url>
+  </organization>
+  <distributionManagement>
+    <repository>
+      <id>echomine-repository</id>
+      <name>Echomine Repository</name>
+      <url>scpexe://shell.berlios.de/home/groups/echomine/htdocs/maven2</url>
+    </repository>
+  </distributionManagement>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>1.0-alpha-5</version>
+      </extension>
+    </extensions>
+    <pluginManagement>
+      <plugins>
+        <!-- run jibx binding after classes are compiled -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>process-classes</phase>
+              <configuration>
+                <tasks>
+                  <taskdef name="bind" classname="org.jibx.binding.ant.CompileTask">
+                    <classpath refid="maven.compile.classpath"/>
+                  </taskdef>
+                  <bind verbose="false" load="true">
+                    <bindingfileset dir="${basedir}/bindings"/>
+                    <classpathset dir="${project.build.outputDirectory}"/>
+                  </bind>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <inherited>true</inherited>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-clover-plugin</artifactId>
+           <configuration>
+             <jdk>1.5</jdk>
+           </configuration>
+		</plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <!-- enable compiler to compile JDK 1.5 codes -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <optimize>true</optimize>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <!-- test only classes specified -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <test>*Test</test>
+        </configuration>
+      </plugin>
+      <!-- create distribution packages -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <outputDirectory>dist/target</outputDirectory>
+          <descriptors>
+             <descriptor>dist/src.xml</descriptor>
+          </descriptors>
+          <finalName>${artifactId}-${modules.version}</finalName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <repositories>
+    <!-- add in jibx repository -->
+    <repository>
+      <releases>
+	    <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+	  </releases>
+	  <snapshots>
+	    <enabled>false</enabled>
+	  </snapshots>
+	  <id>jibx.sf.net</id>
+	  <name>JiBX Repository</name>
+	  <url>http://jibx.sf.net/maven2</url>
+	</repository>
+  </repositories>
+  <dependencyManagement>
+    <dependencies>
+  	  <dependency>
+	    <groupId>com.echomine.feridian</groupId>
+		<artifactId>feridian-xmpp</artifactId>
+		<version>${modules.version}</version>
+	  </dependency>
+  	  <dependency>
+	    <groupId>com.echomine.feridian</groupId>
+		<artifactId>feridian-xmpp</artifactId>
+		<version>${modules.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+	  </dependency>
+  	  <dependency>
+	    <groupId>com.echomine.feridian</groupId>
+		<artifactId>feridian-jabber</artifactId>
+		<version>${modules.version}</version>
+	  </dependency>
+  	  <dependency>
+	    <groupId>com.echomine.feridian</groupId>
+		<artifactId>feridian-jabber-compat</artifactId>
+		<version>${modules.version}</version>
+	  </dependency>
+  	  <dependency>
+	    <groupId>com.echomine.feridian</groupId>
+		<artifactId>feridian-examples</artifactId>
+		<version>${modules.version}</version>
+	  </dependency>
+      <dependency>
+        <groupId>org.jibx</groupId>
+        <artifactId>jibx-extras</artifactId>
+        <version>1.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jibx</groupId>
+        <artifactId>jibx-bind</artifactId>
+        <version>1.1</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>bcel</groupId>
+        <artifactId>bcel</artifactId>
+        <version>5.1</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.1</version>
+        <scope>test</scope>
+      </dependency>
+	</dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.13</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>xpp3</groupId>
+      <artifactId>xpp3</artifactId>
+      <version>1.1.3.4.O</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jibx</groupId>
+      <artifactId>jibx-run</artifactId>
+      <version>1.1</version>
+    </dependency>
+  </dependencies>
+  <modules>
+    <module>modules/xmpp</module>
+    <module>modules/jabber</module>
+    <module>modules/jabber-compat</module>
+    <module>modules/examples</module>
+  </modules>
+  <properties>
+    <modules.version>1.0b4</modules.version>
+  </properties>
+</project>
