@@ -6,14 +6,16 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <moduleSets>
     <moduleSet>
-      <includes>
-        <include>com.echomine.feridian:feridian-xmpp</include>
-        <include>com.echomine.feridian:feridian-jabber</include>
-        <include>com.echomine.feridian:feridian-jabber-compat</include>
-        <include>com.echomine.feridian:feridian-examples</include>
-      </includes>
       <sources>
-        <outputDirectory>${artifactId}</outputDirectory>
+        <fileSets>
+          <fileSet>
+            <excludes>
+              <exclude>target/**</exclude>
+              <exclude>**/*~</exclude>
+              <exclude>**/.svn/**</exclude>
+            </excludes>
+          </fileSet>
+        </fileSets>
       </sources>
     </moduleSet>
   </moduleSets>

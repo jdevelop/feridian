@@ -72,7 +72,6 @@
       <plugins>
         <!-- run jibx binding after classes are compiled -->
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
           <executions>
             <execution>
@@ -96,7 +95,6 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
            <artifactId>maven-clover-plugin</artifactId>
            <configuration>
              <jdk>1.5</jdk>
@@ -107,7 +105,6 @@
     <plugins>
       <!-- enable compiler to compile JDK 1.5 codes -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <optimize>true</optimize>
@@ -117,7 +114,6 @@
       </plugin>
       <!-- test only classes specified -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <test>*Test</test>
@@ -127,9 +123,9 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
-          <outputDirectory>dist/target</outputDirectory>
           <descriptors>
              <descriptor>dist/src.xml</descriptor>
+             <descriptor>dist/bin.xml</descriptor>
           </descriptors>
           <finalName>${artifactId}-${modules.version}</finalName>
         </configuration>
