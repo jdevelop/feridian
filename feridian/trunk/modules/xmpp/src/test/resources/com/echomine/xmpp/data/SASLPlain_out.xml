@@ -2,5 +2,5 @@
 <stream:stream to='example.com' version='1.0'
 	xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams'>
 	<!-- romeo@example.com/Home\0romeo\0somepass -->
-	<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">cm9tZW9AZXhhbXBsZS5jb20vSG9tZQByb21lbwBzb21lcGFzcw==</auth>
+	<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">cm9tZW9AZXhhbXBsZS5jb20Acm9tZW8Ac29tZXBhc3M=</auth>
 </stream:stream>

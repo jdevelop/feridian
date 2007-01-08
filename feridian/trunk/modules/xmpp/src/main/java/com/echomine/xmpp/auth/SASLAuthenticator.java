@@ -133,7 +133,7 @@ public class SASLAuthenticator implements IXMPPAuthenticator, XMPPConstants {
         XMPPAuthCallback callback = streamCtx.getAuthCallback();
         JID authid = new JID(callback.getUsername(), sessCtx.getHostName(), callback.getResource());
         StringBuffer buf = new StringBuffer(128);
-        buf.append(authid.toString()).append('\0').append(callback.getUsername()).append('\0').append(callback.getPassword());
+        buf.append(authid.getJIDWithoutResource()).append('\0').append(callback.getUsername()).append('\0').append(callback.getPassword());
         writer.writeTextContent(Base64.encodeString(buf.toString()));
         writer.endTag(idx, "auth");
         // send response immediately

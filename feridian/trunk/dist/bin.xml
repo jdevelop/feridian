@@ -4,11 +4,7 @@
     <format>zip</format>
     <format>tar.gz</format>
   </formats>
-  <moduleSets>
-    <moduleSet>
-      <binaries>
-        <includeDependencies>true</includeDependencies>
-        <unpack>false</unpack>
+  <!--
         <excludes>
           <exclude>javax.servlet:servlet-api</exclude>
           <exclude>logkit:logkit</exclude>
@@ -17,6 +13,12 @@
           <exclude>avalon-framework:avalon-framework</exclude>
           <exclude>bcel:bcel</exclude>
         </excludes>
+  -->
+  <moduleSets>
+    <moduleSet>
+      <binaries>
+        <includeDependencies>true</includeDependencies>
+        <unpack>false</unpack>
       </binaries> 
     </moduleSet>
   </moduleSets>

@@ -29,12 +29,13 @@ public interface IXMPPConnection {
      * @param username the username
      * @param password password
      * @param resource optional resource name to bind to. Null to request
-     *            dynamic resource binding if available
+     *        dynamic resource binding if available
      * @throws SendPacketFailedException if packet cannot be sent (subclass of
-     *             XMPPException)
+     *         XMPPException)
      * @throws XMPPException if any exception occurs
      */
-    void login(String username, char[] password, String resource) throws XMPPException;
+    void login(String username, char[] password, String resource)
+            throws XMPPException;
 
     /**
      * Sends a packet to the remote entity asynchronously. Implementators must
@@ -52,12 +53,13 @@ public interface IXMPPConnection {
      * 
      * @param packet the packet to send
      * @param wait true if to wait for a reply packet, false to return
-     *            immediately
+     *        immediately
      * @return the reply packet
      * @throws SendPacketFailedException if message cannot be sent, timeout
-     *             occurred, or reply is an error packet.
+     *         occurred, or reply is an error packet.
      */
-    IStanzaPacket sendPacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException;
+    IStanzaPacket sendPacket(IStanzaPacket packet, boolean wait)
+            throws SendPacketFailedException;
 
     /**
      * Checks whether the we are connected.
@@ -84,22 +86,64 @@ public interface IXMPPConnection {
      * the connection is disconnected.
      * </p>
      * <p>
-     * If wait is true, then the return value will always be null since the
-     * session context will not be available (connection might not have been
+     * If wait is false (async), then the return value will always be null since
+     * the session context will not be available (connection might not have been
      * established yet).
      * </p>
      * 
      * @param host the host name to connect to
      * @param port the port number to connect to
      * @param wait true to wait for connection status before returning, false to
-     *            return immediately
+     *        return immediately
      * @return the session context IF using a waiting connect, otherwise null.
      * @throws ConnectionVetoException If connection was vetoed by connection
-     *             listeners
+     *         listeners
      * @throws ConnectionFailedException if connection fails
      * @throws HandshakeFailedException if handshake failed
      */
-    XMPPSessionContext connect(String host, int port, boolean wait) throws ConnectionException, ConnectionVetoException;
+    XMPPSessionContext connect(String host, int port, boolean wait)
+            throws ConnectionException, ConnectionVetoException;
+
+    /**
+     * <p>
+     * connect to remote entity with a hostname that is different from the xmpp
+     * resource hostname (ie. user@doman). By default,the domain and host are
+     * the same unless you specify a non-null domain (NULL domains are the same
+     * as the host name). This is useful for servers that might not have SRV
+     * records. This method will do any initial handshaking, such as sending
+     * initial XMPP handshake and receiving the server's initial handshake. This
+     * may include TLS or stream compression negotiation if the remote entity
+     * supports it. Thus, if TLS is supported, the handshake implementation
+     * might negotiate for TLS before returning control. It will not do any
+     * authentication of any kind. The method supports waiting for connection to
+     * establish before returning. This allows synchronous coding. Asynchronous
+     * connection will not wait for connection to establish and will return
+     * immediately. Thus, if you use asynchronous connect, then do not rely that
+     * the connection is established rigth after control is returned to your
+     * main code. All connection events are subsequently fired to connection
+     * listeners. Note that this method will only block until connection is
+     * established; it does not block until the connection is disconnected.
+     * </p>
+     * <p>
+     * If wait is false (async), then the return value will always be null since
+     * the session context will not be available (connection might not have been
+     * established yet).
+     * </p>
+     * 
+     * @param host the host name to connect to
+     * @param port the port number to connect to
+     * @param domain the optional XMPP resource domain in user@domain, or null
+     *        if domain should be the same as the host
+     * @param wait true to wait for connection status before returning, false to
+     *        return immediately
+     * @return the session context IF using a waiting connect, otherwise null.
+     * @throws ConnectionVetoException If connection was vetoed by connection
+     *         listeners
+     * @throws ConnectionFailedException if connection fails
+     * @throws HandshakeFailedException if handshake failed
+     */
+    XMPPSessionContext connect(String host, int port, String domain, boolean wait)
+            throws ConnectionException, ConnectionVetoException;
 
     /**
      * Disconnect from the remote entity. Before disconnecting, it is

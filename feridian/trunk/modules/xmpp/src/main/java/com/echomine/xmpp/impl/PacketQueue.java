@@ -98,10 +98,10 @@ public class PacketQueue implements Runnable {
      * caller.
      */
     public void stop() {
+        if (state == RunningState.STOPPED || state == RunningState.STOPPING)
+            return;
         lock.lock();
         try {
-            if (state == RunningState.STOPPED || state == RunningState.STOPPING)
-                return;
             state = RunningState.STOPPING;
             queueThread.interrupt();
             if (!queue.isEmpty()) {
@@ -145,7 +145,6 @@ public class PacketQueue implements Runnable {
             if (state != RunningState.RUNNING)
                 return;
             state = RunningState.PAUSED;
-            pauseLock.tryAcquire();
         } finally {
             lock.unlock();
         }
@@ -161,7 +160,7 @@ public class PacketQueue implements Runnable {
             if (state != RunningState.PAUSED)
                 return;
             state = RunningState.RUNNING;
-            if (pauseLock.availablePermits() == 0)
+            while (pauseLock.hasQueuedThreads())
                 pauseLock.release();
         } finally {
             lock.unlock();
@@ -262,11 +261,13 @@ public class PacketQueue implements Runnable {
                 while (state == RunningState.PAUSED) {
                     try {
                         Thread.currentThread().setName(QUEUE_PAUSED);
+                        pauseLock.drainPermits();
+                        //expect the following to lock
                         pauseLock.acquire();
                         Thread.currentThread().setName(QUEUE_RUNNING);
                     } catch (InterruptedException ex) {
                     } finally {
-                        pauseLock.release();
+                        //pauseLock.release();
                     }
                 }
                 if (state == RunningState.RUNNING) {
@@ -282,7 +283,8 @@ public class PacketQueue implements Runnable {
             if (log.isInfoEnabled())
                 log.info("Packet cannot be sent.  Likely an IO Exception occurred.", ex);
         } finally {
-            stop();
+            if (state != RunningState.STOPPING && state != RunningState.STOPPED)
+                stop();
         }
     }
 }

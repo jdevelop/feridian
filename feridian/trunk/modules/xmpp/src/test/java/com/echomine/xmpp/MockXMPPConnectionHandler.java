@@ -34,7 +34,6 @@ public class MockXMPPConnectionHandler extends XMPPConnectionHandler {
 
     public void shutdown() {
         super.shutdown();
-        state = RunningState.STOPPED;
     }
 
     public void setFailHandshake(boolean fail) {

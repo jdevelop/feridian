@@ -30,10 +30,10 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
      * @see com.echomine.xmpp.IXMPPStream#process(com.echomine.xmpp.XMPPSessionContext,
      *      com.echomine.xmpp.XMPPStreamContext)
      */
-    public void process(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) throws XMPPException {
+    public void process(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx)
+            throws XMPPException {
         try {
-            if (!streamCtx.getFeatures().isSessionSupported())
-                return;
+            if (!streamCtx.getFeatures().isSessionSupported()) return;
             XMPPStreamWriter writer = streamCtx.getWriter();
             UnmarshallingContext uctx = streamCtx.getUnmarshallingContext();
             // start logging
@@ -43,12 +43,17 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
             request.setId(IDGenerator.nextID());
             request.setType(IQPacket.TYPE_SET);
             JiBXUtil.marshallIQPacket(writer, request);
-            //synchronized for first access is required to prevent thread racing issue
+            // synchronized for first access is required to prevent thread
+            // racing issue
             synchronized (uctx) {
                 if (!uctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "iq"))
                     uctx.next();
             }
-            // process result
+            // WORKAROUND: some servers will only send an acknowledgement
+            // without returning original session request. If this happens, then
+            // unmarshalling the stream expecting a session request will thrown
+            // an exception.
+            if (!uctx.isEnd()) return;
             SessionIQPacket result = (SessionIQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");

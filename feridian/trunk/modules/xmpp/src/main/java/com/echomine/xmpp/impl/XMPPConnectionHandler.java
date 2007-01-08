@@ -16,6 +16,7 @@ import com.echomine.jibx.XMPPLoggableReader;
 import com.echomine.net.ConnectionContext;
 import com.echomine.net.HandshakeFailedException;
 import com.echomine.net.HandshakeableSocketHandler;
+import com.echomine.net.XMPPConnectionContext;
 import com.echomine.util.IOUtil;
 import com.echomine.xmpp.ErrorCode;
 import com.echomine.xmpp.IDGenerator;
@@ -145,9 +146,9 @@ public class XMPPConnectionHandler implements HandshakeableSocketHandler,
             streamCtx.getUnmarshallingContext().setDocument(reader);
             streamCtx.setSocket(socket);
             streamCtx.setReader(reader);
+            sessCtx.setHostName(((XMPPConnectionContext) connCtx).getDomain());
             if (log.isDebugEnabled())
-                log.debug("Starting Handshake with " + connCtx.getHostName());
-            sessCtx.setHostName(connCtx.getHostName());
+                log.debug("Starting Handshake with " + sessCtx.getHostName());
             handshakeStream.process(sessCtx, streamCtx);
             // tls stream negotiation if a stream supports it
             if (tlsStream != null && streamCtx.getFeatures().isTLSSupported()) {

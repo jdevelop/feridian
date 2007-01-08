@@ -232,6 +232,6 @@
     <module>modules/examples</module>
   </modules>
   <properties>
-    <modules.version>1.0b4</modules.version>
+    <modules.version>1.0b5</modules.version>
   </properties>
 </project>

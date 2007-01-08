@@ -22,8 +22,11 @@ import com.echomine.xmpp.XMPPTestCase;
  */
 public class XMPPConnectionImplTest extends XMPPTestCase {
     XMPPConnectionImpl conn;
+
     MockXMPPConnectionHandler handler;
+
     MockSocketConnector connector;
+
     MockConnectionListener l;
 
     /*
@@ -86,13 +89,12 @@ public class XMPPConnectionImplTest extends XMPPTestCase {
 
     public void testSuccessfulConnectionUsingListener() throws Exception {
         conn.addConnectionListener(l);
+        // this is async connection
         conn.connect("localhost", IXMPPConnection.DEFAULT_XMPP_PORT, false);
-        Thread thread = new Thread() {
-            public void run() {
-                conn.disconnect();
-            }
-        };
-        thread.start();
+        // must wait till connection is successful before disconnecting
+        while (!conn.isConnected())
+            Thread.yield();
+        conn.disconnect();
         l.waitForConnectionClose();
         assertTrue(l.isStartingCalled());
         assertTrue(l.isEstablishedCalled());

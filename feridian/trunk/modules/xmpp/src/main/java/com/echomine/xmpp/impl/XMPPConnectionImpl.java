@@ -7,11 +7,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.echomine.feridian.FeridianConfiguration;
-import com.echomine.net.ConnectionContext;
 import com.echomine.net.ConnectionException;
 import com.echomine.net.ConnectionListener;
 import com.echomine.net.ConnectionVetoException;
 import com.echomine.net.HandshakeableSocketConnector;
+import com.echomine.net.XMPPConnectionContext;
 import com.echomine.xmpp.IPacketListener;
 import com.echomine.xmpp.IStanzaPacket;
 import com.echomine.xmpp.IXMPPAuthenticator;
@@ -33,8 +33,11 @@ import com.echomine.xmpp.XMPPStreamFactory;
  */
 public class XMPPConnectionImpl implements IXMPPConnection {
     private static final Log log = LogFactory.getLog(XMPPConnectionImpl.class);
+
     private HandshakeableSocketConnector conn;
+
     private XMPPConnectionHandler handler;
+
     private PacketListenerManager listenerManager;
 
     /**
@@ -64,7 +67,8 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * @param conn the connector to use
      * @param handler the handler to use.
      */
-    public XMPPConnectionImpl(HandshakeableSocketConnector conn, XMPPConnectionHandler handler) {
+    public XMPPConnectionImpl(HandshakeableSocketConnector conn,
+            XMPPConnectionHandler handler) {
         this.conn = conn;
         this.handler = handler;
         this.listenerManager = new PacketListenerManager(this);
@@ -85,11 +89,25 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * 
      * @see com.echomine.xmpp.IXMPPConnection#connect(java.lang.String, int)
      */
-    public XMPPSessionContext connect(String host, int port, boolean wait) throws ConnectionException, ConnectionVetoException {
+    public XMPPSessionContext connect(String host, int port, boolean wait)
+            throws ConnectionException, ConnectionVetoException {
+        return connect(host, port, host, wait);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.echomine.xmpp.IXMPPConnection#connect(java.lang.String, int,
+     *      java.lang.String, boolean)
+     */
+    public XMPPSessionContext connect(String host, int port, String domain, boolean wait)
+            throws ConnectionException, ConnectionVetoException {
         try {
-            ConnectionContext context = new ConnectionContext(host, port);
+            XMPPConnectionContext context = new XMPPConnectionContext(host, port);
+            context.setDomain(domain);
             if (wait) {
-                conn.connectWithSynchStart(handler, context, "Feridian - " + host);
+                conn.connectWithSynchStart(handler, context, "Feridian - "
+                        + host);
                 return handler.getSessionContext();
             } else {
                 conn.aconnect(handler, context, "Feridian - " + host);
@@ -118,27 +136,26 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * can begin (asynchronous packet processing). What this means is that it is
      * still safe to not be processing random incoming packets since it is
      * assumed that the server will not send such packets before the session is
-     * authenticated.
-     * 
-     * Also, this login method actually searches through a list of registered
-     * authenticators and use the first one that indicates its ability to
-     * authenticate the stream.
+     * authenticated. Also, this login method actually searches through a list
+     * of registered authenticators and use the first one that indicates its
+     * ability to authenticate the stream.
      * 
      * @param username the username
      * @param password the password
      * @param resource optional resource to bind to
      * @throws XMPPErrorStanzaException if login process sent error reply (ie.
-     *             selected resource not available, unable to create session)
+     *         selected resource not available, unable to create session)
      * @throws SendPacketFailedException if packet cannot be sent
      */
-    public void login(String username, char[] password, String resource) throws XMPPException {
+    public void login(String username, char[] password, String resource)
+            throws XMPPException {
         XMPPAuthCallback callback = new XMPPAuthCallback();
         callback.setUsername(username);
         callback.setPassword(password);
         callback.setResource(resource);
         XMPPStreamContext streamCtx = handler.getStreamContext();
         streamCtx.setAuthCallback(callback);
-        Iterator iter = FeridianConfiguration.getConfig().getAuthenticators().iterator();
+        Iterator<IXMPPAuthenticator> iter = FeridianConfiguration.getConfig().getAuthenticators().iterator();
         IXMPPAuthenticator auth = null;
         while (iter.hasNext()) {
             IXMPPAuthenticator tauth = (IXMPPAuthenticator) iter.next();
@@ -151,7 +168,8 @@ public class XMPPConnectionImpl implements IXMPPConnection {
             throw new XMPPException("No proper authenticator method found.");
         // now authenticate
         if (log.isDebugEnabled())
-            log.debug("Authenticating using the following authenticator: " + auth.getClass().getName());
+            log.debug("Authenticating using the following authenticator: "
+                    + auth.getClass().getName());
         handler.processStream(auth, auth.redoHandshake());
         // now check if binding and session features are supported
         // if so, binding and session negotiation must be done
@@ -171,7 +189,8 @@ public class XMPPConnectionImpl implements IXMPPConnection {
      * 
      * @see com.echomine.xmpp.IXMPPConnection#sendPacket(com.echomine.xmpp.IStanzaPacket)
      */
-    public IStanzaPacket sendPacket(IStanzaPacket packet, boolean wait) throws SendPacketFailedException {
+    public IStanzaPacket sendPacket(IStanzaPacket packet, boolean wait)
+            throws SendPacketFailedException {
         return handler.queuePacket(packet, wait);
     }
 

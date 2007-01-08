@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
  * disable any operations requiring the use of any network operations purely
  * for testcase isolation purpose. 
  */
-public class MockConnectionContext extends ConnectionContext {
+public class MockConnectionContext extends XMPPConnectionContext {
     String hostname;
     String ip;
     

@@ -55,8 +55,9 @@ public class PacketQueueTest extends TestCase {
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_RESULT);
         queue.packetReceived(packet);
-        // assertEquals(0, queue.getQueue().size());
-        // assertEquals(0, queue.getReplyTable().size());
+        runner.waitForResult();
+        assertEquals(0, queue.getQueue().size());
+        assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
         assertTrue(runner.replyPacket instanceof RosterIQPacket);
         assertEquals(IQPacket.TYPE_RESULT, runner.replyPacket.getType());
@@ -73,6 +74,7 @@ public class PacketQueueTest extends TestCase {
         packet.setId("id_001");
         packet.setType(IQPacket.TYPE_RESULT);
         queue.packetReceived(packet);
+        runner.waitForResult();
         assertEquals(0, queue.getQueue().size());
         assertEquals(0, queue.getReplyTable().size());
         assertNotNull(runner.replyPacket);
@@ -114,6 +116,7 @@ public class PacketQueueTest extends TestCase {
 
     class QueuePacketRunnable implements Runnable {
         IStanzaPacket replyPacket;
+        boolean resultReceived;
 
         public void run() {
             RosterIQPacket packet = new RosterIQPacket();
@@ -123,9 +126,18 @@ public class PacketQueueTest extends TestCase {
             // queue the packet, and wait for reply
             try {
                 replyPacket = queue.queuePacket(packet, true);
+                synchronized(this) {
+                    resultReceived = true;
+                    notifyAll();
+                }
             } catch (SendPacketFailedException ex) {
             } finally {
             }
+        }
+        
+        public synchronized void waitForResult() throws InterruptedException {
+            if (!resultReceived)
+                wait();
         }
     }
 

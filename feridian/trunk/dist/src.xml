@@ -7,15 +7,12 @@
   <moduleSets>
     <moduleSet>
       <sources>
-        <fileSets>
-          <fileSet>
-            <excludes>
-              <exclude>target/**</exclude>
-              <exclude>**/*~</exclude>
-              <exclude>**/.svn/**</exclude>
-            </excludes>
-          </fileSet>
-        </fileSets>
+        <excludes>
+          <exclude>target/**</exclude>
+          <exclude>**/*~</exclude>
+          <exclude>**/.svn/**</exclude>
+        </excludes>
+        <outputDirectory>${artifactId}</outputDirectory>
       </sources>
     </moduleSet>
   </moduleSets>
