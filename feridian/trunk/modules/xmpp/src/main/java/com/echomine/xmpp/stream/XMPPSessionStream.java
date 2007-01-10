@@ -1,10 +1,8 @@
 package com.echomine.xmpp.stream;
 
-import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IDGenerator;
@@ -16,7 +14,6 @@ import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.SessionIQPacket;
-import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * This stream will issue a session start request. Under XMPP specs, client must

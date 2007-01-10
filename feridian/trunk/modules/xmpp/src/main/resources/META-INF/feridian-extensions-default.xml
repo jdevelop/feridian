@@ -1,6 +1,13 @@
 <feridian>
   <authenticators>
-  	<authenticator class="com.echomine.xmpp.auth.SASLAuthenticator"/>
+  	<!-- 
+  	 	these are the default authenticators. Order DOES matter.  The first one will be used
+  	 	if it can handle the authentication that is supported by the server.  If you put 
+  	 	your feridian-extensions.xml file in the classpath before this jar, then your
+  	 	authenticators will be used first if they can handle the authentication.
+  	-->
+  	<authenticator class="com.echomine.xmpp.auth.DigestMD5SaslAuthenticator"/>
+  	<authenticator class="com.echomine.xmpp.auth.PlainSaslAuthenticator"/>
   </authenticators>
   <streams>
   	<stream ns="urn:echomine:feridian:xmpp-handshake" class="com.echomine.xmpp.stream.XMPPClientHandshakeStream"/>
