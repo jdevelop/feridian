@@ -1,8 +1,10 @@
 package com.echomine.xmpp.stream;
 
+import org.jibx.runtime.IXMLReader;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
+import com.echomine.feridian.FeridianConfiguration;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.xmpp.IDGenerator;
@@ -14,6 +16,7 @@ import com.echomine.xmpp.XMPPStanzaErrorException;
 import com.echomine.xmpp.XMPPStreamContext;
 import com.echomine.xmpp.packet.IQPacket;
 import com.echomine.xmpp.packet.SessionIQPacket;
+import com.echomine.xmpp.packet.StanzaErrorPacket;
 
 /**
  * This stream will issue a session start request. Under XMPP specs, client must
@@ -49,12 +52,7 @@ public class XMPPSessionStream implements IXMPPStream, XMPPConstants {
                 if (!uctx.isAt(XMPPConstants.NS_XMPP_CLIENT, "iq"))
                     uctx.next();
             }
-            // WORKAROUND: some servers will only send an acknowledgement
-            // without returning original session request. If this happens, then
-            // unmarshalling the stream expecting a session request will thrown
-            // an exception.
-            if (!uctx.isEnd()) return;
-            SessionIQPacket result = (SessionIQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
+            IQPacket result = (IQPacket) JiBXUtil.unmarshallObject(uctx, IQPacket.class);
             if (result == null)
                 throw new XMPPException("No Valid Result Packet received");
             if (result.isError())
