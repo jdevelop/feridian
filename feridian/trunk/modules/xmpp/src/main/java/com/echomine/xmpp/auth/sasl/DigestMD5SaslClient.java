@@ -11,21 +11,27 @@ import org.apache.commons.logging.LogFactory;
 
 import com.echomine.util.Base64;
 import com.echomine.util.HexDec;
-import com.echomine.xmpp.JID;
 import com.echomine.xmpp.XMPPAuthCallback;
 import com.echomine.xmpp.XMPPSessionContext;
 import com.echomine.xmpp.XMPPStreamContext;
 
 /**
+ * <p>
  * Allows the user of this class to work with SASL in a more simplied manner. It
  * will unwrap, wrap, and work with the different aspects of SASL authentication
  * that is pertinent to XMPP.
+ * </p>
+ * <p>
+ * NOTE: authzid is currently disabled due to an incompatibility issue with some
+ * servers. However, almost all servers work fine without the authzid. Until
+ * further notice, the authzid is not used.
+ * </p>
  */
 public class DigestMD5SaslClient {
     private static final Log log = LogFactory.getLog(DigestMD5SaslClient.class);
     private DigestMD5SaslContext challengeCtx = new DigestMD5SaslContext();
     private String cnonce;
-    private JID authzid;
+    // private JID authzid;
     private String digesturi;
 
     /**
@@ -47,12 +53,12 @@ public class DigestMD5SaslClient {
      */
     public String getAuthResponse(XMPPSessionContext sessCtx, XMPPStreamContext streamCtx) {
         XMPPAuthCallback auth = streamCtx.getAuthCallback();
-        if (auth == null) 
+        if (auth == null)
             throw new IllegalStateException("Authentication callback must be set");
         StringBuffer buf = new StringBuffer();
         cnonce = generateCNonce();
         digesturi = "xmpp/" + sessCtx.getHostName();
-        authzid = new JID(auth.getUsername(), sessCtx.getHostName(), null);
+        // authzid = new JID(auth.getUsername(), sessCtx.getHostName(), null);
         buf.append("username=\"").append(auth.getUsername()).append("\"");
         if (challengeCtx.getRealm() != null)
             buf.append(",realm=\"").append(challengeCtx.getRealm()).append("\"");
@@ -63,7 +69,7 @@ public class DigestMD5SaslClient {
         buf.append(",digest-uri=\"").append(digesturi).append("\"");
         buf.append(",response=\"").append(generatePasswordDigest(sessCtx, streamCtx.getAuthCallback())).append("\"");
         buf.append(",charset=utf-8");
-        buf.append(",authzid=\"").append(authzid.toString()).append("\"");
+        // buf.append(",authzid=\"").append(authzid.toString()).append("\"");
         if (log.isDebugEnabled())
             log.debug("Response String: " + buf.toString());
         return Base64.encodeString(buf.toString());
@@ -80,11 +86,13 @@ public class DigestMD5SaslClient {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             md = MessageDigest.getInstance("MD5");
-            String realm = challengeCtx.getRealm() != null ? challengeCtx.getRealm() : "";
-            String x = callback.getUsername() + ":" + realm + ":" + new String(callback.getPassword());
+            String realm = challengeCtx.getRealm() != null ? challengeCtx.getRealm()
+                    : "";
+            String x = callback.getUsername() + ":" + realm + ":"
+                    + new String(callback.getPassword());
             temp = md.digest(x.getBytes());
             bos.write(temp);
-            String b = ":" + challengeCtx.getNonce() + ":" + cnonce + ":" + authzid.toString();
+            String b = ":" + challengeCtx.getNonce() + ":" + cnonce;  // + ":" + authzid.toString();
             bos.write(b.getBytes());
             byte[] a1 = bos.toByteArray();
             String a2 = "AUTHENTICATE:" + digesturi;
