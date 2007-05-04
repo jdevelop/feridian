@@ -1,0 +1,39 @@
+<!-- Binding for JEP-0030: Service discovery -->
+<binding>
+    <!-- setup serializers/deserializers -->
+    <format type="com.echomine.xmpp.JID" serializer="com.echomine.xmpp.JID.toString"
+	deserializer="com.echomine.xmpp.JID.parseJID"/>
+    <mapping name="query" ns="http://jabber.org/protocol/disco#info" ordered='false'
+	class="com.echomine.jabber.packet.DiscoveryInfoIQPacket">
+	<namespace uri="http://jabber.org/protocol/disco#info" default="elements"/>
+	<collection field="features" type="java.util.ArrayList" 
+	    item-type="com.echomine.jabber.packet.Feature" usage="optional"/>
+	<collection field="identities" type="java.util.ArrayList" 
+	    item-type="com.echomine.jabber.packet.Identity" usage="optional"/>
+    </mapping>
+    <mapping name="query" ns="http://jabber.org/protocol/disco#items" ordered='false'
+	class="com.echomine.jabber.packet.DiscoveryItemIQPacket">
+	<namespace uri="http://jabber.org/protocol/disco#items" default="elements"/>
+	<collection field="items" type="java.util.ArrayList" 
+	    item-type="com.echomine.jabber.packet.Item" usage="optional"/>
+    </mapping>
+    <mapping name="feature" ns="http://jabber.org/protocol/disco#info" 
+	class="com.echomine.jabber.packet.Feature">
+	<namespace uri="http://jabber.org/protocol/disco#info" default="elements"/>
+	<value style="attribute" name="var" field="var" />
+    </mapping>
+    <mapping name="identity" ns="http://jabber.org/protocol/disco#info" 
+	class="com.echomine.jabber.packet.Identity">
+	<namespace uri="http://jabber.org/protocol/disco#info" default="elements"/>
+	<value style="attribute" name="category" field="category" />
+	<value style="attribute" name="type" field="type" />
+	<value style="attribute" name="name" field="name" />
+    </mapping>
+    <mapping name="item" ns="http://jabber.org/protocol/disco#items"
+	class="com.echomine.jabber.packet.Item">
+	<namespace uri="http://jabber.org/protocol/disco#items" default="elements"/>
+	<value style="attribute" name="jid" field="jid" />
+	<value style="attribute" name="node" field="node" usage="optional" />
+	<value style="attribute" name="name" field="name" usage="optional" />
+    </mapping>
+</binding>

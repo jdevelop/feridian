@@ -5,5 +5,8 @@
   <packets>
     <packet ns="jabber:iq:auth" class="com.echomine.jabber.packet.AuthIQPacket"/>
     <packet ns="jabber:iq:version" class="com.echomine.jabber.packet.VersionIQPacket"/>
+    <packet ns="http://jabber.org/protocol/disco#info" class="com.echomine.jabber.packet.DiscoveryInfoIQPacket"/>
+    <packet ns="http://jabber.org/protocol/disco#items" class="com.echomine.jabber.packet.DiscoveryItemIQPacket"/>
+    <packet ns="jabber:iq:register" class="com.echomine.jabber.packet.RegisterIQPacket"/>
   </packets>
 </feridian>
