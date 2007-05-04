@@ -2,7 +2,7 @@
 <binding>
     <namespace uri="jabber:iq:register" default="elements"/>
     <mapping name="query" ns="jabber:iq:register" 
-	class="com.echomine.jabber.packet.RegisterIQPacket" ordered='false' >
+	class="com.echomine.jabber.compat.packet.RegisterIQPacket" ordered='false' >
 	<value style="element" name="username" field="username" usage="optional" />
 	<value style="element" name="password" field="password" usage="optional" />
 	<value style="element" name="instructions" field="instructions" usage="optional" />

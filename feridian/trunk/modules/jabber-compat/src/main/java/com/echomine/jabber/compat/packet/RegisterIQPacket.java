@@ -1,4 +1,4 @@
-package com.echomine.jabber.packet;
+package com.echomine.jabber.compat.packet;
 
 import com.echomine.xmpp.packet.IQPacket;
 

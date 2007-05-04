@@ -2,6 +2,7 @@ package com.echomine.jabber.auth;
 
 import java.util.ArrayList;
 
+import com.echomine.jabber.compat.auth.NonSASLAuthenticator;
 import com.echomine.net.MockSocket;
 import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.XMPPAuthCallback;

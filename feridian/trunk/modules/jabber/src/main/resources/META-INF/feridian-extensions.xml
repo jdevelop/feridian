@@ -1,5 +1,7 @@
 <feridian>
   <packets>
     <packet ns="jabber:x:data" class="com.echomine.jabber.packet.DataXPacket"/>
+    <packet ns="http://jabber.org/protocol/disco#info" class="com.echomine.jabber.packet.DiscoveryInfoIQPacket"/>
+    <packet ns="http://jabber.org/protocol/disco#items" class="com.echomine.jabber.packet.DiscoveryItemIQPacket"/>
   </packets>
 </feridian>

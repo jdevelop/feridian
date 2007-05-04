@@ -1,4 +1,4 @@
-package com.echomine.jabber.auth;
+package com.echomine.jabber.compat.auth;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jibx.runtime.JiBXException;
 import org.jibx.runtime.impl.UnmarshallingContext;
 
-import com.echomine.jabber.packet.AuthIQPacket;
+import com.echomine.jabber.compat.packet.AuthIQPacket;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.jibx.XMPPStreamWriter;
 import com.echomine.util.HexDec;

@@ -1,10 +1,11 @@
 package com.echomine.jabber.packet;
 
+import java.io.StringReader;
+
+import com.echomine.jabber.compat.packet.VersionIQPacket;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;
-
-import java.io.StringReader;
 
 /**
  * This tests the version IQ message to see if it gets marshalls and unmarshalls properly.

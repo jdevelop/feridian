@@ -2,6 +2,7 @@ package com.echomine.jabber.packet;
 
 import java.io.StringReader;
 
+import com.echomine.jabber.compat.packet.AuthIQPacket;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;
