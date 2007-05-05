@@ -1,8 +1,7 @@
-package com.echomine.jabber.packet;
+package com.echomine.jabber.compat.packet;
 
 import java.io.StringReader;
 
-import com.echomine.jabber.compat.packet.VersionIQPacket;
 import com.echomine.jibx.JiBXUtil;
 import com.echomine.xmpp.XMPPTestCase;
 import com.echomine.xmpp.packet.IQPacket;

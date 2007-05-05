@@ -1,8 +1,7 @@
-package com.echomine.jabber.auth;
+package com.echomine.jabber.compat.auth;
 
 import java.util.ArrayList;
 
-import com.echomine.jabber.compat.auth.NonSASLAuthenticator;
 import com.echomine.net.MockSocket;
 import com.echomine.xmpp.BaseStreamTestCase;
 import com.echomine.xmpp.XMPPAuthCallback;
@@ -37,14 +36,14 @@ public class NonSASLAuthenticatorTest extends BaseStreamTestCase implements XMPP
     }
     
     public void testSuccessfulPlainAuth() throws Exception {
-        String inRes = "com/echomine/jabber/data/NonSASLPlain_in.xml";
-        String outRes = "com/echomine/jabber/data/NonSASLPlain_out.xml";
+        String inRes = "com/echomine/jabber/compat/data/NonSASLPlain_in.xml";
+        String outRes = "com/echomine/jabber/compat/data/NonSASLPlain_out.xml";
         runAndCompare(inRes, outRes, auth, true, true);
     }
 
     public void testSuccessfulDigestAuth() throws Exception {
-        String inRes = "com/echomine/jabber/data/NonSASLDigest_in.xml";
-        String outRes = "com/echomine/jabber/data/NonSASLDigest_out.xml";
+        String inRes = "com/echomine/jabber/compat/data/NonSASLDigest_in.xml";
+        String outRes = "com/echomine/jabber/compat/data/NonSASLDigest_out.xml";
         streamCtx.getAuthCallback().setPassword("Calli0pe".toCharArray());
         sessCtx.setStreamId("3EE948B0");
         runAndCompare(inRes, outRes, auth, true, true);
