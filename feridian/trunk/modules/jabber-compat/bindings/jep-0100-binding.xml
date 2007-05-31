@@ -1,0 +1,14 @@
+<!-- Binding for JEP-0100: Gateway interaction -->
+<binding>
+    <!-- setup serializers/deserializers -->
+    <format type="com.echomine.xmpp.JID" serializer="com.echomine.xmpp.JID.toString"
+	deserializer="com.echomine.xmpp.JID.parseJID"/>
+
+    <mapping name="query" ns="jabber:iq:gateway" ordered='false'
+	class="com.echomine.jabber.compat.packet.GatewayIQPacket">
+	<namespace uri="jabber:iq:gateway" default="elements"/>
+	<value style="element" name="desc" field="desc" usage="optional" />
+	<value style="element" name="prompt" field="prompt" usage="optional" />
+	<value style="element" name="jid" field="jid" usage="optional" />
+    </mapping>
+</binding>

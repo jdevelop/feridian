@@ -6,5 +6,6 @@
     <packet ns="jabber:iq:auth" class="com.echomine.jabber.compat.packet.AuthIQPacket"/>
     <packet ns="jabber:iq:version" class="com.echomine.jabber.compat.packet.VersionIQPacket"/>
     <packet ns="jabber:iq:register" class="com.echomine.jabber.compat.packet.RegisterIQPacket"/>
+    <packet ns="jabber:iq:gateway" class="com.echomine.jabber.compat.packet.GatewayIQPacket"/>
   </packets>
 </feridian>
