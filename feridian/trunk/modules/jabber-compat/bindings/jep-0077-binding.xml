@@ -9,5 +9,6 @@
 	<value style="element" name="key" field="key" usage="optional" />
 	<value style="element" name="email" field="email" usage="optional" />
 	<value style="element" name="registered" field="registered" usage="optional" />
+	<value style="element" name="remove" field="remove" usage="optional" />
     </mapping>
 </binding>
